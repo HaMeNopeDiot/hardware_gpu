@@ -1,0 +1,11 @@
+prefix=/home/dudkin.i/mesa
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+gbmbackendspath=/home/dudkin.i/mesa/lib/gbm
+
+Name: gbm
+Description: Mesa gbm library
+Version: 26.0.0-devel
+Libs: -L${libdir} -lgbm
+Cflags: -I${includedir}
