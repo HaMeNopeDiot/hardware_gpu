@@ -601,7 +601,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
          elts = fetch_info->elts;
       }
 
-      // clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset);
+      clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
 
       // Finding Ubo(Nemo)
       // printf("User.vbuffer: %d\n", draw->pt.user.vbuffer->size);
@@ -611,19 +611,19 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       // }
       // printf("\n\n\n");
 
-      printf("Start: %d\n", start);
-      printf("Verted Id offset: %d\n", vertex_id_offset);
-      printf("Start instance: %d\n", draw->start_instance);
-      // printf("ELTS: %d\n", *elts);
-      printf("Buffer offset0: %d\n", draw->pt.vertex_buffer[0].buffer_offset); // vVerticies
-      printf("Buffer offset1: %d\n", draw->pt.vertex_buffer[1].buffer_offset); // vColors
-      printf("Vertex count: %d\n", fetch_info->count);
-      printf("Buffer offset2: %d\n", draw->pt.vertex_buffer[2].buffer_offset); // vNormals
-      printf("Buffer user: %x\n", *((uint32_t*)draw->pt.vertex_buffer->buffer.user));
+      // printf("Start: %d\n", start);
+      // printf("Verted Id offset: %d\n", vertex_id_offset);
+      // printf("Start instance: %d\n", draw->start_instance);
+      // // printf("ELTS: %d\n", *elts);
+      // printf("Buffer offset0: %d\n", draw->pt.vertex_buffer[0].buffer_offset); // vVerticies
+      // printf("Buffer offset1: %d\n", draw->pt.vertex_buffer[1].buffer_offset); // vColors
+      // printf("Vertex count: %d\n", fetch_info->count);
+      // printf("Buffer offset2: %d\n", draw->pt.vertex_buffer[2].buffer_offset); // vNormals
+      // printf("Buffer user: %x\n", *((uint32_t*)draw->pt.vertex_buffer->buffer.user));
 
-      printf("DEREF_VAR\n");
-      vertecies_info(draw);
-      printf("END_OF_DEREF_VAR\n");
+      // printf("DEREF_VAR\n");
+      // vertecies_info(draw);
+      // printf("END_OF_DEREF_VAR\n");
 
       // UBO array
       // draw->pt.user.vbuffer
@@ -657,29 +657,29 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      printf("Vertex shader output:\n");
-      printf("Vertex size: %d\n", vert_info->vertex_size);
-      printf("Stride: %d\n", vert_info->stride);
-      printf("Count: %d\n", vert_info->count);
+      // printf("Vertex shader output:\n");
+      // printf("Vertex size: %d\n", vert_info->vertex_size);
+      // printf("Stride: %d\n", vert_info->stride);
+      // printf("Count: %d\n", vert_info->count);
 
 
-      printf("AFTER: \n");
-      for (size_t i = 0; i < vert_info->count; i++) {
-         printf("\tVertex: %d\n", (int)i);
-         float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+      // printf("AFTER: \n");
+      // for (size_t i = 0; i < vert_info->count; i++) {
+      //    printf("\tVertex: %d\n", (int)i);
+      //    float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
 
-         for (size_t j = 0; j < 2; j++) {
-            printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
+      //    for (size_t j = 0; j < 2; j++) {
+      //       printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
 
-            for (size_t k = 0; k < 4; k++) {
-               printf("%f ", ptr[j*4 + k]);
-            }
-            printf("\n");
-         }
+      //       for (size_t k = 0; k < 4; k++) {
+      //          printf("%f ", ptr[j*4 + k]);
+      //       }
+      //       printf("\n");
+      //    }
 
-      }
+      // }
 
-      exit(0);
+      // exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment

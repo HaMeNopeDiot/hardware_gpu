@@ -351,6 +351,7 @@ else
   'nir_xfb_info.h',
   'nir_lower_atomics.c',
   'extract.c',
+  'inresults.c'
   )
 endif
 

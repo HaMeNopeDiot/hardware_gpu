@@ -3,6 +3,7 @@
 
 #include "nir.h"
 #include "list.h"
+#include "../../gallium/auxiliary/draw/draw_context.h"
 
 
 struct sources_float {
@@ -39,7 +40,7 @@ void extract_instr(nir_shader *shader);
 const char* get_opname(nir_alu_instr *instr);
 nir_alu_src* get_srcs(nir_alu_instr *instr);
 nir_def** get_srcs_defs(nir_alu_instr* instr, nir_def **defs);
-bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header * verts, struct draw_vertex_buffer *vbuffer);
+bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer, unsigned int buffer_offset, unsigned int verted_id_offset, struct draw_context *draw);
 
 
 #define foreach_instr_in_shader(shader, function_body)                          \
