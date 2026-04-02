@@ -3,7 +3,7 @@
 
 #include "nir.h"
 #include "list.h"
-#include "../../gallium/auxiliary/draw/draw_context.h"
+// #include "../../gallium/auxiliary/draw/draw_context.h"
 
 
 struct sources_float {

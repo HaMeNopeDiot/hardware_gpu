@@ -350,8 +350,8 @@ else
   'nir_worklist.h',
   'nir_xfb_info.h',
   'nir_lower_atomics.c',
-  'extract.c',
-  'inresults.c'
+  # 'extract.c',
+  'inresults.c',
   )
 endif
 
@@ -384,12 +384,13 @@ _libnir = static_library(
 )
 
 inc_nir = include_directories('.')
+inc_pipe = include_directories('../../gallium/include')
 
 # Headers-only dependency
 idep_nir_headers = declare_dependency(
   sources : [nir_opcodes_h, nir_builder_opcodes_h, nir_intrinsics_h, nir_intrinsics_indices_h,
              ir_expression_operation_h, builtin_types_h],
-  include_directories : [inc_nir, inc_compiler, inc_src, inc_include],
+  include_directories : [inc_nir, inc_compiler, inc_src, inc_include, inc_pipe],
 )
 
 # Also link with nir
