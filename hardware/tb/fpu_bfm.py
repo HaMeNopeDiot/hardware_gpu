@@ -16,7 +16,7 @@ class OpEnum(Enum):
     SQRT = 5        # sqrt(op[0])
     SGNJ = 6        # (op[0] * sign(op[1])) * -1
     MINMAX = 7      # min
-    CMP = 8     
+    CMP = 8
     CLASSIFY = 9
     F2F = 10
     F2I = 11
@@ -215,7 +215,7 @@ class FPUBfm(metaclass=utility_classes.Singleton):
             await RisingEdge(self.clk)
         assert False, "Timeout waiting for out_valid_o == 1"
 
-    async def wait_handshake(self, timeout: int = 1000):
+    async def wait_handshake(self, timeout: int = 1000, tag: int = 0):
         """
         Полный «handshake» в обе стороны:
           1) Ждём, пока DUT готов принять вход (in_ready_o);

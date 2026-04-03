@@ -1,0 +1,10 @@
+*.yml
+LICENSE.*
+*.cff
+docs/*
+*__pycache__*
+vendor/*
+util/*
+*/sim_build/*
+src/*
+README*.md

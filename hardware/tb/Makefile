@@ -18,7 +18,8 @@ COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				-Wno-UNSIGNED \
 				-Wno-UNOPTFLAT \
 				-j 5 --timing \
-				--timescale 1ns/1ps
+				--timescale 1ns/1ps \
+				-DTagType="logic[1:0]"
 
 PWD = ../src
 
