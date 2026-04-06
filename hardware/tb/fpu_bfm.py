@@ -2,28 +2,10 @@
 #  fpnew_bfm.py
 # --------------------------------------------------------------
 import cocotb
-from cocotb.triggers import RisingEdge, FallingEdge, Timer, Combine, Event
+from cocotb.triggers import RisingEdge, FallingEdge, Timer, Combine, Event, ClockCycles
 from pyuvm import utility_classes    # ваш метакласс Singleton
 
-from enum import Enum
-
-class OpEnum(Enum):
-    FMADD = 0       # op[0] * op[1] + op[2]
-    FNMSUB = 1      # op[0] * op[1] - op[2]
-    ADD = 2         # op[1] + op[2]
-    MUL = 3         # op[0] * op[1]
-    DIV = 4         # op[0] / op[1]
-    SQRT = 5        # sqrt(op[0])
-    SGNJ = 6        # (op[0] * sign(op[1])) * -1
-    MINMAX = 7      # min
-    CMP = 8
-    CLASSIFY = 9
-    F2F = 10
-    F2I = 11
-    I2F = 12
-    CPKAB = 13
-    CPKCD = 14
-    ADDS = 15
+from fpu_item   import FPUItem
 
 class FPUBfm(metaclass=utility_classes.Singleton):
     """
@@ -125,6 +107,7 @@ class FPUBfm(metaclass=utility_classes.Singleton):
         self.in_valid_i.value     = 0
         self.flush_i.value        = 0
         # handshakes
+        self.in_ready_o.value     = 0
         self.out_ready_i.value    = 0
 
     # --------------------------------------------------------------
@@ -146,7 +129,6 @@ class FPUBfm(metaclass=utility_classes.Singleton):
             tmp_val |= ((val & mask) << (self.WIDTH * i))
         self.operands_i.value = tmp_val
         self.in_valid_i.value = int(valid)
-        await RisingEdge(self.clk)
 
     async def drive_op(self,
                        op_code,
@@ -173,56 +155,72 @@ class FPUBfm(metaclass=utility_classes.Singleton):
             self.tag_i.value = tag
         if mask is not None:
             self.simd_mask_i.value = mask
-        await RisingEdge(self.clk)
+        # await RisingEdge(self.clk)
+
+    async def drive_op_by_item(self, item: FPUItem):
+        self.op_i.value             = item._op_code.value
+        self.op_mod_i.value         = item._op_mod.value
+        self.rnd_mode_i.value       = item._rnd_mode.value
+        self.src_fmt_i.value        = item._src_fmt.value
+        self.dst_fmt_i.value        = item._dst_fmt.value
+        self.int_fmt_i.value        = item._int_fmt.value
+        self.vectorial_op_i.value   = item._vectorial_op_i.value
+        self.tag_i.value            = item._tag.value
+        self.simd_mask_i.value      = item._simd_mask_i.value
+
+    async def drive_operands_by_item(self, item: FPUItem, valid: bool = True):
+        if len(item._operands) != self.NUM_OPERANDS:
+            raise ValueError(f"operands list must contain {self.NUM_OPERANDS} elements")
+        tmp_val = 0
+        for i, val in enumerate(item._operands):
+            mask = (1 << self.WIDTH) - 1
+            cocotb.log.debug(f"val: {val}; mask: {hex(mask)}; ({self.WIDTH * i})")
+            tmp_val |= ((val & mask) << (self.WIDTH * i))
+        self.operands_i.value = tmp_val
+        self.in_valid_i.value = int(valid)
 
     async def drive_flush(self, flush: bool = True):
         """Устанавливает сигнал flush_i."""
         self.flush_i.value = int(flush)
-        await RisingEdge(self.clk)
+        # await RisingEdge(self.clk)
 
     async def drive_out_ready(self, ready: bool = True):
         """Сигнал готовности тест‑бенча принимать результат."""
         self.out_ready_i.value = int(ready)
-        await RisingEdge(self.clk)
+        #await RisingEdge(self.clk)
 
     # --------------------------------------------------------------
     #  Handshake‑in (in_valid / in_ready)
     # --------------------------------------------------------------
-    async def wait_in_ready(self, timeout: int = 1000):
+    async def wait_in_ready(self, timeout: int = 1000, tag: int = -1):
         """
         Ожидает, пока DUT подаст `in_ready_o == 1`.
         Если за `timeout` тактов ничего не пришло – падает.
         """
         for _ in range(timeout):
-            if int(self.in_ready_o.value) == 1:
+            if int(self.in_ready_o.value) == 1 \
+                    and (tag == -1 or int(self.tag_i.value) == tag):
                 return
             await RisingEdge(self.clk)
-        assert False, "Timeout waiting for in_ready_o == 1"
+        assert False, f"Timeout waiting for in_ready_o == 1  with tag == {tag}"
 
     # --------------------------------------------------------------
     #  Handshake‑out (out_valid / out_ready)
     # --------------------------------------------------------------
-    async def wait_out_valid(self, timeout: int = 1000):
+    async def wait_out_valid(self, timeout: int = 1000, tag: int = 0):
         """
         Ожидает, пока DUT подаст `out_valid_o == 1`.
         При получении события ставит внутренний Event, чтобы
         монитор мог отреагировать.
         """
         for _ in range(timeout):
-            if int(self.out_valid_o.value) == 1:
+            await Timer(1, unit="ns")
+            if int(self.out_valid_o.value) == 1 and int(self.tag_o.value) == tag:
                 self._out_event.set()
                 return
             await RisingEdge(self.clk)
-        assert False, "Timeout waiting for out_valid_o == 1"
+        assert False, f"Timeout waiting for out_valid_o == 1 with tag == {tag}"
 
-    async def wait_handshake(self, timeout: int = 1000, tag: int = 0):
-        """
-        Полный «handshake» в обе стороны:
-          1) Ждём, пока DUT готов принять вход (in_ready_o);
-          2) Ждём, пока DUT выдаст результат (out_valid_o);
-        """
-        await self.wait_in_ready(timeout)
-        await self.wait_out_valid(timeout)
 
     # --------------------------------------------------------------
     #  Чтение выходных сигналов
@@ -248,6 +246,16 @@ class FPUBfm(metaclass=utility_classes.Singleton):
     # --------------------------------------------------------------
     #  Композитный метод – одна транзакция «от начала до конца»
     # --------------------------------------------------------------
+    async def wait_responce(self, tag: int =-1):
+        cocotb.log.debug(f"Start capture responce with tag {tag}")
+        await self.wait_out_valid(1000, tag)
+        cocotb.log.debug(f"Handshake capture with tag {tag}")
+        res = await self.read_output()
+        self.out_ready_i.value = 1
+        await RisingEdge(self.clk)
+        self.out_ready_i.value = 0
+        return res
+
     async def transaction(self,
                           operands,
                           op_code,
@@ -257,21 +265,11 @@ class FPUBfm(metaclass=utility_classes.Singleton):
                           dst_fmt: int = 0,
                           int_fmt: int = 0,
                           vectorial: int = 0,
-                          tag=None,
+                          tag=0,
                           mask=None,
                           flush: bool = False,
                           out_ready: bool = True,
                           timeout: int = 1000):
-        """
-        Полный сценарий:
-          1) Устанавливаем все входные поля.
-          2) Ждём, пока DUT примет их (in_ready_o).
-          3) Ждём, пока DUT выдаст результат (out_valid_o).
-          4) Считываем и возвращаем результат.
-
-        Возвращаемый словарь – то же, что и из `read_output()`.
-        """
-        # 1) Драйв всех входов
         await self.drive_operands(operands, valid=True)
         await self.drive_op(op_code,
                             op_mod=op_mod,
@@ -282,35 +280,63 @@ class FPUBfm(metaclass=utility_classes.Singleton):
                             vectorial=vectorial,
                             tag=tag,
                             mask=mask)
+        response_task = cocotb.start_soon(self.wait_responce(tag))
+        await RisingEdge(self.clk)
+        await self.wait_in_ready(timeout)
+        self.drive_idle()
+        return response_task
+
+    async def txn_by_item(self, item: FPUItem, timeout: int = 1000):
+        await self.drive_operands_by_item(item)
+        await self.drive_op_by_item(item)
+        response_task = cocotb.start_soon(self.wait_responce(item._tag))
+        await RisingEdge(self.clk)
+        await self.wait_in_ready(timeout)
+        self.drive_idle()
+        return response_task
+
+    async def send_txn(self, item: FPUItem, vectorial: int = 0):
+        return await self.transaction(operands=item._operands,
+                               op_code=item._op_code.value,
+                               op_mod=item._op_mod,
+                               rnd_mode=item._rnd_mode.value,
+                               src_fmt=item._src_fmt.value,
+                               dst_fmt=item._dst_fmt.value,
+                               int_fmt=item._int_fmt.value,
+                               tag = item._tag,
+                               vectorial = vectorial,
+                               mask = None,
+                               flush = False,
+                               out_ready = True,
+                               timeout=1000)
+
+    async def send_pack_txns(self,
+                             item_l: list[FPUItem],
+                             flush = False,
+                             out_ready = True,
+                             timeout: int = 1000
+                             ):
+        for item in item_l:
+            await self.drive_operands(item._operands)
+            await self.drive_op(item._op_code.value,
+                            op_mod=item._op_mod,
+                            rnd_mode=item._rnd_mode.value,
+                            src_fmt=item._src_fmt.value,
+                            dst_fmt=item._dst_fmt.value,
+                            int_fmt=item._int_fmt.value,
+                            vectorial=0,
+                            tag=item._tag,
+                            mask=None)
+
+
         await self.drive_flush(flush)
         await self.drive_out_ready(out_ready)
 
         # 2) Ждём handshake
-        await self.wait_handshake(timeout)
+        await self.wait_handshake(timeout, 0x01)
         cocotb.log.debug(f"Handshake cptrure")
 
+        result = await self.read_output()
+        # self.drive_idle()
         # 3) Считываем результат
-        return await self.read_output()
-
-    # --------------------------------------------------------------
-    #  Монитор – асинхронный процесс, который постоянно пишет
-    #          изменения интересных сигналов в лог.
-    # --------------------------------------------------------------
-    async def monitor(self, interval: float = 0.0):
-        """
-        Запускается в тесте как:
-            cocotb.start_soon(bfm.monitor())
-        Если `interval` > 0, то вывод делается раз в `interval` сек,
-        иначе – каждый тактовый фронт.
-        """
-        while True:
-            # Печать только когда есть «значимый» выход (out_valid)
-            if self.out_valid_o.value.integer:
-                out = await self.read_output()
-                cocotb.log.info(f"[MON] out_valid=1  result=0x{out['result']:0{self.WIDTH//4}X}  "
-                                f"status=0x{out['status']:X}  tag={out['tag']}  "
-                                f"busy={out['busy']}  early_valid={out['early_valid']}")
-            if interval:
-                await Timer(interval, units="ns")
-            else:
-                await RisingEdge(self.clk)
+        return result

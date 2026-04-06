@@ -1,17 +1,17 @@
 [*]
 [*] GTKWave Analyzer v3.3.126 (w)1999-2026 BSI
-[*] Thu Apr  2 11:38:49 2026
+[*] Mon Apr  6 12:53:03 2026
 [*]
-[dumpfile] "/home/starukhin.d/projects/verilog/cvfpu/tb/dump.vcd"
-[dumpfile_mtime] "Thu Apr  2 11:38:37 2026"
-[dumpfile_size] 1807259
-[savefile] "/home/starukhin.d/projects/verilog/cvfpu/tb/gtkw/fpu_top.gtkw"
+[dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
+[dumpfile_mtime] "Mon Apr  6 12:52:17 2026"
+[dumpfile_size] 4395760
+[savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/gtkw/fpu_top.gtkw"
 [timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-16.199999 159500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.999998 563000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 209
-[signals_width] 186
+[signals_width] 198
 [sst_expanded] 1
 [sst_vpaned_height] 336
 @28
@@ -19,14 +19,11 @@ $rootio.clk_i
 $rootio.rst_ni
 @200
 -OUT
-@28
-$rootio.in_ready_o
 @22
 $rootio.result_o[63:0]
 @28
-$rootio.tag_o
+$rootio.in_ready_o
 $rootio.out_valid_o
-$rootio.out_ready_i
 $rootio.busy_o
 $rootio.early_valid_o
 @200
@@ -38,18 +35,25 @@ $rootio.operands_i[1][63:0]
 $rootio.operands_i[2][63:0]
 @28
 $rootio.in_valid_i
-$rootio.in_ready_o
+$rootio.out_ready_i
 $rootio.op_mod_i
-$rootio.rnd_mode_i[2:0]
+$rootio.flush_i
 $rootio.vectorial_op_i
+$rootio.rnd_mode_i[2:0]
 @22
 $rootio.simd_mask_i[7:0]
+@c00200
+-FORMAT
 @28
-$rootio.flush_i
-$rootio.early_valid_o
 $rootio.src_fmt_i[2:0]
 $rootio.dst_fmt_i[2:0]
 $rootio.int_fmt_i[1:0]
-$rootio.tag_i
+@1401200
+-FORMAT
+@200
+-TAGS
+@22
+$rootio.tag_i[3:0]
+$rootio.tag_o[3:0]
 [pattern_trace] 1
 [pattern_trace] 0
