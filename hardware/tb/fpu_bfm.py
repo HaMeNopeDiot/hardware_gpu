@@ -113,60 +113,17 @@ class FPUBfm(metaclass=utility_classes.Singleton):
     # --------------------------------------------------------------
     #  Драйверы отдельных групп сигналов
     # --------------------------------------------------------------
-    async def drive_operands(self, operand_list, valid: bool = True):
-        """
-        operand_list – список/кортеж длиной NUM_OPERANDS,
-                       каждый элемент – int, помещающийся в WIDTH бит.
-        """
-        if len(operand_list) != self.NUM_OPERANDS:
-            raise ValueError(f"operands list must contain {self.NUM_OPERANDS} elements")
-
-        tmp_val = 0
-        for i, val in enumerate(operand_list):
-            # ограничиваем разрядность, если передали «слишком» большое число
-            mask = (1 << self.WIDTH) - 1
-            cocotb.log.debug(f"val: {val}; mask: {hex(mask)}; ({self.WIDTH * i})")
-            tmp_val |= ((val & mask) << (self.WIDTH * i))
-        self.operands_i.value = tmp_val
-        self.in_valid_i.value = int(valid)
-
-    async def drive_op(self,
-                       op_code,
-                       op_mod: int = 0,
-                       rnd_mode: int = 0,
-                       src_fmt: int = 0,
-                       dst_fmt: int = 0,
-                       int_fmt: int = 0,
-                       vectorial: int = 0,
-                       tag=None,
-                       mask=None):
-        """
-        Одновременная установка всех «операционных» полей.
-        `tag` и `mask` могут быть `None` → оставляем без изменения.
-        """
-        self.op_i.value           = op_code
-        self.op_mod_i.value       = op_mod
-        self.rnd_mode_i.value     = rnd_mode
-        self.src_fmt_i.value      = src_fmt
-        self.dst_fmt_i.value      = dst_fmt
-        self.int_fmt_i.value      = int_fmt
-        self.vectorial_op_i.value = vectorial
-        if tag is not None:
-            self.tag_i.value = tag
-        if mask is not None:
-            self.simd_mask_i.value = mask
-        # await RisingEdge(self.clk)
 
     async def drive_op_by_item(self, item: FPUItem):
         self.op_i.value             = item._op_code.value
-        self.op_mod_i.value         = item._op_mod.value
+        self.op_mod_i.value         = item._op_mod
         self.rnd_mode_i.value       = item._rnd_mode.value
         self.src_fmt_i.value        = item._src_fmt.value
         self.dst_fmt_i.value        = item._dst_fmt.value
         self.int_fmt_i.value        = item._int_fmt.value
-        self.vectorial_op_i.value   = item._vectorial_op_i.value
-        self.tag_i.value            = item._tag.value
-        self.simd_mask_i.value      = item._simd_mask_i.value
+        self.vectorial_op_i.value   = item._vectorial_op_i
+        self.tag_i.value            = item._tag
+        self.simd_mask_i.value      = item._simd_mask_i
 
     async def drive_operands_by_item(self, item: FPUItem, valid: bool = True):
         if len(item._operands) != self.NUM_OPERANDS:
@@ -256,36 +213,6 @@ class FPUBfm(metaclass=utility_classes.Singleton):
         self.out_ready_i.value = 0
         return res
 
-    async def transaction(self,
-                          operands,
-                          op_code,
-                          op_mod: int = 0,
-                          rnd_mode: int = 0,
-                          src_fmt: int = 0,
-                          dst_fmt: int = 0,
-                          int_fmt: int = 0,
-                          vectorial: int = 0,
-                          tag=0,
-                          mask=None,
-                          flush: bool = False,
-                          out_ready: bool = True,
-                          timeout: int = 1000):
-        await self.drive_operands(operands, valid=True)
-        await self.drive_op(op_code,
-                            op_mod=op_mod,
-                            rnd_mode=rnd_mode,
-                            src_fmt=src_fmt,
-                            dst_fmt=dst_fmt,
-                            int_fmt=int_fmt,
-                            vectorial=vectorial,
-                            tag=tag,
-                            mask=mask)
-        response_task = cocotb.start_soon(self.wait_responce(tag))
-        await RisingEdge(self.clk)
-        await self.wait_in_ready(timeout)
-        self.drive_idle()
-        return response_task
-
     async def txn_by_item(self, item: FPUItem, timeout: int = 1000):
         await self.drive_operands_by_item(item)
         await self.drive_op_by_item(item)
@@ -295,48 +222,3 @@ class FPUBfm(metaclass=utility_classes.Singleton):
         self.drive_idle()
         return response_task
 
-    async def send_txn(self, item: FPUItem, vectorial: int = 0):
-        return await self.transaction(operands=item._operands,
-                               op_code=item._op_code.value,
-                               op_mod=item._op_mod,
-                               rnd_mode=item._rnd_mode.value,
-                               src_fmt=item._src_fmt.value,
-                               dst_fmt=item._dst_fmt.value,
-                               int_fmt=item._int_fmt.value,
-                               tag = item._tag,
-                               vectorial = vectorial,
-                               mask = None,
-                               flush = False,
-                               out_ready = True,
-                               timeout=1000)
-
-    async def send_pack_txns(self,
-                             item_l: list[FPUItem],
-                             flush = False,
-                             out_ready = True,
-                             timeout: int = 1000
-                             ):
-        for item in item_l:
-            await self.drive_operands(item._operands)
-            await self.drive_op(item._op_code.value,
-                            op_mod=item._op_mod,
-                            rnd_mode=item._rnd_mode.value,
-                            src_fmt=item._src_fmt.value,
-                            dst_fmt=item._dst_fmt.value,
-                            int_fmt=item._int_fmt.value,
-                            vectorial=0,
-                            tag=item._tag,
-                            mask=None)
-
-
-        await self.drive_flush(flush)
-        await self.drive_out_ready(out_ready)
-
-        # 2) Ждём handshake
-        await self.wait_handshake(timeout, 0x01)
-        cocotb.log.debug(f"Handshake cptrure")
-
-        result = await self.read_output()
-        # self.drive_idle()
-        # 3) Считываем результат
-        return result

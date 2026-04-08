@@ -76,10 +76,10 @@ async def my_first_test(dut):
                tag=0x4)
 
     # await fpu_bfm.drive_operands(operands)
-    respond_task_1 = await fpu_bfm.send_txn(fpu_item1, vectorial=0)
-    respond_task_2 = await fpu_bfm.send_txn(fpu_item2, vectorial=0)
-    respond_task_3 = await fpu_bfm.send_txn(fpu_item3, vectorial=0)
-    respond_task_4 = await fpu_bfm.send_txn(fpu_item4, vectorial=0)
+    respond_task_1 = await fpu_bfm.txn_by_item(fpu_item1)
+    respond_task_2 = await fpu_bfm.txn_by_item(fpu_item2)
+    respond_task_3 = await fpu_bfm.txn_by_item(fpu_item3)
+    respond_task_4 = await fpu_bfm.txn_by_item(fpu_item4)
 
     await Timer(1000, unit="ns")
     print_result(await respond_task_1)
@@ -88,3 +88,18 @@ async def my_first_test(dut):
     print_result(await respond_task_4)
 
     await Timer(2000, unit="ns")
+
+    fpu_item0 = FPUItem(operands=[1, 2, 3],
+           op_code=OperationE.MUL,
+           src_fmt=FpFormatE.FP16,
+           dst_fmt=FpFormatE.FP16,
+           int_fmt=IntFormatE.INT16,
+           tag=0x1)
+    fpu_item0._vectorial_op_i = 1
+    fpu_item0.vectoral_operands_pack([5, 7, 8, 10], [10, 4, 2, 1], [12, 3, 7, 1])
+    respond_task_5 = await fpu_bfm.txn_by_item(fpu_item0)
+
+    print(f"HEX RS: {hex((await respond_task_5)["result"])}")
+
+    for e in fpu_item0._operands:
+        print(f"HEX OP: {hex(e)}")
