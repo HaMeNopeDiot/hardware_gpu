@@ -203,10 +203,11 @@ class FPUBfm(metaclass=utility_classes.Singleton):
     # --------------------------------------------------------------
     #  Композитный метод – одна транзакция «от начала до конца»
     # --------------------------------------------------------------
-    async def wait_responce(self, tag: int =-1):
+    async def wait_responce(self, tag: int = -1, with_delay: int = 0):
         cocotb.log.debug(f"Start capture responce with tag {tag}")
         await self.wait_out_valid(1000, tag)
         cocotb.log.debug(f"Handshake capture with tag {tag}")
+        if with_delay != 0: await ClockCycles(self.clk, with_delay)
         res = await self.read_output()
         self.out_ready_i.value = 1
         await RisingEdge(self.clk)

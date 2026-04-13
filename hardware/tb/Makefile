@@ -21,9 +21,10 @@ COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				--timescale 1ns/1ps \
 				-DTAG_TYPE="logic[3:0]"
 
-PWD = ../src
 
-ROOT_PATH = ..
+ROOT_PATH = ../cvfpu
+
+PWD = $(ROOT_PATH)/src
 
 VERILOG_SOURCES +=  $(PWD)/common_cells/src/cf_math_pkg.sv \
 					$(PWD)/fpnew_pkg.sv \
