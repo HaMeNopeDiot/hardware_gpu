@@ -3,7 +3,7 @@
 // Author:                Starukhin Danila M.
 // Author's e-mail:       starukhin.d@milandr.ru
 // -----------------------------------------------------------------------------
-// Purpose: GPU Compute unit
+// Purpose: GPU thread unit
 //------------------------------------------------------------------------------
 // Copyright (c) 2026 JSC "ICC Milandr", all rights reserved.
 //
@@ -23,7 +23,7 @@
 /*===================================================================================//
 region MODULE DEFINITION
 //===================================================================================*/
-module compute_unit
+module thread_unit
     import handshake_fpu_pkg::tags_t;
     import handshake_fpu_pkg::TAGS_NUM;
     import handshake_fpu_pkg::proccess_t;
@@ -40,16 +40,20 @@ module compute_unit
     import fpnew_pkg::INT64;
 
     // Operation
-    import cu_pkg::cu_command_t;
+    import cu_pkg::thread_command_t;
 #(
     parameter int unsigned DW = 64,
-    parameter int unsigned REGFILE_SIZE = 6
+    parameter int unsigned REGFILE_SIZE = 6,
+    parameter int unsigned AW = $clog2(REGFILE_SIZE)
 ) (
-    input logic         clk,
-    input logic         rst_n,
+    input  logic            clk,
+    input  logic            rst_n,
 
-    input cu_command_t  command,
-    input logic         ready
+    input  logic            ready_in,
+    output logic            ready_out,
+
+    input  thread_command_t command,
+    output thread_result_t  result
 );
 
 /*===================================================================================//
@@ -63,10 +67,10 @@ logic [DW - 1: 0] op_3;
 
 assign operands = {op_1, op_2, op_3};
 
-/*===================================================================================//
-region HANDSHAKE FSM
-//===================================================================================*/
 
+logic wr_en;
+logic [AW - 1: 0] addr_w;
+logic [DW - 1: 0] data_w;
 
 /*===================================================================================//
 region INSTANCES
@@ -80,18 +84,21 @@ cu_regfile #(
     .REG_NUM (REGFILE_SIZE)
 ) cu_regfile_u (
     //================### COMMON SIGNALS ###=================//
-    .clk     (clk),         // <-
+    .clk     (clk),                 // <-
     //=================### WRITE SIGNALS ###=================//
-    .wr_en   (), // <-
-    .addr_w  (), // <-
-    .data_w  (), // <-
-    //=================### READ SIGNALS ###==================//
-    .addr_r1 (command.a1),  // <-
-    .addr_r2 (command.a2),  // <-
-    .addr_r3 (command.a3),  // <-
-    .data_r1 (op_1),        // ->
-    .data_r2 (op_2),        // ->
-    .data_r3 (op_3)         // ->
+    .wr_en   (wr_en),               // <-
+    .addr_w  (addr_w),              // <-
+    .data_w  (data_w),              // <-
+    //=============### READ SIGNALS FOR ALU ###==============//
+    .addr_r1 (command.a1),          // <-
+    .addr_r2 (command.a2),          // <-
+    .addr_r3 (command.a3),          // <-
+    .data_r1 (op_1),                // ->
+    .data_r2 (op_2),                // ->
+    .data_r3 (op_3),                // ->
+    /*================### READ SIGNALS ###===================*/
+    .addr_r  (command.ar),          // <-
+    .data_r  (result.result_data)   // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

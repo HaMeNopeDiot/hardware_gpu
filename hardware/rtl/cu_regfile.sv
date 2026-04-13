@@ -33,8 +33,9 @@ module cu_regfile #(
     /*========================### READ SIGNALS FOR ALU ###===========================*/
     input  logic [AW - 1: 0]    addr_r1, addr_r2, addr_r3,  // Read address ports
     output logic [DW - 1: 0]    data_r1, data_r2, data_r3,  // Read data ports
-    /*==========================### RESULT SIGNALS ###===============================*/
-    output logic [DW - 1: 0]   result
+    /*==========================### READ SIGNALS ###=================================*/
+    input logic  [AW - 1: 0]    addr_r,
+    output logic [DW - 1: 0]    data_r
     //===============================================================================//
 );
     logic [DW - 1:0] rf [REG_NUM];
@@ -50,6 +51,5 @@ module cu_regfile #(
     assign data_r2 = addr_r2 != '0? rf[addr_r2]: '0;
     assign data_r3 = addr_r3 != '0? rf[addr_r3]: '0;
 
-    assign result = rf[REG_NUM - 1];
-
+    assign data_r  = addr_r != '0? rd[addr_r]: '0;
 endmodule
