@@ -11,3 +11,4 @@ README*.md
 cvfpu/
 *.xml
 *.vcd
+*/*/sim_build/*

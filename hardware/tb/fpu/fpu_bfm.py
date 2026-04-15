@@ -5,7 +5,7 @@ import cocotb
 from cocotb.triggers import RisingEdge, FallingEdge, Timer, Combine, Event, ClockCycles
 from pyuvm import utility_classes    # ваш метакласс Singleton
 
-from fpu_item   import FPUItem
+from fpu.fpu_item   import FPUItem
 
 class FPUBfm(metaclass=utility_classes.Singleton):
     """

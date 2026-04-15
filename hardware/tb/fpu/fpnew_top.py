@@ -3,13 +3,13 @@
 import cocotb
 from cocotb.triggers import Timer, ClockCycles
 
-from fpu_bfm import FPUBfm
-from fppconverter import float_to_ieee754, ieee754_to_float, float_to_i754
+from fpu.fpu_bfm import FPUBfm
+from fpu.fppconverter import ieee754_to_float
+from fpu.fpu_item import FPUItem, FpFormatE, IntFormatE, OperationE
 
 from numbers import Real
 from decimal import Decimal
 
-from fpu_item import FPUItem, FpFormatE, IntFormatE, OperationE
 
 def print_result(result):
     cocotb.log.info(result)
@@ -28,8 +28,7 @@ async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
         clk.value = 1
         await Timer(time, unit)
 
-@cocotb.test()
-async def my_first_test(dut):
+async def fpu_test(dut):
     """Try accessing the design."""
     clk = dut.clk_i
     rst_n = dut.rst_ni

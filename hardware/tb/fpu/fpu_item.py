@@ -3,7 +3,7 @@
 # --------------------------------------------------------------
 from enum import Enum
 
-from fppconverter import float_to_ieee754, ieee754_to_float, float_to_i754
+from fpu.fppconverter import float_to_ieee754, ieee754_to_float, float_to_i754
 
 class OperationE(Enum):
     FMADD = 0       # op[0] * op[1] + op[2]
