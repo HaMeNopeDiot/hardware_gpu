@@ -1,26 +1,13 @@
-//------------------------------------------------------------------------------
-// Department:            Software Laboratory
+//-------------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
-// Author's e-mail:       starukhin.d@milandr.ru
-// -----------------------------------------------------------------------------
-// Purpose: Compute unit fsm
-//------------------------------------------------------------------------------
-// Copyright (c) 2026 JSC "ICC Milandr", all rights reserved.
-//
-// This file contains confidential, proprietary information and trade
-// secrets of JSC "ICC Milandr". The information contained in this file
-// may only be used by a person authorised under and to the extent
-// permitted by a subsisting license agreement or design service
-// agreement from JSC "ICC Milandr".
-//
-// This entire notice must be reproduced on all copies of this file
-// and copies of this file may only be made by a person if such person
-// is permitted to do so under the terms of a subsisting license
-// agreement or design service agreement from JSC "ICC Milandr".
-//------------------------------------------------------------------------------
+// Author's e-mail:       sniperusus2002@gmail.com
+// ------------------------------------------------------------------------------//
+// Purpose: Thread unit FSM
+//-------------------------------------------------------------------------------//
 
-module cu_fsm
+module tu_fsm
     import handshake_fpu_pkg::proccess_t;
+    import handshake_fpu_pkg::fsm_fpu_state_e;
     // FSM states
     import handshake_fpu_pkg::FPU_IDLE;
     import handshake_fpu_pkg::FPU_PRELOAD;
@@ -29,13 +16,17 @@ module cu_fsm
     import handshake_fpu_pkg::FPU_RESULT;
 #() (
     /*============================### COMMON SIGNALS ###==========================*/
-    input  logic clk,
-    input  logic rst_n,
+    input  logic            clk,
+    input  logic            rst_n,
+    /*===========================### CONTROL SIGNALS ###==========================*/
+    input  logic            ready,
     /*==========================### HANDSHAKE SIGNALS ###=========================*/
-    input  logic in_ready_o,
-    input  logic out_valid_o,
-    output logic out_ready_i,
-    output logic in_valid_i
+    input  logic            in_ready_o,
+    input  logic            out_valid_o,
+    output logic            out_ready_i,
+    output logic            in_valid_i,
+    /*===========================### STATUS SIGNALS ###-==========================*/
+    output fsm_fpu_state_e  state
     //============================================================================//
 );
 

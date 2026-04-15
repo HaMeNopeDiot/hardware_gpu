@@ -1,23 +1,9 @@
-//------------------------------------------------------------------------------
-// Department:            Software Laboratory
+//-------------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
-// Author's e-mail:       starukhin.d@milandr.ru
-// -----------------------------------------------------------------------------
-// Purpose: GPU thread unit
-//------------------------------------------------------------------------------
-// Copyright (c) 2026 JSC "ICC Milandr", all rights reserved.
-//
-// This file contains confidential, proprietary information and trade
-// secrets of JSC "ICC Milandr". The information contained in this file
-// may only be used by a person authorised under and to the extent
-// permitted by a subsisting license agreement or design service
-// agreement from JSC "ICC Milandr".
-//
-// This entire notice must be reproduced on all copies of this file
-// and copies of this file may only be made by a person if such person
-// is permitted to do so under the terms of a subsisting license
-// agreement or design service agreement from JSC "ICC Milandr".
-//------------------------------------------------------------------------------
+// Author's e-mail:       sniperusus2002@gmail.com
+// ------------------------------------------------------------------------------//
+// Purpose: GPU Thread unit
+//-------------------------------------------------------------------------------//
 
 
 /*===================================================================================//
@@ -26,7 +12,8 @@ region MODULE DEFINITION
 module thread_unit
     import handshake_fpu_pkg::tags_t;
     import handshake_fpu_pkg::TAGS_NUM;
-    import handshake_fpu_pkg::proccess_t;
+    import handshake_fpu_pkg::fsm_fpu_state_e;
+    import handshake_fpu_pkg::FPU_RESULT;
 
     // FSM states
     import handshake_fpu_pkg::FPU_IDLE;
@@ -40,7 +27,8 @@ module thread_unit
     import fpnew_pkg::INT64;
 
     // Operation
-    import cu_pkg::thread_command_t;
+    import tu_pkg::thread_command_t;
+    import tu_pkg::lsu2tu_txn_t;
 #(
     parameter int unsigned DW = 64,
     parameter int unsigned REGFILE_SIZE = 6,
@@ -49,10 +37,14 @@ module thread_unit
     input  logic            clk,
     input  logic            rst_n,
 
-    input  logic            ready_in,
     output logic            ready_out,
 
-    input  thread_command_t command,
+    input  lsu2tu_txn_t     lsu_cmd,
+    input                   lsu_cmd_active,
+
+    input  thread_command_t dec_cmd,
+    input  logic            dec_cmd_active,
+
     output thread_result_t  result
 );
 
@@ -67,10 +59,40 @@ logic [DW - 1: 0] op_3;
 
 assign operands = {op_1, op_2, op_3};
 
+fsm_fpu_state_e state;
+logic  fpu_result_active;
+assign fpu_result_active = state == FPU_RESULT;
 
 logic wr_en;
 logic [AW - 1: 0] addr_w;
 logic [DW - 1: 0] data_w;
+
+// write
+always_comb begin
+    if (lsu_cmd_active && lsu_cmd.rw) begin
+        addr_w = lsu_cmd.addr;
+        data_w = lsu_cmd.data_w;
+        wr_en  = '1;
+    end
+    else if (fpu_result_active) begin
+        addr_w = dec_cmd.ar;
+        data_w = result.result_data;
+        wr_en = '1;
+    end
+    else begin
+        addr_w = '0;
+        data_w = '0;
+        wr_en  = '0;
+    end
+end
+
+// read
+always_comb begin
+    if (lsu_cmd_active && ~lsu_cmd.rw)
+        addr_r = lsu_cmd.addr;
+    else
+        addr_r = dec_cmd_ar;
+end
 
 /*===================================================================================//
 region INSTANCES
@@ -79,10 +101,10 @@ region INSTANCES
 // ///////////////////////////////////////////////////////// //
 //                    *** CU REGFILE ***                     //
 // NOTE: write a purpose here
-cu_regfile #(
+tu_regfile #(
     .DW      (DW),
     .REG_NUM (REGFILE_SIZE)
-) cu_regfile_u (
+) tu_regfile_u (
     //================### COMMON SIGNALS ###=================//
     .clk     (clk),                 // <-
     //=================### WRITE SIGNALS ###=================//
@@ -90,14 +112,14 @@ cu_regfile #(
     .addr_w  (addr_w),              // <-
     .data_w  (data_w),              // <-
     //=============### READ SIGNALS FOR ALU ###==============//
-    .addr_r1 (command.a1),          // <-
-    .addr_r2 (command.a2),          // <-
-    .addr_r3 (command.a3),          // <-
+    .addr_r1 (dec_cmd.a1),          // <-
+    .addr_r2 (dec_cmd.a2),          // <-
+    .addr_r3 (dec_cmd.a3),          // <-
     .data_r1 (op_1),                // ->
     .data_r2 (op_2),                // ->
     .data_r3 (op_3),                // ->
     /*================### READ SIGNALS ###===================*/
-    .addr_r  (command.ar),          // <-
+    .addr_r  (dec_cmd.ar),          // <-
     .data_r  (result.result_data)   // ->
     //=======================================================//
 );
@@ -106,15 +128,19 @@ cu_regfile #(
 // ///////////////////////////////////////////////////////// //
 //                      *** CU FSM ***                       //
 // NOTE: write a purpose here
-cu_fsm cu_fsm_u (
+tu_fsm tu_fsm_u (
     //================### COMMON SIGNALS ###=================//
-    .clk         (clk),         // <-
-    .rst_n       (rst_n),       // <-
+    .clk         (clk),             // <-
+    .rst_n       (rst_n),           // <-
+    /*================### COMMON SIGNALS ###=================*/
+    .ready       (dec_cmd_active),  // <-
     //===============### HANDSHAKE SIGNALS ###===============//
-    .in_ready_o  (in_ready_o),  // <-
-    .out_valid_o (out_valid_o), // <-
-    .out_ready_i (out_ready_i), // ->
-    .in_valid_i  (in_valid_i)   // ->
+    .in_ready_o  (in_ready_o),      // <-
+    .out_valid_o (out_valid_o),     // <-
+    .out_ready_i (out_ready_i),     // ->
+    .in_valid_i  (in_valid_i),      // ->
+    /*================### STATUS SIGNALS ###=================*/
+    .state       (state)            // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -128,38 +154,38 @@ fpnew_top #(
     .Features       (fpnew_pkg::RV64D_Xsflt),
     .Implementation (fpnew_pkg::DEFAULT_NOREGS),
     .DivSqrtSel     (fpnew_pkg::THMULTI),
-    .TrueSIMDClass  (0),
-    .EnableSIMDMask (0),
+    .TrueSIMDClass  ('0),
+    .EnableSIMDMask ('0),
     .TagType        (logic [3: 0])
 ) fpnew_top_u (
     /*================### COMMON SIGNALS ###=================*/
-    .clk_i          (clk),              // <-
-    .rst_ni         (rst_n),            // <-
+    .clk_i          (clk),                  // <-
+    .rst_ni         (rst_n),                // <-
     /*=================### MAIN SIGNALS ###==================*/
-    .operands_i     (operands),         // <- (operands like a, b, c in a + b * c)
-    .rnd_mode_i     (command.rnd),      // <- (type of round after calc)
-    .op_i           (command.op),       // <- (type of operation in expression)
-    .op_mod_i       (command.op_mod),   // <- (alt option for operation type)
+    .operands_i     (operands),             // <- (operands like a, b, c in a + b * c)
+    .rnd_mode_i     (dec_cmd.rnd),          // <- (type of round after calc)
+    .op_i           (dec_cmd.op),           // <- (type of operation in expression)
+    .op_mod_i       (dec_cmd.op_mod),       // <- (alt option for operation type)
     /*==============### SET FORMAT SIGNALS ###===============*/
-    .src_fmt_i      (FP64),             // <- (type of incoming data)
-    .dst_fmt_i      (FP64),             // <- (type of outcoming data)
-    .int_fmt_i      (INT64),            // <- (type of data, if it int)
+    .src_fmt_i      (FP64),                 // <- (type of incoming data)
+    .dst_fmt_i      (FP64),                 // <- (type of outcoming data)
+    .int_fmt_i      (INT64),                // <- (type of data, if it int)
     /*==============### PROPERTIES SIGNALS ###===============*/
-    .vectorial_op_i (),                 // <- (vectorial mode)
-    .simd_mask_i    (),                 // <-
-    .flush_i        (),                 // <-
-    .tag_i          (),                 // <- (tag of operation set)
-    .tag_o          (),                 // -> (tag of operation get)
+    .vectorial_op_i ('0),                   // <- (vectorial mode)
+    .simd_mask_i    ('0),                   // <-
+    .flush_i        ('0),                   // <-
+    .tag_i          (dec_cmd.tag),          // <- (tag of operation set)
+    .tag_o          (result.tag),           // -> (tag of operation get)
     /*===============### HANDSHAKE SIGNALS ###===============*/
-    .in_valid_i     (in_valid_i),   // <-
-    .out_ready_i    (out_ready_i),  // <-
-    .out_valid_o    (out_valid_o),  // ->
-    .in_ready_o     (in_ready_o),   // ->
+    .in_valid_i     (in_valid_i),           // <-
+    .out_ready_i    (out_ready_i),          // <-
+    .out_valid_o    (out_valid_o),          // ->
+    .in_ready_o     (in_ready_o),           // ->
     /*================### RESULT SIGNALS ###=================*/
-    .result_o       (), // ->
-    .status_o       (), // ->
-    .busy_o         (), // ->
-    .early_valid_o  ()  // ->
+    .result_o       (result.result_data),   // ->
+    .status_o       (result.status),        // ->
+    .busy_o         (result.is_busy),       // ->
+    .early_valid_o  (result.early_valid)    // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

@@ -1,22 +1,8 @@
 //-------------------------------------------------------------------------------//
-// Department:            Software Laboratory
 // Author:                Starukhin Danila M.
-// Author's e-mail:       starukhin.d@milandr.ru
+// Author's e-mail:       sniperusus2002@gmail.com
 // ------------------------------------------------------------------------------//
 // Purpose: Structs for in/out ports in modules
-//-------------------------------------------------------------------------------//
-// Copyright (c) 2026 JSC "ICC Milandr", all rights reserved.
-//
-// This file contains confidential, proprietary information and trade
-// secrets of JSC "ICC Milandr". The information contained in this file
-// may only be used by a person authorised under and to the extent
-// permitted by a subsisting license agreement or design service
-// agreement from JSC "ICC Milandr".
-//
-// This entire notice must be reproduced on all copies of this file
-// and copies of this file may only be made by a person if such person
-// is permitted to do so under the terms of a subsisting license
-// agreement or design service agreement from JSC "ICC Milandr".
 //-------------------------------------------------------------------------------//
 
 package handshake_fpu_pkg;
@@ -36,7 +22,6 @@ package handshake_fpu_pkg;
     } fsm_fpu_state_e;
 
     typedef struct packed {
-        tags_t          tag;
         fsm_fpu_state_e prev_state;
         fsm_fpu_state_e state;
     } proccess_t;
