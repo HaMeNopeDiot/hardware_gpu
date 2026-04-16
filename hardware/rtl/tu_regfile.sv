@@ -37,5 +37,5 @@ module tu_regfile #(
     assign data_r2 = addr_r2 != '0? rf[addr_r2]: '0;
     assign data_r3 = addr_r3 != '0? rf[addr_r3]: '0;
 
-    assign data_r  = addr_r != '0? rd[addr_r]: '0;
+    assign data_r  = addr_r  != '0? rf[addr_r]: '0;
 endmodule

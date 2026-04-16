@@ -28,6 +28,7 @@ module thread_unit
 
     // Operation
     import tu_pkg::thread_command_t;
+    import tu_pkg::thread_result_t;
     import tu_pkg::lsu2tu_txn_t;
 #(
     parameter int unsigned DW = 64,
@@ -87,12 +88,19 @@ always_comb begin
 end
 
 // read
+logic [AW - 1: 0] addr_r;
 always_comb begin
     if (lsu_cmd_active && ~lsu_cmd.rw)
         addr_r = lsu_cmd.addr;
     else
-        addr_r = dec_cmd_ar;
+        addr_r = dec_cmd.addr;
 end
+
+// hshk sig
+logic out_ready_i;
+logic out_valid_o;
+logic in_valid_i;
+logic in_ready_o;
 
 /*===================================================================================//
 region INSTANCES
@@ -148,15 +156,15 @@ tu_fsm tu_fsm_u (
 // ///////////////////////////////////////////////////////// //
 //                     *** FPNEW TOP ***                     //
 // NOTE: write a purpose here
-fpnew_top #(
+fpu_dummy #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
     // Type of FPU configuration. Do not touch
     .Features       (fpnew_pkg::RV64D_Xsflt),
     .Implementation (fpnew_pkg::DEFAULT_NOREGS),
     .DivSqrtSel     (fpnew_pkg::THMULTI),
+    .TagType        (logic [3: 0]),
     .TrueSIMDClass  ('0),
-    .EnableSIMDMask ('0),
-    .TagType        (logic [3: 0])
+    .EnableSIMDMask ('0)
 ) fpnew_top_u (
     /*================### COMMON SIGNALS ###=================*/
     .clk_i          (clk),                  // <-
@@ -189,5 +197,4 @@ fpnew_top #(
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
-
 endmodule

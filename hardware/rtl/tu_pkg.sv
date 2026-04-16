@@ -9,13 +9,14 @@ package tu_pkg;
     import handshake_fpu_pkg::tags_t;
     import fpnew_pkg::roundmode_e;
     import fpnew_pkg::status_t;
+    import fpnew_pkg::operation_e;
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 6;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
     localparam int unsigned DW              = 64;
 
     typedef struct packed {
-        operation_t                 op;
+        operation_e                 op;
         logic                       op_mod;
         logic [REGFILE_AW - 1: 0]   a1, a2, a3, ar;
         tags_t                      tag;
