@@ -26,10 +26,9 @@ module tu_fsm
     output logic            out_ready_i,
     output logic            in_valid_i,
     /*===========================### STATUS SIGNALS ###-==========================*/
-    output fsm_fpu_state_e  state
+    output fsm_fpu_state_e  prev_state
     //============================================================================//
 );
-
 logic ready_prev;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -42,54 +41,62 @@ logic  start;
 assign start = ready && ~ready_prev;
 
 // FSM logic
-proccess_t process_info;
+fsm_fpu_state_e state;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        process_info.prev_state <= '0;
+        prev_state <= FPU_IDLE;
     else
-        process_info.prev_state <= process_info.state;
+        prev_state <= state;
 end
 
 // Make FSM
 always_comb begin
-    case (process_info.prev_state)
+    case (prev_state)
         FPU_IDLE: begin
             if (in_valid_i)
-                process_info.state = FPU_PRELOAD;
+                state = FPU_PRELOAD;
+            else
+                state = FPU_IDLE;
         end
         FPU_PRELOAD: begin
             if (~in_valid_i)
-                process_info.state = FPU_IDLE;
+                state = FPU_IDLE;
             else if (in_ready_o)
-                process_info.state = FPU_LOAD;
+                state = FPU_LOAD;
+            else
+                state = FPU_PRELOAD;
         end
         FPU_LOAD: begin
-            process_info.state = FPU_PROCESS;
+            state = FPU_PROCESS;
         end
         FPU_PROCESS: begin
             if (out_valid_o)
-                process_info.state = FPU_RESULT;
+                state = FPU_RESULT;
+            else
+                state = FPU_PROCESS;
         end
         FPU_RESULT: begin
             if (out_ready_i)
                 if(in_valid_i)
                     if(in_ready_o)
-                        process_info.state = FPU_LOAD;
+                        state = FPU_LOAD;
                     else
-                        process_info.state = FPU_PRELOAD;
+                        state = FPU_PRELOAD;
                 else
-                    process_info.state = FPU_IDLE;
+                    state = FPU_IDLE;
+            else
+                state = FPU_RESULT;
         end
         default:
-            process_info.state = FPU_IDLE;
+            state = FPU_IDLE;
     endcase
 end
 
 logic  fpu_give_result;
-assign fpu_give_result = process_info.state == FPU_RESULT;
+assign fpu_give_result = state == FPU_RESULT;
 
 logic  fpu_load;
-assign fpu_load = process_info.state == FPU_LOAD;
+assign fpu_load = state == FPU_LOAD;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -100,11 +107,13 @@ always_ff @(posedge clk or negedge rst_n) begin
         in_valid_i <= '0;
 end
 
-always_comb begin
-    if(fpu_give_result)
-        out_ready_i = '1;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        out_ready_i <= '0;
+    else if(fpu_give_result)
+        out_ready_i <= '1;
     else
-        out_ready_i = '0;
+        out_ready_i <= '0;
 end
 
 

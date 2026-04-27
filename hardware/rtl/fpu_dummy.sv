@@ -9,11 +9,18 @@
   `define TAG_TYPE logic
 `endif
 
-
-module fpu_dummy #(
+module fpu_dummy
+    import fpnew_pkg::roundmode_e;
+    import fpnew_pkg::operation_e;
+    import fpnew_pkg::fp_format_e;
+    import fpnew_pkg::int_format_e;
+    import fpnew_pkg::status_t;
+#(
     parameter fpnew_pkg::fpu_features_t       Features       = fpnew_pkg::RV64D_Xsflt,
     parameter fpnew_pkg::fpu_implementation_t Implementation = fpnew_pkg::DEFAULT_NOREGS,
     parameter fpnew_pkg::divsqrt_unit_t       DivSqrtSel     = fpnew_pkg::THMULTI,
+
+
     parameter type                            TagType        = `TAG_TYPE,
     parameter int unsigned                    TrueSIMDClass  = 0,
     parameter int unsigned                    EnableSIMDMask = 0,
@@ -28,12 +35,12 @@ module fpu_dummy #(
     input logic                               rst_ni,
     // Input signals
     input logic [NUM_OPERANDS-1:0][WIDTH-1:0] operands_i,
-    input fpnew_pkg::roundmode_e              rnd_mode_i,
-    input fpnew_pkg::operation_e              op_i,
+    input roundmode_e                         rnd_mode_i,
+    input operation_e                         op_i,
     input logic                               op_mod_i,
-    input fpnew_pkg::fp_format_e              src_fmt_i,
-    input fpnew_pkg::fp_format_e              dst_fmt_i,
-    input fpnew_pkg::int_format_e             int_fmt_i,
+    input fp_format_e                         src_fmt_i,
+    input fp_format_e                         dst_fmt_i,
+    input int_format_e                        int_fmt_i,
     input logic                               vectorial_op_i,
     input TagType                             tag_i,
     input MaskType                            simd_mask_i,
@@ -43,7 +50,7 @@ module fpu_dummy #(
     input  logic                              flush_i,
     // Output signals
     output logic [WIDTH-1:0]                  result_o,
-    output fpnew_pkg::status_t                status_o,
+    output status_t                           status_o,
     output TagType                            tag_o,
     // Output handshake
     output logic                              out_valid_o,
@@ -55,17 +62,18 @@ module fpu_dummy #(
     logic                               unused1;
     logic                               unused2;
     logic [NUM_OPERANDS-1:0][WIDTH-1:0] unused3;
-    fpnew_pkg::roundmode_e              unused4;
-    fpnew_pkg::operation_e              unused5;
+    roundmode_e                         unused4;
+    operation_e                         unused5;
     logic                               unused6;
-    fpnew_pkg::fp_format_e              unused7;
-    fpnew_pkg::fp_format_e              unused8;
-    fpnew_pkg::int_format_e             unused9;
-    TagType                             unused10;
-    MaskType                            unused11;
-    logic                               unused12;
+    fp_format_e                         unused7;
+    fp_format_e                         unused8;
+    int_format_e                        unused9;
+    logic                               unused10;
+    TagType                             unused11;
+    MaskType                            unused12;
     logic                               unused13;
     logic                               unused14;
+    logic                               unused15;
 
     assign unused1  = clk_i;
     assign unused2  = rst_ni;
@@ -77,10 +85,11 @@ module fpu_dummy #(
     assign unused8  = dst_fmt_i;
     assign unused9  = int_fmt_i;
     assign unused10 = vectorial_op_i;
-    assign unused11 = simd_mask_i;
-    assign unused12 = in_valid_i;
-    assign unused13 = flush_i;
-    assign unused14 = out_ready_i;
+    assign unused11 = tag_i;
+    assign unused12 = simd_mask_i;
+    assign unused13 = in_valid_i;
+    assign unused14 = flush_i;
+    assign unused15 = out_ready_i;
 
     assign busy_o           = '0;
     assign early_valid_o    = '0;

@@ -13,7 +13,6 @@ module thread_unit
     import handshake_fpu_pkg::tags_t;
     import handshake_fpu_pkg::TAGS_NUM;
     import handshake_fpu_pkg::fsm_fpu_state_e;
-    import handshake_fpu_pkg::FPU_RESULT;
 
     // FSM states
     import handshake_fpu_pkg::FPU_IDLE;
@@ -23,37 +22,47 @@ module thread_unit
     import handshake_fpu_pkg::FPU_RESULT;
 
     // Types for src/dst/int
+
     import fpnew_pkg::FP64;
     import fpnew_pkg::INT64;
+
+    import fpnew_pkg::RV64D_Xsflt;
+    import fpnew_pkg::DEFAULT_NOREGS;
+    import fpnew_pkg::THMULTI;
+
 
     // Operation
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_result_t;
     import tu_pkg::lsu2tu_txn_t;
+    import tu_pkg::thread_info_t;
 #(
     parameter int unsigned DW = 64,
-    parameter int unsigned REGFILE_SIZE = 6,
+    parameter int unsigned REGFILE_SIZE = 8,
     parameter int unsigned AW = $clog2(REGFILE_SIZE)
 ) (
-    input  logic            clk,
-    input  logic            rst_n,
+    input  logic                clk,
+    input  logic                rst_n,
 
-    output logic            ready_out,
+    input  lsu2tu_txn_t         lsu_cmd,
+    input                       lsu_cmd_active,
 
-    input  lsu2tu_txn_t     lsu_cmd,
-    input                   lsu_cmd_active,
+    input  thread_command_t     dec_cmd,
+    input  logic                dec_cmd_active,
 
-    input  thread_command_t dec_cmd,
-    input  logic            dec_cmd_active,
+    output logic [DW - 1: 0]    data_o,
+    output logic                valid_o,
 
-    output thread_result_t  result
+    output thread_info_t        thread_info
 );
 
 /*===================================================================================//
 region LOGIC
 //===================================================================================*/
 
-logic [DW - 1: 0] operands [3];
+thread_result_t fpu_result;
+
+logic [2: 0][DW - 1: 0] operands;
 logic [DW - 1: 0] op_1;
 logic [DW - 1: 0] op_2;
 logic [DW - 1: 0] op_3;
@@ -61,23 +70,28 @@ logic [DW - 1: 0] op_3;
 assign operands = {op_1, op_2, op_3};
 
 fsm_fpu_state_e state;
-logic  fpu_result_active;
-assign fpu_result_active = state == FPU_RESULT;
+logic  fpu_result_valid;
+assign fpu_result_valid = state == FPU_RESULT;
 
 logic wr_en;
 logic [AW - 1: 0] addr_w;
 logic [DW - 1: 0] data_w;
 
+logic  lsu_read;
+logic  lsu_write;
+assign lsu_read  = lsu_cmd_active && (~lsu_cmd.rw);
+assign lsu_write = lsu_cmd_active && lsu_cmd.rw;
+
 // write
 always_comb begin
-    if (lsu_cmd_active && lsu_cmd.rw) begin
+    if (lsu_write && lsu_cmd_active) begin
         addr_w = lsu_cmd.addr;
         data_w = lsu_cmd.data_w;
         wr_en  = '1;
     end
-    else if (fpu_result_active) begin
+    else if (fpu_result_valid) begin
         addr_w = dec_cmd.ar;
-        data_w = result.result_data;
+        data_w = fpu_result.result_data;
         wr_en = '1;
     end
     else begin
@@ -89,11 +103,15 @@ end
 
 // read
 logic [AW - 1: 0] addr_r;
+logic [DW - 1: 0] data_r;
+
 always_comb begin
-    if (lsu_cmd_active && ~lsu_cmd.rw)
+    if (lsu_read) begin
         addr_r = lsu_cmd.addr;
-    else
-        addr_r = dec_cmd.addr;
+    end
+    else begin
+        addr_r = '0;
+    end
 end
 
 // hshk sig
@@ -101,6 +119,22 @@ logic out_ready_i;
 logic out_valid_o;
 logic in_valid_i;
 logic in_ready_o;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        valid_o <= '0;
+    else if (lsu_read)
+        valid_o <= '1;
+    else
+        valid_o <= 0;
+end
+
+/*===================================================================================//
+region OUT
+//===================================================================================*/
+assign  data_o = data_r;
+
+assign  thread_info = fpu_result.info;
 
 /*===================================================================================//
 region INSTANCES
@@ -127,8 +161,8 @@ tu_regfile #(
     .data_r2 (op_2),                // ->
     .data_r3 (op_3),                // ->
     /*================### READ SIGNALS ###===================*/
-    .addr_r  (dec_cmd.ar),          // <-
-    .data_r  (result.result_data)   // ->
+    .addr_r  (addr_r),              // <-
+    .data_r  (data_r)               // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -148,52 +182,52 @@ tu_fsm tu_fsm_u (
     .out_ready_i (out_ready_i),     // ->
     .in_valid_i  (in_valid_i),      // ->
     /*================### STATUS SIGNALS ###=================*/
-    .state       (state)            // ->
+    .prev_state  (state)            // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
 
 // ///////////////////////////////////////////////////////// //
 //                     *** FPNEW TOP ***                     //
-// NOTE: write a purpose here
+// NOTE: Instance fpu dummy need to change in simulation to fpnew_top
 fpu_dummy #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
     // Type of FPU configuration. Do not touch
-    .Features       (fpnew_pkg::RV64D_Xsflt),
-    .Implementation (fpnew_pkg::DEFAULT_NOREGS),
-    .DivSqrtSel     (fpnew_pkg::THMULTI),
-    .TagType        (logic [3: 0]),
+    .Features       (RV64D_Xsflt),
+    .Implementation (DEFAULT_NOREGS),
+    .DivSqrtSel     (THMULTI),
+    .TagType        (tags_t),
     .TrueSIMDClass  ('0),
     .EnableSIMDMask ('0)
 ) fpnew_top_u (
     /*================### COMMON SIGNALS ###=================*/
-    .clk_i          (clk),                  // <-
-    .rst_ni         (rst_n),                // <-
+    .clk_i          (clk),                          // <-
+    .rst_ni         (rst_n),                        // <-
     /*=================### MAIN SIGNALS ###==================*/
-    .operands_i     (operands),             // <- (operands like a, b, c in a + b * c)
-    .rnd_mode_i     (dec_cmd.rnd),          // <- (type of round after calc)
-    .op_i           (dec_cmd.op),           // <- (type of operation in expression)
-    .op_mod_i       (dec_cmd.op_mod),       // <- (alt option for operation type)
+    .operands_i     (operands),                     // <- (operands like a, b, c in a + b * c)
+    .rnd_mode_i     (dec_cmd.rnd),                  // <- (type of round after calc)
+    .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
+    .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
     /*==============### SET FORMAT SIGNALS ###===============*/
-    .src_fmt_i      (FP64),                 // <- (type of incoming data)
-    .dst_fmt_i      (FP64),                 // <- (type of outcoming data)
-    .int_fmt_i      (INT64),                // <- (type of data, if it int)
+    .src_fmt_i      (FP64),                         // <- (type of incoming data)
+    .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
+    .int_fmt_i      (INT64),                        // <- (type of data, if it int)
     /*==============### PROPERTIES SIGNALS ###===============*/
-    .vectorial_op_i ('0),                   // <- (vectorial mode)
-    .simd_mask_i    ('0),                   // <-
-    .flush_i        ('0),                   // <-
-    .tag_i          (dec_cmd.tag),          // <- (tag of operation set)
-    .tag_o          (result.tag),           // -> (tag of operation get)
+    .vectorial_op_i ('0),                           // <- (vectorial mode)
+    .simd_mask_i    ('0),                           // <-
+    .flush_i        ('0),                           // <-
+    .tag_i          (dec_cmd.tag),                  // <- (tag of operation set)
+    .tag_o          (fpu_result.info.tag),          // -> (tag of operation get)
     /*===============### HANDSHAKE SIGNALS ###===============*/
-    .in_valid_i     (in_valid_i),           // <-
-    .out_ready_i    (out_ready_i),          // <-
-    .out_valid_o    (out_valid_o),          // ->
-    .in_ready_o     (in_ready_o),           // ->
+    .in_valid_i     (in_valid_i),                   // <-
+    .out_ready_i    (out_ready_i),                  // <-
+    .out_valid_o    (out_valid_o),                  // ->
+    .in_ready_o     (in_ready_o),                   // ->
     /*================### RESULT SIGNALS ###=================*/
-    .result_o       (result.result_data),   // ->
-    .status_o       (result.status),        // ->
-    .busy_o         (result.is_busy),       // ->
-    .early_valid_o  (result.early_valid)    // ->
+    .result_o       (fpu_result.result_data),       // ->
+    .status_o       (fpu_result.info.status),       // ->
+    .busy_o         (fpu_result.info.is_busy),      // ->
+    .early_valid_o  (fpu_result.info.early_valid)   // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

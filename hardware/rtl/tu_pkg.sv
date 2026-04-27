@@ -7,14 +7,25 @@
 
 package tu_pkg;
     import handshake_fpu_pkg::tags_t;
+
     import fpnew_pkg::roundmode_e;
     import fpnew_pkg::status_t;
     import fpnew_pkg::operation_e;
+
     // ========================= ### COMMON ENUMS ### ========================= //
-    localparam int unsigned REGFILE_SIZE    = 6;
+    localparam int unsigned REGFILE_SIZE    = 8;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
     localparam int unsigned DW              = 64;
 
+
+    /* Danya, take a notice please:
+    typedef struct packed {
+        logic a; <- high bit
+        logic b;
+        ...
+        logic z; <- low bit
+    } aboba_t;
+    */
     typedef struct packed {
         operation_e                 op;
         logic                       op_mod;
@@ -25,10 +36,14 @@ package tu_pkg;
 
     typedef struct packed {
         tags_t            tag;
-        logic [DW - 1: 0] result_data;
         status_t          status;
         logic             is_busy;
         logic             early_valid;
+    } thread_info_t;
+
+    typedef struct packed {
+        logic [DW - 1: 0] result_data;
+        thread_info_t     info;
     } thread_result_t;
 
     typedef struct packed {
