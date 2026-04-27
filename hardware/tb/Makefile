@@ -11,7 +11,6 @@ VCD_PATH = $(SIM_DIR)/output.vcd
 
 COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				-Wno-WIDTHEXPAND \
-				-Wno-WIDTHEXPAND \
 				-Wno-USERWARN \
 				-Wno-ASCRANGE \
 				-Wno-SPLITVAR \
@@ -22,24 +21,31 @@ COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				-DTAG_TYPE="logic[3:0]"
 
 
-ROOT_PATH = ../cvfpu
+FPU_ROOT_PATH = ../cvfpu
 
-PWD = $(ROOT_PATH)/src
+FPU_PWD = $(FPU_ROOT_PATH)/src
+MAIN_PWD = ../rtl
 
-VERILOG_SOURCES +=  $(PWD)/common_cells/src/cf_math_pkg.sv \
-					$(PWD)/fpnew_pkg.sv \
-					$(PWD)/fpnew_top.sv
+VERILOG_SOURCES +=  $(FPU_PWD)/common_cells/src/cf_math_pkg.sv \
+					$(FPU_PWD)/fpnew_pkg.sv \
+					$(FPU_PWD)/fpnew_top.sv \
+					$(MAIN_PWD)/fpu_dummy.sv \
+					$(MAIN_PWD)/handshake_fpu_pkg.sv \
+					$(MAIN_PWD)/tu_pkg.sv \
+					$(MAIN_PWD)/tu_fsm.sv \
+					$(MAIN_PWD)/tu_regfile.sv \
+					$(MAIN_PWD)/thread_unit.sv
 
-VERILOG_INCLUDE_DIRS += $(PWD) \
-						$(PWD)/common_cells/src \
-						$(PWD)/common_cells/include \
+VERILOG_INCLUDE_DIRS += $(FPU_PWD) \
+						$(FPU_PWD)/common_cells/src \
+						$(FPU_PWD)/common_cells/include \
 						$(ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ \
 						$(ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/clk/rtl/
 
 # use VHDL_SOURCES for VHDL files
 
 # COCOTB_TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
-COCOTB_TOPLEVEL = fpnew_top
+COCOTB_TOPLEVEL = thread_unit#fpnew_top
 
 # COCOTB_TEST_MODULES is the basename of the Python test file(s)
 COCOTB_TEST_MODULES = tu_top
