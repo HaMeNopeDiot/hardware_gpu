@@ -3,11 +3,8 @@
 # --------------------------------------------------------------
 from pyuvm import utility_classes
 
-from tu.tu_item import ThreadUnitCommandItem
-from utility.enums  import OperationE, RoundModeE, DirectionE
-
-from enum import Enum
-import math
+from tu.tu_item import TUCmdItem, Lsu2TUCmdItem
+from cocotb.triggers import ClockCycles
 
 class ThreadUnitBfm(metaclass=utility_classes.Singleton):
     def __init__(self,
@@ -36,10 +33,12 @@ class ThreadUnitBfm(metaclass=utility_classes.Singleton):
         self.data_o         = getattr(dut, "data_o")
         self.valid_out      = getattr(dut, "valid_o")
         self.thread_info    = getattr(dut, "thread_info")
+        self.busy_o         = getattr(dut, "busy_o")
 
         self.WIDTH        = int(len(self.data_o)) # битность результата
         self.REGFILE_SIZE = 8                     # fixme
-        self.TAG_SIZE     = 4                     # fixme
+        self.TAG_SIZE     = 8                     # fixme
+        self.DATA_W       = 64                    # fixme
 
     def drive_idle(self):
         self.lsu_cmd.value        = 0
@@ -47,22 +46,22 @@ class ThreadUnitBfm(metaclass=utility_classes.Singleton):
         self.dec_cmd.value        = 0
         self.dec_cmd_active.value = 0
 
-    def get_mask_by_enum(self, enum: Enum) -> int:
-        width = math.ceil(math.log2(max(enum)))
-        return (1 << width) - 1
 
+    async def drive_dec_cmd(self, dec_cmd: TUCmdItem):
+        bs = dec_cmd.pack2bs(self.REGFILE_SIZE, self.TAG_SIZE)
+        self.dec_cmd.value = bs
+        self.dec_cmd_active.value = 1
+        await ClockCycles(self.clk, 1)
+        # await ClockCycles(self.clk, 1)
+        self.dec_cmd_active.value = 0
+        self.dec_cmd.value = 0
+        # await ClockCycles(self.clk, 1)
 
-    def drive_dec_cmd(self, dec_cmd: ThreadUnitCommandItem):
-        op_code_tmp = dec_cmd._op_code.value & self.get_mask_by_enum(OperationE)
-        op_mode_tmp = dec_cmd._op_mod & 0b1
-        # addreses
-        addr_mask = (1 << self.REGFILE_SIZE) - 1
-        addr_f_l = []
-        for i in range(len(dec_cmd._op_addr)):
-            addr_f_l.append(dec_cmd._op_addr[i] & addr_mask)
-        addr_f_tmp = (addr_f_l[0] << self.REGFILE_SIZE) | (addr_f_l[1] << self.REGFILE_SIZE * 2) | (addr_f_l[2])
-        addr_r_tmp = dec_cmd._res_addr & (1 << self.REGFILE_SIZE) - 1
-        tag_tmp = dec_cmd._tag & (1 << self.TAG_SIZE) - 1
-        rnd_tmp = dec_cmd._rnd_mode.value & self.get_mask_by_enum(RoundModeE)
-        # Pack all
-        result = 0
+    async def drive_lsu_cmd(self, lsu_cmd: Lsu2TUCmdItem):
+        bs = lsu_cmd.pack2bs(self.REGFILE_SIZE)
+        self.lsu_cmd.value = bs
+        self.lsu_cmd_active.value = 1
+        await ClockCycles(self.clk, 1)
+        self.lsu_cmd_active.value = 0
+        self.lsu_cmd.value = 0
+        # await ClockCycles(self.clk, 1)

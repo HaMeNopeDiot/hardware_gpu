@@ -39,8 +39,8 @@ VERILOG_SOURCES +=  $(FPU_PWD)/common_cells/src/cf_math_pkg.sv \
 VERILOG_INCLUDE_DIRS += $(FPU_PWD) \
 						$(FPU_PWD)/common_cells/src \
 						$(FPU_PWD)/common_cells/include \
-						$(ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ \
-						$(ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/clk/rtl/
+						$(FPU_ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ \
+						$(FPU_ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/clk/rtl/
 
 # use VHDL_SOURCES for VHDL files
 

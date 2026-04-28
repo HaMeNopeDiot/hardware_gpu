@@ -9,7 +9,9 @@ from numbers import Real
 from decimal import Decimal
 
 from tu.tu_bfm import ThreadUnitBfm
+from tu.tu_item import TUCmdItem, Lsu2TUCmdItem
 
+from utility.enums import DirectionE, OperationE
 
 def print_result(result):
     cocotb.log.info(result)
@@ -48,3 +50,48 @@ async def tu_test(dut):
 
     tu_bfm.drive_idle()
     await ClockCycles(clk, 10)
+
+    lsu_i1 = Lsu2TUCmdItem(DirectionE.WRITE, 1, 2)
+    lsu_i2 = Lsu2TUCmdItem(DirectionE.WRITE, 2, 3)
+    lsu_i3 = Lsu2TUCmdItem(DirectionE.WRITE, 3, 7)
+
+    await tu_bfm.drive_lsu_cmd(lsu_i1)
+    await tu_bfm.drive_lsu_cmd(lsu_i2)
+    await tu_bfm.drive_lsu_cmd(lsu_i3)
+
+    await ClockCycles(clk, 1)
+
+    # First txn
+    await tu_bfm.drive_dec_cmd(TUCmdItem([1, 2, 3], 4, OperationE.ADD, tag=1))
+
+    await ClockCycles(clk, 10)
+
+    await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 4))
+    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+    await ClockCycles(clk, 10)
+    cocotb.log.info(f"data: {data}")
+
+    # Second txn
+    await tu_bfm.drive_dec_cmd(TUCmdItem([4, 2, 3], 5, OperationE.ADD, tag=2))
+
+    await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 5))
+    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+    await ClockCycles(clk, 10)
+    cocotb.log.info(f"data: {data}")
+
+    # Third txn
+    await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.WRITE, 1, 7))
+    await tu_bfm.drive_dec_cmd(TUCmdItem([1, 2, 3], 4, OperationE.DIV, tag=3))
+
+    while tu_bfm.busy_o.value == 1:
+        await ClockCycles(clk, 1)
+
+    await ClockCycles(clk, 10)
+    await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 4))
+    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+
+
+    await ClockCycles(clk, 30)
+    cocotb.log.info(f"data: {data}")
+
+
