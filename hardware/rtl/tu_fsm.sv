@@ -26,7 +26,7 @@ module tu_fsm
     output logic            out_ready_i,
     output logic            in_valid_i,
     /*===========================### STATUS SIGNALS ###-==========================*/
-    output fsm_fpu_state_e  prev_state
+    output fsm_fpu_state_e  state
     //============================================================================//
 );
 logic ready_prev;
@@ -41,7 +41,7 @@ logic  start;
 assign start = ready && ~ready_prev;
 
 // FSM logic
-fsm_fpu_state_e state;
+fsm_fpu_state_e prev_state;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         prev_state <= FPU_IDLE;
@@ -54,15 +54,21 @@ always_comb begin
     case (prev_state)
         FPU_IDLE: begin
             if (in_valid_i)
-                state = FPU_PRELOAD;
+                if (in_ready_o)
+                    state = FPU_LOAD;
+                else
+                    if (out_valid_o)
+                        state = FPU_RESULT;
+                    else
+                        state = FPU_PRELOAD;
             else
                 state = FPU_IDLE;
         end
         FPU_PRELOAD: begin
-            if (~in_valid_i)
-                state = FPU_IDLE;
-            else if (in_ready_o)
+            if (in_ready_o)
                 state = FPU_LOAD;
+            else if (~in_valid_i)
+                state = FPU_IDLE;
             else
                 state = FPU_PRELOAD;
         end
@@ -93,27 +99,35 @@ always_comb begin
 end
 
 logic  fpu_give_result;
-assign fpu_give_result = state == FPU_RESULT;
-
-logic  fpu_load;
-assign fpu_load = state == FPU_LOAD;
-
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        in_valid_i <= '0;
-    else if (start)
-        in_valid_i <= '1;
-    else if (fpu_load)
-        in_valid_i <= '0;
+        fpu_give_result <= '0;
+    else
+        fpu_give_result <= state == FPU_RESULT;
 end
 
+logic  fpu_load;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        out_ready_i <= '0;
-    else if(fpu_give_result)
-        out_ready_i <= '1;
+        fpu_load <= '0;
     else
-        out_ready_i <= '0;
+        fpu_load <= state == FPU_LOAD;
+end
+
+always_comb begin
+    if (start)
+        in_valid_i = '1;
+    else if (fpu_load)
+        in_valid_i = '0;
+    else
+        in_valid_i = '0;
+end
+
+always_comb begin
+    if(fpu_give_result)
+        out_ready_i = '1;
+    else
+        out_ready_i = '0;
 end
 
 

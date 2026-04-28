@@ -5,7 +5,6 @@
 // Purpose: GPU Thread unit
 //-------------------------------------------------------------------------------//
 
-
 /*===================================================================================//
 region MODULE DEFINITION
 //===================================================================================*/
@@ -39,19 +38,24 @@ module thread_unit
 #(
     parameter int unsigned DW = 64,
     parameter int unsigned REGFILE_SIZE = 8,
-    parameter int unsigned AW = $clog2(REGFILE_SIZE)
+    parameter int unsigned AW = $clog2(REGFILE_SIZE),
+
+    parameter bit          LATCH_R_ADDR = 1,
+
+    parameter bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif
 ) (
     input  logic                clk,
     input  logic                rst_n,
 
     input  lsu2tu_txn_t         lsu_cmd,
-    input                       lsu_cmd_active,
+    input  logic                lsu_cmd_active,
 
     input  thread_command_t     dec_cmd,
     input  logic                dec_cmd_active,
 
     output logic [DW - 1: 0]    data_o,
     output logic                valid_o,
+    output logic                busy_o,
 
     output thread_info_t        thread_info
 );
@@ -70,8 +74,6 @@ logic [DW - 1: 0] op_3;
 assign operands = {op_1, op_2, op_3};
 
 fsm_fpu_state_e state;
-logic  fpu_result_valid;
-assign fpu_result_valid = state == FPU_RESULT;
 
 logic wr_en;
 logic [AW - 1: 0] addr_w;
@@ -82,6 +84,24 @@ logic  lsu_write;
 assign lsu_read  = lsu_cmd_active && (~lsu_cmd.rw);
 assign lsu_write = lsu_cmd_active && lsu_cmd.rw;
 
+logic [AW - 1: 0] addr_result;
+if (LATCH_R_ADDR) begin: gen_latch_r_addr
+    logic [AW - 1: 0] ff_addr_r;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n)
+            ff_addr_r <= '0;
+        else if (dec_cmd_active)
+            ff_addr_r <= dec_cmd.ar;
+        else if (~busy_o)
+            ff_addr_r <= '0;
+    end
+
+    assign addr_result = dec_cmd_active? dec_cmd.ar: ff_addr_r;
+end
+else begin: gen_no_latch_r_addr
+    assign addr_result = dec_cmd.ar;
+end
+
 // write
 always_comb begin
     if (lsu_write && lsu_cmd_active) begin
@@ -89,8 +109,8 @@ always_comb begin
         data_w = lsu_cmd.data_w;
         wr_en  = '1;
     end
-    else if (fpu_result_valid) begin
-        addr_w = dec_cmd.ar;
+    else if (state == FPU_RESULT) begin
+        addr_w = addr_result;
         data_w = fpu_result.result_data;
         wr_en = '1;
     end
@@ -120,21 +140,19 @@ logic out_valid_o;
 logic in_valid_i;
 logic in_ready_o;
 
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        valid_o <= '0;
-    else if (lsu_read)
-        valid_o <= '1;
+always_comb begin
+    if (lsu_read)
+        valid_o = '1;
     else
-        valid_o <= 0;
+        valid_o = '0;
 end
 
 /*===================================================================================//
 region OUT
 //===================================================================================*/
-assign  data_o = data_r;
-
-assign  thread_info = fpu_result.info;
+assign  data_o          = data_r;
+assign  thread_info     = fpu_result.info;
+assign  busy_o          = state != FPU_IDLE;
 
 /*===================================================================================//
 region INSTANCES
@@ -182,7 +200,7 @@ tu_fsm tu_fsm_u (
     .out_ready_i (out_ready_i),     // ->
     .in_valid_i  (in_valid_i),      // ->
     /*================### STATUS SIGNALS ###=================*/
-    .prev_state  (state)            // ->
+    .state       (state)            // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -190,45 +208,90 @@ tu_fsm tu_fsm_u (
 // ///////////////////////////////////////////////////////// //
 //                     *** FPNEW TOP ***                     //
 // NOTE: Instance fpu dummy need to change in simulation to fpnew_top
-fpu_dummy #(
-    // ----------------- GLOBAL PARAMETERS ----------------- //
-    // Type of FPU configuration. Do not touch
-    .Features       (RV64D_Xsflt),
-    .Implementation (DEFAULT_NOREGS),
-    .DivSqrtSel     (THMULTI),
-    .TagType        (tags_t),
-    .TrueSIMDClass  ('0),
-    .EnableSIMDMask ('0)
-) fpnew_top_u (
-    /*================### COMMON SIGNALS ###=================*/
-    .clk_i          (clk),                          // <-
-    .rst_ni         (rst_n),                        // <-
-    /*=================### MAIN SIGNALS ###==================*/
-    .operands_i     (operands),                     // <- (operands like a, b, c in a + b * c)
-    .rnd_mode_i     (dec_cmd.rnd),                  // <- (type of round after calc)
-    .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
-    .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
-    /*==============### SET FORMAT SIGNALS ###===============*/
-    .src_fmt_i      (FP64),                         // <- (type of incoming data)
-    .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
-    .int_fmt_i      (INT64),                        // <- (type of data, if it int)
-    /*==============### PROPERTIES SIGNALS ###===============*/
-    .vectorial_op_i ('0),                           // <- (vectorial mode)
-    .simd_mask_i    ('0),                           // <-
-    .flush_i        ('0),                           // <-
-    .tag_i          (dec_cmd.tag),                  // <- (tag of operation set)
-    .tag_o          (fpu_result.info.tag),          // -> (tag of operation get)
-    /*===============### HANDSHAKE SIGNALS ###===============*/
-    .in_valid_i     (in_valid_i),                   // <-
-    .out_ready_i    (out_ready_i),                  // <-
-    .out_valid_o    (out_valid_o),                  // ->
-    .in_ready_o     (in_ready_o),                   // ->
-    /*================### RESULT SIGNALS ###=================*/
-    .result_o       (fpu_result.result_data),       // ->
-    .status_o       (fpu_result.info.status),       // ->
-    .busy_o         (fpu_result.info.is_busy),      // ->
-    .early_valid_o  (fpu_result.info.early_valid)   // ->
-    //=======================================================//
-);
-// ///////////////////////////////////////////////////////// //
+if (ONLY_LINT == 0) begin: gen_real_fpu
+    fpnew_top #(
+        // ----------------- GLOBAL PARAMETERS ----------------- //
+        // Type of FPU configuration. Do not touch
+        .Features       (RV64D_Xsflt),
+        .Implementation (DEFAULT_NOREGS),
+        .DivSqrtSel     (THMULTI),
+        .TagType        (tags_t),
+        .TrueSIMDClass  ('0),
+        .EnableSIMDMask ('0)
+    ) fpnew_top_u (
+        /*================### COMMON SIGNALS ###=================*/
+        .clk_i          (clk),                          // <-
+        .rst_ni         (rst_n),                        // <-
+        /*=================### MAIN SIGNALS ###==================*/
+        .operands_i     (operands),                     // <- (operands like a, b, c in a + b * c)
+        .rnd_mode_i     (dec_cmd.rnd),                  // <- (type of round after calc)
+        .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
+        .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
+        /*==============### SET FORMAT SIGNALS ###===============*/
+        .src_fmt_i      (FP64),                         // <- (type of incoming data)
+        .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
+        .int_fmt_i      (INT64),                        // <- (type of data, if it int)
+        /*==============### PROPERTIES SIGNALS ###===============*/
+        .vectorial_op_i ('0),                           // <- (vectorial mode)
+        .simd_mask_i    ('0),                           // <-
+        .flush_i        ('0),                           // <-
+        .tag_i          (dec_cmd.tag),                  // <- (tag of operation set)
+        .tag_o          (fpu_result.info.tag),          // -> (tag of operation get)
+        /*===============### HANDSHAKE SIGNALS ###===============*/
+        .in_valid_i     (in_valid_i),                   // <-
+        .out_ready_i    (out_ready_i),                  // <-
+        .out_valid_o    (out_valid_o),                  // ->
+        .in_ready_o     (in_ready_o),                   // ->
+        /*================### RESULT SIGNALS ###=================*/
+        .result_o       (fpu_result.result_data),       // ->
+        .status_o       (fpu_result.info.status),       // ->
+        .busy_o         (fpu_result.info.is_busy),      // ->
+        .early_valid_o  (fpu_result.info.early_valid)   // ->
+        //=======================================================//
+    );
+    // ///////////////////////////////////////////////////////// //
+end
+else begin: gen_dummy_fpu
+        fpu_dummy #(
+        // ----------------- GLOBAL PARAMETERS ----------------- //
+        // Type of FPU configuration. Do not touch
+        .Features       (RV64D_Xsflt),
+        .Implementation (DEFAULT_NOREGS),
+        .DivSqrtSel     (THMULTI),
+        .TagType        (tags_t),
+        .TrueSIMDClass  ('0),
+        .EnableSIMDMask ('0)
+    ) fpnew_top_u (
+        /*================### COMMON SIGNALS ###=================*/
+        .clk_i          (clk),                          // <-
+        .rst_ni         (rst_n),                        // <-
+        /*=================### MAIN SIGNALS ###==================*/
+        .operands_i     (operands),                     // <- (operands like a, b, c in a + b * c)
+        .rnd_mode_i     (dec_cmd.rnd),                  // <- (type of round after calc)
+        .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
+        .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
+        /*==============### SET FORMAT SIGNALS ###===============*/
+        .src_fmt_i      (FP64),                         // <- (type of incoming data)
+        .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
+        .int_fmt_i      (INT64),                        // <- (type of data, if it int)
+        /*==============### PROPERTIES SIGNALS ###===============*/
+        .vectorial_op_i ('0),                           // <- (vectorial mode)
+        .simd_mask_i    ('0),                           // <-
+        .flush_i        ('0),                           // <-
+        .tag_i          (dec_cmd.tag),                  // <- (tag of operation set)
+        .tag_o          (fpu_result.info.tag),          // -> (tag of operation get)
+        /*===============### HANDSHAKE SIGNALS ###===============*/
+        .in_valid_i     (in_valid_i),                   // <-
+        .out_ready_i    (out_ready_i),                  // <-
+        .out_valid_o    (out_valid_o),                  // ->
+        .in_ready_o     (in_ready_o),                   // ->
+        /*================### RESULT SIGNALS ###=================*/
+        .result_o       (fpu_result.result_data),       // ->
+        .status_o       (fpu_result.info.status),       // ->
+        .busy_o         (fpu_result.info.is_busy),      // ->
+        .early_valid_o  (fpu_result.info.early_valid)   // ->
+        //=======================================================//
+    );
+    // ///////////////////////////////////////////////////////// //
+end
 endmodule
