@@ -1,16 +1,16 @@
 [*]
 [*] GTKWave Analyzer v3.3.126 (w)1999-2026 BSI
-[*] Mon Apr  6 12:53:03 2026
+[*] Tue Apr  7 19:13:35 2026
 [*]
-[dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Mon Apr  6 12:52:17 2026"
-[dumpfile_size] 4395760
-[savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/gtkw/fpu_top.gtkw"
+[dumpfile] "/mnt/e/CodePrograms/3.Global/mdiploma/hardware_gpu/hardware/tb/dump.vcd"
+[dumpfile_mtime] "Tue Apr  7 19:09:40 2026"
+[dumpfile_size] 2567638
+[savefile] "/mnt/e/CodePrograms/3.Global/mdiploma/hardware_gpu/hardware/tb/gtkw/fpu_top.gtkw"
 [timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-17.999998 563000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[sst_width] 209
+*-17.999998 680000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 290
 [signals_width] 198
 [sst_expanded] 1
 [sst_vpaned_height] 336

@@ -1,2 +1,12 @@
 *.o
 *.so
+hardware/*.yml
+hardware/*.md
+hardware/docs/
+hardware/src/
+hardware/vendor/
+hardware/util/
+*LICENSE*
+hardware/.gitmodules
+hardware/tb/flexfloat/
+hardware/CITATION.cff
