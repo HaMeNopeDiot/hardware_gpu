@@ -17,6 +17,7 @@ package tu_pkg;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
     localparam int unsigned DW              = 64;
 
+    typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
 
     /* Danya, take a notice please:
     typedef struct packed {
@@ -26,12 +27,15 @@ package tu_pkg;
         logic z; <- low bit
     } aboba_t;
     */
+
+    // TU
+
     typedef struct packed {
-        operation_e                 op;
-        logic                       op_mod;
-        logic [REGFILE_AW - 1: 0]   a1, a2, a3, ar;
-        tags_t                      tag;
-        roundmode_e                 rnd;
+        operation_e     op;
+        logic           op_mod;
+        regfile_addr_t  a1, a2, a3, ar;
+        tags_t          tag;
+        roundmode_e     rnd;
     } thread_command_t;
 
     typedef struct packed {
@@ -46,10 +50,68 @@ package tu_pkg;
         thread_info_t     info;
     } thread_result_t;
 
+    // ALU
+
+    typedef enum logic [1: 0] {
+        AOP_ADD         = 0,
+        AOP_IMM_LSHIFT  = 1
+    } alu_op_e;
+
+
+    // LSU
+
+    parameter int unsigned LSU_OP_W = 5;
+    parameter int unsigned IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W);
+
+    typedef logic [IMM_W - 1: 0] imm_t;
+
+    typedef enum logic[LSU_OP_W - 1: 0] {
+        LOP_LW     = 0,
+        LOP_SW     = 1
+    } lsu_op_e;
+
+    typedef struct packed {
+        lsu_op_e op;
+        addr_t   rd, rs1, rs2;
+        imm_t    imm;
+    } lsu_cmd_t;
+
     typedef struct packed {
         logic                     rw;
-        logic [REGFILE_AW - 1: 0] addr;
+        addr_t                    addr;
         logic [DW - 1        : 0] data_w;
     } lsu2tu_txn_t;
+
+    // DEC INSTR
+    typedef enum logic {
+        LSU_CMD = 0,
+        FPU_CMD = 1
+    } dec_op_type_e;
+
+    typedef union packed {
+        lsu_op_e    lsu_op;
+        operation_e fpu_op;
+    } op_union_t;
+
+    typedef struct packed {
+        dec_op_type_e  op_type;
+        op_union_t     operand;
+        addr_t         a1, a2, a3, ar;
+        logic [2:0]    extra;
+        logic [10:0]   imm;
+    } f_cmd_t;
+
+    typedef struct packed {
+        dec_op_type_e  op_type;
+        op_union_t     operand;
+        addr_t         a1, a2, a3;
+        logic [16:0]   imm;
+    } l_cmd_t;
+
+    typedef union packed {
+        f_cmd_t fcmd;
+        l_cmt_t lcmd;
+    } cmd_union_t;
+
     // ======================================================================== //
 endpackage
