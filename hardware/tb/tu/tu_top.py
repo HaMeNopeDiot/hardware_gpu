@@ -51,9 +51,9 @@ async def tu_test(dut):
     tu_bfm.drive_idle()
     await ClockCycles(clk, 10)
 
-    lsu_i1 = Lsu2TUCmdItem(DirectionE.WRITE, 1, 2)
-    lsu_i2 = Lsu2TUCmdItem(DirectionE.WRITE, 2, 3)
-    lsu_i3 = Lsu2TUCmdItem(DirectionE.WRITE, 3, 7)
+    lsu_i1 = Lsu2TUCmdItem(DirectionE.WRITE, 1, 3)
+    lsu_i2 = Lsu2TUCmdItem(DirectionE.WRITE, 2, 2)
+    lsu_i3 = Lsu2TUCmdItem(DirectionE.WRITE, 3, 16)
 
     await tu_bfm.drive_lsu_cmd(lsu_i1)
     await tu_bfm.drive_lsu_cmd(lsu_i2)
@@ -62,9 +62,9 @@ async def tu_test(dut):
     await ClockCycles(clk, 1)
 
     # First txn
-    await tu_bfm.drive_dec_cmd(TUCmdItem([1, 2, 3], 4, OperationE.ADD, tag=1))
+    await tu_bfm.drive_dec_cmd(TUCmdItem([1, 2, 3], 4, OperationE.SQRT, tag=1))
 
-    await ClockCycles(clk, 10)
+    await ClockCycles(clk, 20)
 
     await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 4))
     data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)

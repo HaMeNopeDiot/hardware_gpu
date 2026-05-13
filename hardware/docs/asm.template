@@ -1,0 +1,38 @@
+deref_var:
+    lui %0, <value[31:11]>
+    addi %0, %0, <value[12:0]>
+    mul <vector_id>, <sizeof(type)>
+    add %0, %1
+
+load_deref:
+    lw %4, *(%0)
+    addi %0, %0, 4   # <- sizeof()
+    ...
+    # if repeat:
+    # lw %5 *(%0)
+    # addi %0, %0, 4
+    # lw %6 *(%0)
+    # addi %0, %0, 4
+    # ...
+
+store_deref:
+    sw %0
+    addi sizeof(float)
+
+load_ubo:
+    deref_var
+    load_deref
+
+load_const:
+    lui
+    addi
+
+load_const_buf_base_addr_lvp:
+    lui
+    addi
+
+fmul:
+    fmul
+
+fadd:
+    fadd
