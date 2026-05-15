@@ -20,8 +20,8 @@ module tu_regfile #(
     input  logic [AW - 1: 0]    addr_r1, addr_r2, addr_r3,  // Read address ports
     output logic [DW - 1: 0]    data_r1, data_r2, data_r3,  // Read data ports
     /*==========================### READ SIGNALS ###============================*/
-    input logic  [AW - 1: 0]    addr_r,
-    output logic [DW - 1: 0]    data_r
+    input logic  [AW - 1: 0]    addr_rs1, addr_rs2,
+    output logic [DW - 1: 0]    data_rs1, data_rs2
     //==========================================================================//
 );
     logic [DW - 1:0] rf [REG_NUM];
@@ -33,9 +33,10 @@ module tu_regfile #(
     end
 
     // Asynchronous Read (Combinational)
-    assign data_r1 = addr_r1 != '0? rf[addr_r1]: '0;
-    assign data_r2 = addr_r2 != '0? rf[addr_r2]: '0;
-    assign data_r3 = addr_r3 != '0? rf[addr_r3]: '0;
+    assign data_r1   = addr_r1  != '0? rf[addr_r1]: '0;
+    assign data_r2   = addr_r2  != '0? rf[addr_r2]: '0;
+    assign data_r3   = addr_r3  != '0? rf[addr_r3]: '0;
 
-    assign data_r  = addr_r  != '0? rf[addr_r]: '0;
+    assign data_rs1  = addr_rs1 != '0? rf[addr_rs1]: '0;
+    assign data_rs2  = addr_rs2 != '0? rf[addr_rs2]: '0;
 endmodule

@@ -33,7 +33,7 @@ module thread_unit
     // Operation
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_result_t;
-    import tu_pkg::lsu2tu_txn_t;
+    import tu_pkg::dec2tu_bus_t;
     import tu_pkg::thread_info_t;
 #(
     parameter int unsigned DW = 64,
@@ -47,14 +47,17 @@ module thread_unit
     input  logic                clk,
     input  logic                rst_n,
 
-    input  lsu2tu_txn_t         lsu_cmd,
+    input  dec2tu_bus_t         lsu_cmd,
     input  logic                lsu_cmd_active,
+
+    input  logic [DW - 1: 0]    rd,
+    input  logic                rd_active,
+    output logic [DW - 1: 0]    rs1,
+    output logic [DW - 1: 0]    rs2,
 
     input  thread_command_t     dec_cmd,
     input  logic                dec_cmd_active,
 
-    output logic [DW - 1: 0]    data_o,
-    output logic                valid_o,
     output logic                busy_o,
 
     output thread_info_t        thread_info
@@ -79,11 +82,6 @@ logic wr_en;
 logic [AW - 1: 0] addr_w;
 logic [DW - 1: 0] data_w;
 
-logic  lsu_read;
-logic  lsu_write;
-assign lsu_read  = lsu_cmd_active && (~lsu_cmd.rw);
-assign lsu_write = lsu_cmd_active && lsu_cmd.rw;
-
 logic [AW - 1: 0] addr_result;
 if (LATCH_R_ADDR) begin: gen_latch_r_addr
     logic [AW - 1: 0] ff_addr_r;
@@ -104,9 +102,9 @@ end
 
 // write
 always_comb begin
-    if (lsu_write && lsu_cmd_active) begin
-        addr_w = lsu_cmd.addr;
-        data_w = lsu_cmd.data_w;
+    if (rd_active && lsu_cmd_active) begin
+        addr_w = lsu_cmd.rd_addr;
+        data_w = rd;
         wr_en  = '1;
     end
     else if (state == FPU_RESULT) begin
@@ -122,16 +120,11 @@ always_comb begin
 end
 
 // read
-logic [AW - 1: 0] addr_r;
-logic [DW - 1: 0] data_r;
+logic [AW - 1: 0] addr_rs1, addr_rs2;
 
 always_comb begin
-    if (lsu_read) begin
-        addr_r = lsu_cmd.addr;
-    end
-    else begin
-        addr_r = '0;
-    end
+    addr_rs1 = lsu_cmd_active? lsu_cmd.rs1_addr: '0;
+    addr_rs2 = lsu_cmd_active? lsu_cmd.rs2_addr: '0;
 end
 
 // hshk sig
@@ -140,17 +133,10 @@ logic out_valid_o;
 logic in_valid_i;
 logic in_ready_o;
 
-always_comb begin
-    if (lsu_read)
-        valid_o = '1;
-    else
-        valid_o = '0;
-end
 
 /*===================================================================================//
 region OUT
 //===================================================================================*/
-assign  data_o          = data_r;
 assign  thread_info     = fpu_result.info;
 assign  busy_o          = state != FPU_IDLE;
 
@@ -179,8 +165,10 @@ tu_regfile #(
     .data_r2 (op_2),                // ->
     .data_r3 (op_3),                // ->
     /*================### READ SIGNALS ###===================*/
-    .addr_r  (addr_r),              // <-
-    .data_r  (data_r)               // ->
+    .addr_rs1  (addr_rs1),          // <-
+    .addr_rs2  (addr_rs2),          // <-
+    .data_rs1  (rs1),               // ->
+    .data_rs2  (rs2)                // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
