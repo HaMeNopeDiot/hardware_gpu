@@ -10,7 +10,9 @@ package tu_pkg;
 
     import fpnew_pkg::roundmode_e;
     import fpnew_pkg::status_t;
+
     import fpnew_pkg::operation_e;
+    import fpnew_pkg::OP_BITS;
 
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 8;
@@ -60,7 +62,7 @@ package tu_pkg;
 
     // LSU
 
-    parameter int unsigned LSU_OP_W = 5;
+    parameter int unsigned LSU_OP_W = 4;
     parameter int unsigned IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W);
 
     typedef logic [IMM_W - 1: 0] imm_t;
@@ -71,14 +73,14 @@ package tu_pkg;
     } lsu_op_e;
 
     typedef struct packed {
-        lsu_op_e op;
-        addr_t   rd, rs1, rs2;
-        imm_t    imm;
+        lsu_op_e        op;
+        regfile_addr_t  rd, rs1, rs2;
+        imm_t           imm;
     } lsu_cmd_t;
 
     typedef struct packed {
         logic                     rw;
-        addr_t                    addr;
+        regfile_addr_t            addr;
         logic [DW - 1        : 0] data_w;
     } lsu2tu_txn_t;
 
@@ -93,24 +95,42 @@ package tu_pkg;
         operation_e fpu_op;
     } op_union_t;
 
+    /*==========================================================================//
+    region TYPE OF COMMANDS FROM DECODER
+    //==========================================================================*/
+
+    // fpu
     typedef struct packed {
         dec_op_type_e  op_type;
         op_union_t     operand;
-        addr_t         a1, a2, a3, ar;
+        regfile_addr_t a1, a2, a3, ar;
         logic [2:0]    extra;
         logic [10:0]   imm;
     } f_cmd_t;
 
+    // lsu
     typedef struct packed {
-        dec_op_type_e  op_type;
-        op_union_t     operand;
-        addr_t         a1, a2, a3;
-        logic [16:0]   imm;
-    } l_cmd_t;
+        regfile_addr_t rs1_addr;
+        regfile_addr_t rs2_addr;
+        regfile_addr_t rd_addr;
+    } dec2tu_bus_t;
 
+    typedef struct packed {
+        dec_op_type_e   op_type;
+        op_union_t      operand;
+        logic [16:0]    imm;
+    } dec2lsu_bus_t;
+
+    typedef struct packed {
+        dec2lsu_bus_t   to_lsu;
+        dec2tu_bus_t    to_tu;
+    } l_cmd_t;
+    /*==========================================================================//
+    region DECODER COMMAND MAIN
+    //==========================================================================*/
     typedef union packed {
         f_cmd_t fcmd;
-        l_cmt_t lcmd;
+        l_cmd_t lcmd;
     } cmd_union_t;
 
     // ======================================================================== //
