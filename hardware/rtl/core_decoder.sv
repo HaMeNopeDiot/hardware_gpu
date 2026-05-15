@@ -19,42 +19,45 @@ module core_decoder
     import tu_pkg::thread_command_t;
     import tu_pkg::tags_t;
     import tu_pkg::FPU_CMD;
+
+    // unsorted
+    import tu_pkg::dec2lsu_bus_t;
+    import tu_pkg::dec2tu_bus_t;
 #(
     parameter int unsigned DW = 64
 ) (
+    /*=========================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
     input  logic                rst_n,
 
+    /*====================### SIGNALS FROM CONTROL UNIT ###=====================*/
     input  cmd_union_t          instr_i,
     input                       instr_valid,
 
-    output lsu_cmd_t            lsu_cmd,
+    /*=========================### SIGNALS TO LSU ###===========================*/
+    output dec2lsu_bus_t        lsu_cmd,
     output logic                lsu_valid,
 
+    /*=====================### SIGNALS TO REGFILE ###===========================*/
+    output dec2tu_bus_t         regfile_cmd,
+    output logic                regfile_valid,
+
+    /*=========================### SIGNALS TO FPU ###===========================*/
     output thread_command_t     fpu_cmd,
     output                      fpu_valid,
 
-
+    /*======================### HANDSHAKE SINGALS ###===========================*/
     input  logic                ready_i,
     output logic                ready_o
+    //==========================================================================//
 );
 
-assign lsu_valid = (instr_valid && instr_i.op_type == LSU_CMD);
+assign lsu_valid        = (instr_valid && instr_i.op_type == LSU_CMD);
+assign regfile_valid    = (instr_valid && instr_i.op_type == LSU_CMD);
+assign fpu_valid        = (instr_valid && instr_i.op_type == FPU_CMD);
 
-assign fpu_valid = (instr_valid && instr_i.op_type == FPU_CMD);
-
-always_comb begin
-    if (lsu_valid) begin
-        lsu_cmd.op  = instr_i.lcmd.operand;
-        lsu_cmd.rd  = instr_i.lcmd.a1;
-        lsu_cmd.r1  = instr_i.lcmd.a2;
-        lsu_cmd.r2  = instr_i.lcmd.a3;
-        lsu_cmd.imm = instr_i.lcmd.imm;
-    end
-    else begin
-        lsu_cmd = '0;
-    end
-end
+assign lsu_cmd      = lsu_valid? intsr_i.lcmd.to_lsu: '0;
+assign regfile_cmd  = lsu_valid? instr_i.lcmd.to_rf : '0;
 
 always_comb begin
     if (fpu_valid) begin
