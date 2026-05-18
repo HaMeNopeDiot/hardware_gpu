@@ -33,50 +33,81 @@ module thread_unit
     // Operation
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_result_t;
-    import tu_pkg::dec2tu_bus_t;
+    import tu_pkg::l_cmd_t;
     import tu_pkg::thread_info_t;
+    import tu_pkg::tu_alu_t;
+
+
+    import tu_pkg::LSU_CMD;
+    import tu_pkg::LOP_LW;
+    import tu_pkg::LOP_SW;
+    import tu_pkg::AOP_ADD;
+
+
+    import tu_pkg::dw_value_t;
 #(
-    parameter int unsigned DW = 64,
-    parameter int unsigned REGFILE_SIZE = 8,
-    parameter int unsigned AW = $clog2(REGFILE_SIZE),
-
-    parameter bit          LATCH_R_ADDR = 1,
-
-    parameter bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif
+    parameter  int unsigned DW = 64,
+    parameter  int unsigned REGFILE_SIZE = 8,
+    localparam int unsigned AW = $clog2(REGFILE_SIZE),
+    parameter  bit          LATCH_R_ADDR = 1,
+    parameter  bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif
 ) (
+    /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                clk,
     input  logic                rst_n,
 
-    input  dec2tu_bus_t         lsu_cmd,
-    input  logic                lsu_cmd_active,
+    /*===========================### LSU SIGNALS ###==========================*/
+    input  l_cmd_t              lsu_cmd,
+    input  logic                lsu_cmd_valid,
 
-    input  logic [DW - 1: 0]    rd,
-    input  logic                rd_active,
-    output logic [DW - 1: 0]    rs1,
-    output logic [DW - 1: 0]    rs2,
+    /*=========================### REGISTER SIGNALS ###=======================*/
+    reg_if.tu                   r_if,
 
+    /*===========================### DEC SIGNALS ###==========================*/
     input  thread_command_t     dec_cmd,
-    input  logic                dec_cmd_active,
+    input  logic                dec_cmd_valid,
 
-    output logic                busy_o,
+    /*=======================### HANDSHAKE SIGNALS ###========================*/
+    input  logic                fpu_valid_i,
+    output logic                fpu_ready_o,
 
+    /*===========================### OUT SIGNALS ###==========================*/
     output thread_info_t        thread_info
+    //========================================================================//
 );
 
-/*===================================================================================//
+/*============================================================================//
+region ASSIGNES
+//============================================================================*/
+
+// Register interface
+logic [DW - 1: 0] rs1,       rs2,       rd;
+logic             rs1_valid, rs2_valid, rd_valid;
+
+assign r_if.rs1.value   = rs1;
+assign r_if.rs1.valid   = rs1_valid;
+assign r_if.rs2.value   = rs2;
+assign r_if.rs2.valid   = rs2_valid;
+
+assign rd               = r_if.rd.value;
+assign rd_valid         = r_if.rd.valid;
+
+
+/*============================================================================//
 region LOGIC
-//===================================================================================*/
+//============================================================================*/
 
 thread_result_t fpu_result;
 
+logic [DW - 1: 0]       op_1, op_2, op_3;
 logic [2: 0][DW - 1: 0] operands;
-logic [DW - 1: 0] op_1;
-logic [DW - 1: 0] op_2;
-logic [DW - 1: 0] op_3;
 
 assign operands = {op_1, op_2, op_3};
 
 fsm_fpu_state_e state;
+
+logic  busy_o;
+assign busy_o          = state != FPU_IDLE;
 
 logic wr_en;
 logic [AW - 1: 0] addr_w;
@@ -88,13 +119,13 @@ if (LATCH_R_ADDR) begin: gen_latch_r_addr
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
             ff_addr_r <= '0;
-        else if (dec_cmd_active)
+        else if (dec_cmd_valid)
             ff_addr_r <= dec_cmd.ar;
         else if (~busy_o)
             ff_addr_r <= '0;
     end
 
-    assign addr_result = dec_cmd_active? dec_cmd.ar: ff_addr_r;
+    assign addr_result = dec_cmd_valid? dec_cmd.ar: ff_addr_r;
 end
 else begin: gen_no_latch_r_addr
     assign addr_result = dec_cmd.ar;
@@ -102,7 +133,7 @@ end
 
 // write
 always_comb begin
-    if (rd_active && lsu_cmd_active) begin
+    if (rd_valid && lsu_cmd_valid) begin
         addr_w = lsu_cmd.rd_addr;
         data_w = rd;
         wr_en  = '1;
@@ -123,26 +154,107 @@ end
 logic [AW - 1: 0] addr_rs1, addr_rs2;
 
 always_comb begin
-    addr_rs1 = lsu_cmd_active? lsu_cmd.rs1_addr: '0;
-    addr_rs2 = lsu_cmd_active? lsu_cmd.rs2_addr: '0;
+    addr_rs1 = lsu_cmd_valid? lsu_cmd.rs1_addr: '0;
+    addr_rs2 = lsu_cmd_valid? lsu_cmd.rs2_addr: '0;
 end
 
-// hshk sig
+// handshake sig
 logic out_ready_i;
 logic out_valid_o;
 logic in_valid_i;
 logic in_ready_o;
 
+logic [DW - 1: 0] data_rs1, data_rs2;
 
-/*===================================================================================//
+/*============================================================================//
+region ALU
+//============================================================================*/
+
+tu_alu_t alu_struct;
+always_comb begin
+    if (lsu_cmd_valid) begin
+        case (lsu_cmd.operand.lsu_op)
+            LOP_LW: begin
+                alu_struct.o1       = data_rs1;
+                alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                alu_struct.op       = AOP_ADD;
+                alu_struct.valid    = '1;
+            end
+            LOP_SW: begin
+                alu_struct.o1       = data_rs1;
+                alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                alu_struct.op       = AOP_ADD;
+                alu_struct.valid    = '1;
+            end
+            default: begin
+                alu_struct = '0;
+            end
+        endcase
+    end
+end
+
+logic [DW - 1: 0]   alu_or; // operation result
+logic               alu_rr; // result ready
+
+/*============================================================================//
 region OUT
-//===================================================================================*/
+//============================================================================*/
 assign  thread_info     = fpu_result.info;
-assign  busy_o          = state != FPU_IDLE;
 
-/*===================================================================================//
+logic   busy_prev;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        busy_prev <= '0;
+    else
+        busy_prev <= busy_o;
+end
+
+logic  done;
+assign done = ~busy_o && busy_prev;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        fpu_ready_o <= '0;
+    else if (done)
+        fpu_ready_o <= '1;
+    else if (fpu_valid_i)
+        fpu_ready_o <= '0;
+end
+
+always_comb begin
+    if(lsu_cmd_valid) begin
+        rs1         = alu_or;
+        rs1_valid   = alu_rr;
+    end
+    else begin
+        rs1         = data_rs1;
+        rs1_valid   = '1;
+    end
+end
+
+assign rs2          = data_rs2;
+assign rs2_valid    = '1;
+
+/*============================================================================//
 region INSTANCES
-//===================================================================================*/
+//============================================================================*/
+
+// ///////////////////////////////////////////////////////// //
+//                     *** CORE ALU ***                      //
+// NOTE: alu for calc addressing
+tu_alu #(
+    .DW        (DW)
+) tu_alu_u (
+    //================### COMMON SIGNALS ###=================//
+    .op_i    (alu_struct.op),       // <-
+    .a1_i    (alu_struct.o1),       // <-
+    .a2_i    (alu_struct.o2),       // <-
+    .valid_i (alu_struct.valid),    // <-
+    .r_o     (alu_or),              // ->
+    .ready_o (alu_rr)               // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
 
 // ///////////////////////////////////////////////////////// //
 //                    *** CU REGFILE ***                     //
@@ -167,8 +279,8 @@ tu_regfile #(
     /*================### READ SIGNALS ###===================*/
     .addr_rs1  (addr_rs1),          // <-
     .addr_rs2  (addr_rs2),          // <-
-    .data_rs1  (rs1),               // ->
-    .data_rs2  (rs2)                // ->
+    .data_rs1  (data_rs1),          // ->
+    .data_rs2  (data_rs2)           // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -181,7 +293,7 @@ tu_fsm tu_fsm_u (
     .clk         (clk),             // <-
     .rst_n       (rst_n),           // <-
     /*================### COMMON SIGNALS ###=================*/
-    .ready       (dec_cmd_active),  // <-
+    .ready       (dec_cmd_valid),   // <-
     //===============### HANDSHAKE SIGNALS ###===============//
     .in_ready_o  (in_ready_o),      // <-
     .out_valid_o (out_valid_o),     // <-

@@ -9,20 +9,16 @@
 /*===================================================================================//
 region MODULE DEFINITION
 //===================================================================================*/
-module core_alu
+module tu_alu
     import tu_pkg::alu_op_e;
 
     // operands list
     import tu_pkg::AOP_ADD;
     import tu_pkg::AOP_IMM_LSHIFT;
 #(
-    parameter int unsigned      DW        = 64,
-    parameter logic [DW - 1: 0] IMM_CONST = 10
+    parameter int unsigned      DW        = 64
 ) (
-    input  logic                clk,
-    input  logic                rst_n,
-
-    input  alu_op               op_i,
+    input  alu_op_e             op_i,
     input  logic [DW - 1: 0]    a1_i,
     input  logic [DW - 1: 0]    a2_i,
     input  logic                valid_i,
@@ -38,7 +34,7 @@ module core_alu
                     ready_o = '1;
                 end
                 AOP_IMM_LSHIFT: begin
-                    r_o = a1_i << (DW)'(IMM_CONST);
+                    r_o = a1_i << a2_i;
                     ready_o = '1;
                 end
                 default: begin

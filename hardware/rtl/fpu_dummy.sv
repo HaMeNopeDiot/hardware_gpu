@@ -9,6 +9,7 @@
   `define TAG_TYPE logic
 `endif
 
+/* verilator lint_off UNUSEDPARAM */
 module fpu_dummy
     import fpnew_pkg::roundmode_e;
     import fpnew_pkg::operation_e;
@@ -26,7 +27,11 @@ module fpu_dummy
     parameter int unsigned                    EnableSIMDMask = 0,
 
 
-    localparam int unsigned NumLanes     = fpnew_pkg::max_num_lanes(Features.Width, Features.FpFmtMask, Features.EnableVectors),
+    localparam int unsigned NumLanes     = fpnew_pkg::max_num_lanes(
+                                                    Features.Width,
+                                                    Features.FpFmtMask,
+                                                    Features.EnableVectors
+                                            ),
     localparam type         MaskType     = logic [NumLanes-1:0],
     localparam int unsigned WIDTH        = Features.Width,
     localparam int unsigned NUM_OPERANDS = 3

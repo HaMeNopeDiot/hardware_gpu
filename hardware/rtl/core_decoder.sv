@@ -10,9 +10,13 @@
 region MODULE DEFINITION
 //===================================================================================*/
 module core_decoder
+    import fpnew_pkg::roundmode_e;
+    import handshake_fpu_pkg::tags_t;
     // DEC
     import tu_pkg::cmd_union_t;
+    import tu_pkg::cmd_t;
     // LSU
+    import tu_pkg::l_cmd_t;
     import tu_pkg::lsu_cmd_t;
     import tu_pkg::LSU_CMD;
     // FPU
@@ -20,61 +24,45 @@ module core_decoder
     import tu_pkg::tags_t;
     import tu_pkg::FPU_CMD;
 
-    // unsorted
-    import tu_pkg::dec2lsu_bus_t;
-    import tu_pkg::dec2tu_bus_t;
-#(
-    parameter int unsigned DW = 64
-) (
-    /*=========================### COMMON SIGNALS ###===========================*/
-    input  logic                clk,
-    input  logic                rst_n,
+#() (
+    /*=======================### COMMON SIGNALS ###===========================*/
+    // input  logic                clk,
+    // input  logic                rst_n,
 
-    /*====================### SIGNALS FROM CONTROL UNIT ###=====================*/
-    input  cmd_union_t          instr_i,
+    /*===================### SIGNALS FROM CONTROL UNIT ###====================*/
+    input  cmd_t                instr_i,
     input                       instr_valid,
 
-    /*=========================### SIGNALS TO LSU ###===========================*/
-    output dec2lsu_bus_t        lsu_cmd,
-    output logic                lsu_valid,
+    /*=======================### CMD SIGNALS ###==============================*/
+    output l_cmd_t              lsu_cmd,
+    output logic                lsu_cmd_valid,
 
-    /*=====================### SIGNALS TO REGFILE ###===========================*/
-    output dec2tu_bus_t         regfile_cmd,
-    output logic                regfile_valid,
-
-    /*=========================### SIGNALS TO FPU ###===========================*/
+    /*=========================### SIGNALS TO FPU ###=========================*/
     output thread_command_t     fpu_cmd,
-    output                      fpu_valid,
+    output logic                fpu_valid
 
-    /*======================### HANDSHAKE SINGALS ###===========================*/
-    input  logic                ready_i,
-    output logic                ready_o
-    //==========================================================================//
+    //========================================================================//
 );
 
-assign lsu_valid        = (instr_valid && instr_i.op_type == LSU_CMD);
-assign regfile_valid    = (instr_valid && instr_i.op_type == LSU_CMD);
+assign lsu_cmd_valid    = (instr_valid && instr_i.op_type == LSU_CMD);
 assign fpu_valid        = (instr_valid && instr_i.op_type == FPU_CMD);
 
-assign lsu_cmd      = lsu_valid? intsr_i.lcmd.to_lsu: '0;
-assign regfile_cmd  = lsu_valid? instr_i.lcmd.to_rf : '0;
+assign lsu_cmd          = lsu_cmd_valid? instr_i.cmd.l: '0;
 
 always_comb begin
     if (fpu_valid) begin
-        fpu_cmd.op      = instr_i.fcmd.operand[4: 1];
-        fpu_cmd.op_mod  = instr_i.fcmd.operand[0];
-        fpu_cmd.a1      = instr_i.fcmd.a1;
-        fpu_cmd.a2      = instr_i.fcmd.a2;
-        fpu_cmd.a3      = instr_i.fcmd.a3;
-        fpu_cmd.ar      = intsr_i.fcmd.ar;
-        fpu_cmd.tag     = (tags_t)'(imm);
-        fpu_cmd.rnd     = instr_i.fcmd.extra;
+        fpu_cmd.op      = instr_i.cmd.f.operand.fpu_op.t;
+        fpu_cmd.op_mod  = instr_i.cmd.f.operand.fpu_op.mod;
+        fpu_cmd.a1      = instr_i.cmd.f.a1;
+        fpu_cmd.a2      = instr_i.cmd.f.a2;
+        fpu_cmd.a3      = instr_i.cmd.f.a3;
+        fpu_cmd.ar      = instr_i.cmd.f.ar;
+        fpu_cmd.tag     = (tags_t)'(instr_i.cmd.f.imm);
+        fpu_cmd.rnd     = (roundmode_e)'(instr_i.cmd.f.extra);
     end
     else begin
         fpu_cmd = '0;
     end
 end
-
-assign ready_i = ready_o;
 
 endmodule

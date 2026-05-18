@@ -4,4 +4,12 @@ rtl/handshake_fpu_pkg.sv
 rtl/tu_pkg.sv
 rtl/tu_fsm.sv
 rtl/tu_regfile.sv
+rtl/tu_alu.sv
 rtl/thread_unit.sv
+rtl/interfaces/reg_if.sv
+rtl/interfaces/simple_bus_if.sv
+rtl/interfaces/simple_hq_if.sv
+rtl/core_decoder.sv
+rtl/core_lsu_fsm_pkg.sv
+rtl/core_lsu.sv
+rtl/core.sv
