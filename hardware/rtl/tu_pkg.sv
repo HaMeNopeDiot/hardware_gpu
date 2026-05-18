@@ -69,10 +69,12 @@ package tu_pkg;
         LOP_SW     = 1
     } lsu_op_e;
 
+    localparam int unsigned  DEC_OP_W = 2;
     // DEC INSTR
-    typedef enum logic {
+    typedef enum logic [DEC_OP_W - 1: 0] {
         LSU_CMD = 0,
-        FPU_CMD = 1
+        FPU_CMD = 1,
+        UIM_CMD = 2
     } dec_op_type_e;
 
     typedef struct packed {
@@ -114,7 +116,7 @@ package tu_pkg;
     region TYPE OF COMMANDS FROM DECODER
     //==========================================================================*/
 
-    localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + 3);
+    localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + 3 + DEC_OP_W);
     // fpu
     typedef struct packed {
         op_union_t              operand;         // 5
@@ -124,7 +126,7 @@ package tu_pkg;
     } f_cmd_t;
 
 
-    localparam int unsigned L_IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W);
+    localparam int unsigned L_IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W + DEC_OP_W);
     // lsu
     typedef struct packed {
         regfile_addr_t          rs1_addr, rs2_addr, rd_addr;
