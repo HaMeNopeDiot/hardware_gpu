@@ -31,14 +31,22 @@ module thread_unit
 
 
     // Operation
+    import tu_pkg::cmd_union_t;
+    import tu_pkg::dec_op_type_e;
+
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_result_t;
     import tu_pkg::l_cmd_t;
+    import tu_pkg::u_cmd_t;
     import tu_pkg::thread_info_t;
     import tu_pkg::tu_alu_t;
 
+    import tu_pkg::U_OFS_IMM_W;
+
 
     import tu_pkg::LSU_CMD;
+    import tu_pkg::UPP_CMD;
+
     import tu_pkg::LOP_LW;
     import tu_pkg::LOP_SW;
     import tu_pkg::AOP_ADD;
@@ -57,8 +65,8 @@ module thread_unit
     input  logic                rst_n,
 
     /*===========================### LSU SIGNALS ###==========================*/
-    input  l_cmd_t              lsu_cmd,
-    input  logic                lsu_cmd_valid,
+    input  cmd_union_t          cmd,
+    input  dec_op_type_e        cmd_op_type,
 
     /*=========================### REGISTER SIGNALS ###=======================*/
     reg_if.tu                   r_if,
@@ -92,6 +100,17 @@ assign r_if.rs2.valid   = rs2_valid;
 assign rd               = r_if.rd.value;
 assign rd_valid         = r_if.rd.valid;
 
+// Dec
+logic  lsu_cmd_valid;
+logic  upp_cmd_valid;
+assign lsu_cmd_valid = cmd_op_type == LSU_CMD;
+assign upp_cmd_valid = cmd_op_type == UPP_CMD;
+
+l_cmd_t lsu_cmd;
+assign  lsu_cmd = lsu_cmd_valid? cmd.l: '0;
+
+u_cmd_t upp_cmd;
+assign  upp_cmd = upp_cmd_valid? cmd.u: '0;
 
 /*============================================================================//
 region LOGIC
@@ -138,6 +157,11 @@ always_comb begin
         data_w = rd;
         wr_en  = '1;
     end
+    else if (upp_cmd_valid) begin
+        addr_w = upp_cmd.rd_addr;
+        data_w = (DW)'(upp_cmd.imm << U_OFS_IMM_W);
+        wr_en  = '1;
+    end
     else if (state == FPU_RESULT) begin
         addr_w = addr_result;
         data_w = fpu_result.result_data;
@@ -172,25 +196,29 @@ region ALU
 
 tu_alu_t alu_struct;
 always_comb begin
-    if (lsu_cmd_valid) begin
-        case (lsu_cmd.operand.lsu_op)
-            LOP_LW: begin
-                alu_struct.o1       = data_rs1;
-                alu_struct.o2       = (DW)'(lsu_cmd.imm);
-                alu_struct.op       = AOP_ADD;
-                alu_struct.valid    = '1;
-            end
-            LOP_SW: begin
-                alu_struct.o1       = data_rs1;
-                alu_struct.o2       = (DW)'(lsu_cmd.imm);
-                alu_struct.op       = AOP_ADD;
-                alu_struct.valid    = '1;
-            end
-            default: begin
-                alu_struct = '0;
-            end
-        endcase
-    end
+    case (cmd_op_type)
+        LSU_CMD: begin
+            case (lsu_cmd.operand.lsu_op)
+                LOP_LW: begin
+                    alu_struct.o1       = data_rs1;
+                    alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                    alu_struct.op       = AOP_ADD;
+                    alu_struct.valid    = '1;
+                end
+                LOP_SW: begin
+                    alu_struct.o1       = data_rs1;
+                    alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                    alu_struct.op       = AOP_ADD;
+                    alu_struct.valid    = '1;
+                end
+                default: begin
+                    alu_struct = '0;
+                end
+            endcase
+        end
+        default:
+            alu_struct = '0;
+    endcase
 end
 
 logic [DW - 1: 0]   alu_or; // operation result

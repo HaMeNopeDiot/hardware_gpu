@@ -15,14 +15,17 @@ module core_decoder
     // DEC
     import tu_pkg::cmd_union_t;
     import tu_pkg::cmd_t;
+    import tu_pkg::dec_op_type_e;
+    import tu_pkg::NO_CMD;
     // LSU
-    import tu_pkg::l_cmd_t;
     import tu_pkg::lsu_cmd_t;
     import tu_pkg::LSU_CMD;
     // FPU
     import tu_pkg::thread_command_t;
     import tu_pkg::tags_t;
     import tu_pkg::FPU_CMD;
+    // UPPER
+    import tu_pkg::UPP_CMD;
 
 #() (
     /*=======================### COMMON SIGNALS ###===========================*/
@@ -34,8 +37,8 @@ module core_decoder
     input                       instr_valid,
 
     /*=======================### CMD SIGNALS ###==============================*/
-    output l_cmd_t              lsu_cmd,
-    output logic                lsu_cmd_valid,
+    output cmd_union_t          cmd,
+    output dec_op_type_e        cmd_op_type,
 
     /*=========================### SIGNALS TO FPU ###=========================*/
     output thread_command_t     fpu_cmd,
@@ -44,10 +47,19 @@ module core_decoder
     //========================================================================//
 );
 
+always_comb begin
+    if (instr_valid)
+        cmd_op_type = instr_i.op_type;
+    else
+        cmd_op_type = NO_CMD;
+end
+
+logic  lsu_cmd_valid, upp_cmd_valid;
 assign lsu_cmd_valid    = (instr_valid && instr_i.op_type == LSU_CMD);
+assign upp_cmd_valid    = (instr_valid && instr_i.op_type == UPP_CMD);
 assign fpu_valid        = (instr_valid && instr_i.op_type == FPU_CMD);
 
-assign lsu_cmd          = lsu_cmd_valid? instr_i.cmd.l: '0;
+assign cmd              = lsu_cmd_valid || upp_cmd_valid? instr_i.cmd: '0;
 
 always_comb begin
     if (fpu_valid) begin

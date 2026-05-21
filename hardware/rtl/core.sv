@@ -13,8 +13,10 @@ module core
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_info_t;
     import tu_pkg::cmd_t;
-    import tu_pkg::l_cmd_t;
+    import tu_pkg::dec_op_type_e;
+    import tu_pkg::cmd_union_t;
     import tu_pkg::lsu_op_e;
+    import tu_pkg::LSU_CMD;
 #(
     parameter int unsigned DW               = 64,
     parameter int unsigned MEM_AW           = 64,
@@ -41,16 +43,17 @@ module core
 /*============================================================================//
 region LOGIC
 //============================================================================*/
-l_cmd_t             lsu_cmd;
+cmd_union_t         cmd;
+dec_op_type_e       cmd_op_type;
 logic               lsu_cmd_valid;
-
+assign              lsu_cmd_valid = cmd_op_type == LSU_CMD;
 
 thread_command_t    fpu_cmd;
 logic               fpu_cmd_valid;
 
 lsu_op_e            lsu_op;
 logic               lsu_op_valid;
-assign              lsu_op       = lsu_cmd.operand.lsu_op;
+assign              lsu_op       = cmd.l.operand.lsu_op;
 assign              lsu_op_valid = lsu_cmd_valid;
 
 reg_if              r_if();
@@ -69,8 +72,8 @@ core_decoder #() core_decoder_u (
     .instr_i        (instr_i      ),    // <-
     .instr_valid    (instr_valid_i),    // <-
     //==================### CMD SIGNALS ###==================//
-    .lsu_cmd        (lsu_cmd      ),    // ->
-    .lsu_cmd_valid  (lsu_cmd_valid),    // ->
+    .cmd            (cmd          ),    // ->
+    .cmd_op_type    (cmd_op_type  ),    // ->
     //================### SIGNALS TO FPU ###=================//
     .fpu_cmd        (fpu_cmd      ),    // ->
     .fpu_valid      (fpu_cmd_valid)     // ->
@@ -113,8 +116,8 @@ thread_unit #(
     .clk            (clk             ),  // <-
     .rst_n          (rst_n           ),  // <-
     //==================### LSU SIGNALS ###==================//
-    .lsu_cmd        (lsu_cmd         ),  // <-
-    .lsu_cmd_valid  (lsu_cmd_valid   ),  // <-
+    .cmd            (cmd             ),  // <-
+    .cmd_op_type    (cmd_op_type     ),  // <-
     //===============### REGISTER SIGNALS ###================//
     .r_if           (r_if.tu         ),  // <->
     //==================### DEC SIGNALS ###==================//

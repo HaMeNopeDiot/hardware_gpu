@@ -33,6 +33,10 @@ module tu_alu
                     r_o = a1_i + a2_i;
                     ready_o = '1;
                 end
+                AOP_MUL: begin
+                    r_0 = a1_i * a2_i;
+                    ready_o = '1;
+                end
                 AOP_IMM_LSHIFT: begin
                     r_o = a1_i << a2_i;
                     ready_o = '1;
