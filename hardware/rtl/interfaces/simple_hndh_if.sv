@@ -8,7 +8,7 @@
 
 /* verilator lint_off UNDRIVEN */
 /* verilator lint_off UNUSEDSIGNAL */
-interface simple_hq_if;
+interface simple_hndh_if;
 	logic ready;
 	logic valid;
 
@@ -20,5 +20,5 @@ interface simple_hq_if;
 		output 	ready,
 		input	valid
 	);
-endinterface // simple_hq_if
+endinterface // simple_hndh_if
 
