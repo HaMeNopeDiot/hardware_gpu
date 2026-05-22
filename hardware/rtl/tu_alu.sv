@@ -15,6 +15,7 @@ module tu_alu
     // operands list
     import tu_pkg::AOP_ADD;
     import tu_pkg::AOP_IMM_LSHIFT;
+    import tu_pkg::AOP_MUL;
 #(
     parameter int unsigned      DW        = 64
 ) (
@@ -34,7 +35,7 @@ module tu_alu
                     ready_o = '1;
                 end
                 AOP_MUL: begin
-                    r_0 = a1_i * a2_i;
+                    r_o = a1_i * a2_i;
                     ready_o = '1;
                 end
                 AOP_IMM_LSHIFT: begin

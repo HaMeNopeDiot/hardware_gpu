@@ -169,5 +169,28 @@ package tu_pkg;
         cmd_union_t    cmd;
     } cmd_t;
 
+    /*==========================================================================//
+    region CORE
+    //==========================================================================*/
+
+    localparam int unsigned CORE_STATE_W = 3;
+    typedef enum logic [CORE_STATE_W - 1: 0] {
+        CORE_STATE_FETCH   = 0,
+        CORE_STATE_DECODE  = 1,
+        CORE_STATE_REQUEST = 2,
+        CORE_STATE_WAIT    = 3,
+        CORE_STATE_EXECUTE = 4,
+        CORE_STATE_UPDATE  = 5,
+        CORE_STATE_DONE    = 6
+    } core_state_e;
+
+    localparam int unsigned TU_STATE_W = 2;
+    typedef enum logic [TU_STATE_W - 1: 0] {
+        TU_STATE_IDLE    = 0,
+        TU_STATE_REQUEST = 1,
+        TU_STATE_WAIT    = 2,
+        TU_STATE_DONE    = 3
+    } tu_state_e;
+
     // ======================================================================== //
 endpackage
