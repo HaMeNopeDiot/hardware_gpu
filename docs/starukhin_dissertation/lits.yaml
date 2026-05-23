@@ -1,0 +1,39 @@
+graph_review:
+  type: Article
+  title: Обзор и анализ 2D графических ускорителей
+  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+
+graph_arch:
+  type: Article
+  title: Разработка архитектуры аппаратной реализации 2D графического ускорителя
+  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+
+gpu_wiki:
+  type: Web
+  title: Видеокарта
+  url: https://ru.wikipedia.org/wiki/Видеокарта
+
+sisd_wiki:
+  type: Web
+  title: SISD
+  url: https://ru.wikipedia.org/wiki/SISD
+
+simd_wiki:
+  type: Web
+  title: SIMD
+  url: https://ru.wikipedia.org/wiki/SIMD
+
+misd_wiki:
+  type: Web
+  title: MISD
+  url: https://ru.wikipedia.org/wiki/MISD
+
+mimd_wiki:
+  type: Web
+  title: MIMD
+  url: https://ru.wikipedia.org/wiki/MIMD
+
+flin_taxonomy_wiki:
+  type: Web
+  title: Таксономия Флинна
+  url: https://en.wikipedia.org/wiki/Flynn%27s_taxonomy
