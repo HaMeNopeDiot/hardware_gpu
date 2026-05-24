@@ -84,3 +84,27 @@ flin_taxonomy_wiki:
   title: Таксономия Флинна
   url: https://en.wikipedia.org/wiki/Flynn%27s_taxonomy
 
+amd_wiki:
+  type: Web
+  title: amd
+  url: https://en.wikipedia.org/wiki/AMD
+
+epoch_1:
+  type: Web
+  title: Part I The first fully programmable GPUs-a rewiew
+  url: https://www.jonpeddie.com/news/part-i-the-first-fully-programmable-gpus-a-review/
+
+amd_r600_isa:
+  type: Web
+  title: R600-Family Instruction Set Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/ati-r600-isa.pdf
+
+amd_r600_terascale_dns:
+  type: Web
+  title: История развития графики AMD/ATI. Часть 2 путь универсальности
+  url: https://club.dns-shop.ru/blog/t-99-videokartyi/101511-istoriya-razvitiya-grafiki-amd-ati-chast-2-put-universalnosti/#sub_Radeon__HD2000__DirectX__10__i__superskalyarnaya__TeraScale
+
+amd_evergreen_isa:
+  type: Web
+  title: Evergreen Family Instruction Set Architecture Instructions and Microcode
+  url: https://www.techpowerup.com/gpu-specs/docs/ati-evergreen-isa.pdf
