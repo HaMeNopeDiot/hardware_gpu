@@ -1,3 +1,28 @@
+nvidia_nv30_chip:
+  type: Web
+  title: NVIDIA NV30
+  url: https://www.techpowerup.com/gpu-specs/nvidia-nv30.g20
+
+rop_wiki:
+  type: Web
+  title: Render output unit
+  url: https://en.wikipedia.org/wiki/Render_output_unit
+
+turing_microarchitecture_wiki:
+  type: Web
+  title: Turing (микроархитектура)
+  url: https://en.wikipedia.org/wiki/Turing_(microarchitecture)
+
+turing_archi:
+  type: Web
+  title: NVIDIA TURING GPU ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
+
+nvidia_wiki:
+  type: Web
+  title: Nvidia
+  url: https://ru.wikipedia.org/wiki/Nvidia
+
 graph_review:
   type: Article
   title: Обзор и анализ 2D графических ускорителей
@@ -7,6 +32,27 @@ graph_arch:
   type: Article
   title: Разработка архитектуры аппаратной реализации 2D графического ускорителя
   author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+
+graph_arch_8:
+  type: Article
+  title: Архитектура графических процессоров Nvidia восьмого поколения с точки 
+    зрения вычислений общего назначения
+  author: [Э. С. Ершов, Е. А. Сухотерин]
+
+tesla_microarchi:
+  type: Web
+  title: NVIDIA Tesla A Unified Graphics and Computing Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-tesla-architecture.pdf
+
+fermi_archi:
+  type: Web
+  title: NVIDIA's Next Generation CUDA Compute Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-fermi-compute-architecture.pdf
+
+blackwell_archi:
+  type: Web
+  title: NVIDIA RTX BLACKWELL GPU ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-blackwell-architecture.pdf 
 
 gpu_wiki:
   type: Web
@@ -37,3 +83,4 @@ flin_taxonomy_wiki:
   type: Web
   title: Таксономия Флинна
   url: https://en.wikipedia.org/wiki/Flynn%27s_taxonomy
+
