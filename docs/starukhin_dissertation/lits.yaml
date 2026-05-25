@@ -35,7 +35,7 @@ graph_arch:
 
 graph_arch_8:
   type: Article
-  title: Архитектура графических процессоров Nvidia восьмого поколения с точки 
+  title: Архитектура графических процессоров Nvidia восьмого поколения с точки
     зрения вычислений общего назначения
   author: [Э. С. Ершов, Е. А. Сухотерин]
 
@@ -52,7 +52,7 @@ fermi_archi:
 blackwell_archi:
   type: Web
   title: NVIDIA RTX BLACKWELL GPU ARCHITECTURE
-  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-blackwell-architecture.pdf 
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-blackwell-architecture.pdf
 
 gpu_wiki:
   type: Web
@@ -108,3 +108,28 @@ amd_evergreen_isa:
   type: Web
   title: Evergreen Family Instruction Set Architecture Instructions and Microcode
   url: https://www.techpowerup.com/gpu-specs/docs/ati-evergreen-isa.pdf
+
+amd_gcn1_archi:
+  type: Web
+  title: AMD GrAPHICS CORES NEXT (GCN) ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/amd-gcn1-architecture.pdf
+
+workitem_info:
+  type: Web
+  title: Введение в OpenCL
+  url: https://habr.com/ru/articles/124925/
+
+workgroup_info:
+  type: Web
+  title: Учимся разрабатывать для GPU на примере операции GEMM
+  url: https://habr.com/ru/companies/yadro/articles/934878/
+
+rdna_microarchi:
+  type: Web
+  title: RDNA (microarchitecture)
+  url: https://en.wikipedia.org/wiki/RDNA_(microarchitecture)
+
+compute_unit_amd:
+  type: Web
+  title: Compute unit
+  url: https://rocm.docs.amd.com/projects/omniperf/en/amd-staging/conceptual/compute-unit.html
