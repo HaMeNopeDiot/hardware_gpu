@@ -133,3 +133,13 @@ compute_unit_amd:
   type: Web
   title: Compute unit
   url: https://rocm.docs.amd.com/projects/omniperf/en/amd-staging/conceptual/compute-unit.html
+
+interface_wiki:
+  type: Web
+  title: Интерфейс
+  url: https://ru.wikipedia.org/wiki/Интерфейс
+
+amba_wiki:
+  type: Web
+  title: AMBA
+  url: https://ru.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture
