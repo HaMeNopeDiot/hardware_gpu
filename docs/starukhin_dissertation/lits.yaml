@@ -187,3 +187,34 @@ alu_wiki:
   type: Web
   title: ALU
   url: https://en.wikipedia.org/wiki/Arithmetic_logic_unit
+
+fpu_wiki:
+  type: Web
+  title: FPU
+  url: https://en.wikipedia.org/wiki/Floating-point_unit
+
+ieee_754_wiki:
+  type: Web
+  title: IEEE_754
+  url: https://ru.wikipedia.org/wiki/IEEE_754
+
+ieee_754_standart:
+  type: Article
+  title: IEEE Standard for Floating-Point Arithmetic
+  author: Microprocessor Standards Committee
+
+cvfpu:
+  type: Repository
+  title: FPnew - New Floating-Point Unit with Transprecision Capabilities
+  url: https://github.com/openhwgroup/cvfpu
+
+archi_proc_sys_regfile:
+  type: chapter
+  title: "Лабораторная работа №3 \"Регистровый файл и память инструкций\""
+  page-range: 87-90
+  parent:
+    type: Book
+    title: Архитектуры процессорных систем
+    author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
+    publisher:
+      name: "АО \"РИЦ \"Техносфера\"\""
