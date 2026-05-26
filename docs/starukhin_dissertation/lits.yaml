@@ -1,3 +1,12 @@
+haris:
+  type: Book
+  title: Цифровая схемотехника и архитектура компьютера
+  author:
+    - Дэвид М. Хэррис
+    - Сара Л. Хэррис
+  publisher:
+    name: Morgan Kaufman
+
 nvidia_nv30_chip:
   type: Web
   title: NVIDIA NV30
@@ -143,3 +152,38 @@ amba_wiki:
   type: Web
   title: AMBA
   url: https://ru.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture
+
+alu_haris:
+  type: chapter
+  title: "Арифметико-логическое устройство"
+  chapter: 5.2.4
+  page-range: 304-309
+  parent:
+    type: Book
+    title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
+    author:
+      - Дэвид М. Хэррис
+      - Сара Л. Хэррис
+    publisher:
+      name: ДМК Пресс
+
+
+
+fpn_haris:
+  type: chapter
+  title: "Числа с плавающей точкой"
+  chapter: 5.3.2
+  page-range: 315-316
+  parent:
+    type: Book
+    title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
+    author:
+      - Дэвид М. Хэррис
+      - Сара Л. Хэррис
+    publisher:
+      name: ДМК Пресс
+
+alu_wiki:
+  type: Web
+  title: ALU
+  url: https://en.wikipedia.org/wiki/Arithmetic_logic_unit
