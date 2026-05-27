@@ -218,3 +218,22 @@ archi_proc_sys_regfile:
     author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
     publisher:
       name: "АО \"РИЦ \"Техносфера\"\""
+
+isa_wiki:
+  type: Web
+  title: Instruction Set Architecture
+  url: https://en.wikipedia.org/wiki/Instruction_set_architecture
+
+guide_to_risc_proccessors:
+  type: chapter
+  title: "RISC Principles"
+  chapter: "3"
+  page-range: 39-44
+  parent:
+    type: Book
+    title: "Guide to RISC Processors for Programmers and Engineers"
+    author:
+      - Сиварама П. Дандамуди
+    publisher:
+      name: Springer
+    date: "2005"
