@@ -64,14 +64,28 @@ package tu_pkg;
 
     parameter int unsigned LSU_OP_W = 4 + 1;
     typedef enum logic[LSU_OP_W - 1: 0] {
-        LOP_LW     = 0,
-        LOP_SW     = 1
+        LOP_LW     = 0, // rd = M[rs1 + imm]
+        LOP_SW     = 1, // M[rs1 + imm] = rs2
+        LOP_ADDI   = 2, // rd = r1 + imm
+        LOP_ADD    = 3, // rd = r1 + r2
+        LOP_MUL    = 4  // rd = r1 * r2
     } lsu_op_e;
 
     typedef struct packed {
         lsu_op_e        op;
         regfile_addr_t  rd, rs1, rs2;
     } lsu_cmd_t;
+
+    /*==========================================================================//
+    region UPPER
+    //==========================================================================*/
+
+    parameter int unsigned U_OP_W = 4 + 1;
+    typedef enum logic[U_OP_W - 1: 0] {
+        UOP_IMM = 0,    // rd = rs1 << 20
+        UOP_APC = 1     // PC = PC + 4
+    } u_op_e;
+
 
     /*==========================================================================//
     region OP
@@ -85,17 +99,9 @@ package tu_pkg;
     typedef union packed {
         lsu_op_e    lsu_op;
         fpu_op_t    fpu_op;
+        u_op_e      upp_op;
     } op_union_t;
 
-    /*==========================================================================//
-    region UPPER
-    //==========================================================================*/
-
-    parameter int unsigned U_OP_W = 4 + 1;
-    typedef enum logic[U_OP_W - 1: 0] {
-        UOP_IMM = 0,
-        UOP_APC = 1
-    } u_op_e;
 
     /*==========================================================================//
     region ALU
@@ -103,9 +109,9 @@ package tu_pkg;
 
     // ALU
     typedef enum logic [1: 0] {
-        AOP_ADD         = 0,
-        AOP_IMM_LSHIFT  = 1,
-        AOP_MUL         = 2
+        AOP_ADD         = 0,    // r = s1 + s2
+        AOP_IMM_LSHIFT  = 1,    // r = s1 << s2
+        AOP_MUL         = 2     // r = s1 * s2
     } alu_op_e;
 
     typedef struct packed {
@@ -140,7 +146,7 @@ package tu_pkg;
     localparam int unsigned U_IMM_W     = DW - U_OFS_IMM_W;
     // upper imid
     typedef struct packed {
-        // op_union_t              operand;
+        op_union_t              operand;
         regfile_addr_t          rd_addr;
         logic [U_IMM_W - 1: 0]  imm;
     } u_cmd_t;
