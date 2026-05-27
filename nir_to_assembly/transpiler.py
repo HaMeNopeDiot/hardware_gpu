@@ -30,7 +30,7 @@ class Transpiler:
     def _add_instruction(self, opcode: str, args: list):
         self.target_code.append(
             Instruction(
-                opcode=opcode, result=self.result_index, result_size=1, args=args
+                opcode=opcode, result=f"t{self.result_index}", result_size=1, args=args
             )
         )
         self.result_index += 1
