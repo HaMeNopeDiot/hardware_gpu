@@ -10,3 +10,4 @@ hardware/util/
 hardware/.gitmodules
 hardware/tb/flexfloat/
 hardware/CITATION.cff
+*__pycache__
