@@ -139,3 +139,13 @@ llvm_doc:
   type: Web
   title: The LLVM Compiler Infrastructure
   url: https://llvm.org/
+
+interpreter_wiki:
+   type: Web
+   title: Интерпретатор
+   url: https://ru.wikipedia.org/wiki/Интерпретатор
+
+token_wiki:
+  type: Web
+  title: Токен (лексический анализ)
+  url: https://ru.wikipedia.org/wiki/Токен_(лексический_анализ)
