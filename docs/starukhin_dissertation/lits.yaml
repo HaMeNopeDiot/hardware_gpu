@@ -237,3 +237,24 @@ guide_to_risc_proccessors:
     publisher:
       name: Springer
     date: "2005"
+
+archi_proc_sys_lsu:
+  type: chapter
+  title: "Лабораторная работа №8 \"Блок загрузки и сохранения\""
+  page-range: 155-156
+  parent:
+    type: Book
+    title: Архитектуры процессорных систем
+    author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
+    publisher:
+      name: "АО \"РИЦ \"Техносфера\"\""
+
+interconnect_reg_cloud:
+  type: Web
+  title: "Что такое Interconnect: аппаратные и сетевые технологии"
+  url: https://reg.cloud/blog/chto-takoe-interconnect/?utm_source=google.com&utm_medium=organic&utm_campaign=reg.cloud&utm_referrer=google.com&utm_content=%2Fblog%2Fchto-takoe-interconnect%2F
+
+round_robin_wiki:
+  type: Web
+  title: "Round-Robin"
+  url: https://ru.wikipedia.org/wiki/Round-robin_(%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC)
