@@ -10,3 +10,5 @@ hardware/util/
 hardware/.gitmodules
 hardware/tb/flexfloat/
 hardware/CITATION.cff
+*.bkp
+*.pdf
