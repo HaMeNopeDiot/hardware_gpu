@@ -130,6 +130,16 @@ riscv_article:
   title: Исследование технологии RISC-V
   url: https://www.mathnet.ru/links/74f6f2e62d9510259e3a97a45b3ff6f1/tisp500.pdf
 
+riscv_standard:
+  type: Web
+  title: Библиотека стандарта RISC-V
+  url: https://docs.riscv.org/reference/home/index.html
+
+intel_atnt_syntax:
+  type: Web
+  title: Язык ассемблера x86
+  url: https://en.wikipedia.org/wiki/X86_assembly_language
+
 jit_wiki:
   type: Web
   title: Just-in-time compilation
@@ -148,3 +158,14 @@ verification_habr:
 ipblocks_gost:
   type: Book
   title: ГОСТ Р 70916-2023. БЛОКИ СЛОЖНО-ФУНКЦИОНАЛЬНЫЕ Термины и определения
+
+dragon_book:
+  type: Book
+  title: "Compilers: Principles, Techniques, and Tools"
+  author:
+    - Alfred V. Aho
+    - Monica S. Lam
+    - Ravi Sethi
+    - Jeffrey D. Ullman
+  publisher:
+    name: Pearson Education, Inc

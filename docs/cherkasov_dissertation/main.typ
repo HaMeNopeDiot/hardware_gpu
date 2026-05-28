@@ -13,7 +13,7 @@
   show figure.where(kind: raw): set figure.caption(separator: [ --- ])
   show raw: set text(
     font: "New Computer Modern",
-    size: 12pt,
+    size: 14pt,
   )
   show figure: set block(breakable: true)
   show heading: set block(below: line_margin)
@@ -25,7 +25,7 @@
 
 #set text(
     font: "New Computer Modern",
-    size: 12pt,
+    size: 14pt,
 )
 #set math.equation(numbering: "(1)")
 
