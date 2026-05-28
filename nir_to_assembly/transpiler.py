@@ -1,6 +1,8 @@
 from instruction import Instruction
 
 """
+ISA:
+
 lw rd, imm(rs1) : rd = M[rs1+imm]
 sw rs2, imm(rs1): M[rs1+imm] = rs2
 lui rd,imm      : rd = imm << 20
@@ -11,7 +13,7 @@ li rd, imm      : rd = imm
 fdiv rd,rs1,rs2 : rd = rs1 / rd2
 fneg rd,rs1     : rd = -rs1
 fsqrt rd,rs1    : rd = sqrt(rs1)
-fmax rd, rs1    : rd =   max(rs1, rs2)
+fmax rd, rs1    : rd = max(rs1, rs2)
 fadd rd,rs1,rs2 : rd = rs1 + rs2
 fmul rd,rs1,rs2 : rd = rs1 * rs2
 ret
@@ -28,6 +30,9 @@ class Transpiler:
         self.dependencies_map = {}
 
     def _add_instruction(self, opcode: str, args: list):
+        """
+        Adds instruction to the target code
+        """
         self.target_code.append(
             Instruction(
                 opcode=opcode, result=f"t{self.result_index}", result_size=1, args=args
@@ -35,20 +40,29 @@ class Transpiler:
         )
         self.result_index += 1
 
-    def _expand_subscript(self, arg_num: int, arg_subscript: str | None) -> str:
+    def _expand_subscript(self, arg_num: str, arg_subscript: str | None) -> str:
+        """
+        Combines the subscript into a string to something like: %99.x
+        """
         if arg_subscript is None:
             return f"%{arg_num}"
         else:
             return f"%{arg_num}.{arg_subscript}"
 
     def _previous_is_result_in_source_code(
-        self, result_num: int, result_subscript: str | None
+        self, result_num: str, result_subscript: str | None
     ):
+        """
+        Registers that the output of the previous instruction matches the result of the original instruction in the NIR
+        """
         self.dependencies_map[self._expand_subscript(result_num, result_subscript)] = (
             f"t{self.result_index - 1}"
         )
 
     def transpile(self, source_code: list[Instruction]) -> list[Instruction]:
+        """
+        Per instruction in the source code calls the method with the same name as its opcode
+        """
         for instr in source_code:
             method = getattr(self, instr.opcode, None)
             if callable(method):
@@ -58,7 +72,15 @@ class Transpiler:
 
         return self.target_code
 
+    # NIR instructions below
+
     def deref_var(self, instr: Instruction) -> None:
+        """
+        Find where input and output attributes are stored, based on their name
+        I actually ofload it onto the future by referencing constants:
+            - _base - the begining of data
+            - _stride - the spacing between data
+        """
         self._add_instruction("li", [f"{instr.args[0]}_base"])
         self._add_instruction("li", [f"{instr.args[0]}_stride"])
         self._add_instruction("mul", ["v_id", f"t{self.result_index - 1}"])
@@ -68,6 +90,9 @@ class Transpiler:
         self._previous_is_result_in_source_code(instr.result, None)
 
     def load_deref(self, instr: Instruction) -> None:
+        """
+        Based on the location of the attribute, go there and load its value
+        """
         if instr.result_size == 1:
             dependency = self.dependencies_map[
                 self._expand_subscript(instr.args[0][0], instr.args[0][1])
@@ -87,6 +112,9 @@ class Transpiler:
                 )
 
     def load_const(self, instr: Instruction) -> None:
+        """
+        Load a constant/vector
+        """
         if instr.result_size == 1:
             self._add_instruction("li", [instr.args[0]])
             self._previous_is_result_in_source_code(instr.result, None)
@@ -98,6 +126,9 @@ class Transpiler:
                 )
 
     def load_const_buf_base_addr_lvp(self, instr: Instruction) -> None:
+        """
+        Nothing-function, needs to find a buffer base address, but i just return the begining of ubos in the memory
+        """
         self._add_instruction("li", ["ubo_base"])
         self._previous_is_result_in_source_code(instr.result, None)
 
@@ -113,10 +144,11 @@ class Transpiler:
             self._add_instruction("lw", [f"t{self.result_index - 1}", "0"])
             self._previous_is_result_in_source_code(instr.result, None)
         else:
+            address = self.result_index - 1
             for i in range(instr.result_size):
                 self._add_instruction(
                     "lw",
-                    [f"t{self.result_index - 1}", str(self.WORD_SIZE_IN_BYTES * i)],
+                    [f"t{address}", str(self.WORD_SIZE_IN_BYTES * i)],
                 )
                 self._previous_is_result_in_source_code(
                     instr.result, self.SUBSCRIPTS[i]

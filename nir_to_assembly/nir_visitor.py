@@ -85,7 +85,7 @@ class NirCodeLoader(Transformer):
         return ("fsqrt", tree)
 
     def fmax(self, tree):
-        return ("fadd", tree)
+        return ("fmax", tree)
 
     def store_deref(self, tree):
         return ("store_deref", tree[0:6])

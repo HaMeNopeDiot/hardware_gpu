@@ -23,7 +23,7 @@ parser = Lark(lark_grammar, ambiguity="explicit")
 # print(parser.parse(source_code).pretty())
 source_code = NirCodeLoader().transform(parser.parse(source_code))
 target_code = Transpiler().transpile(source_code)
-# target_code = Optimizer().optimize(target_code)
+target_code = Optimizer().optimize(target_code)
 
 for instruction in target_code:
     print(instruction)
