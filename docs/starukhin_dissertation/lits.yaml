@@ -167,8 +167,6 @@ alu_haris:
     publisher:
       name: ДМК Пресс
 
-
-
 fpn_haris:
   type: chapter
   title: "Числа с плавающей точкой"
