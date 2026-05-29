@@ -5,15 +5,16 @@
   show ref: it => in-ref.update(true) + it + in-ref.update(false)
   let sup(fig, ref) = (supplement: context if in-ref.get() { ref } else { fig })
   show figure.where(kind: image): set figure(..sup("Рис.", "рис."))
-  show figure.where(kind: image): set figure.caption(separator: [ . ])
+  show figure.where(kind: image): set figure.caption(separator: [. ])
   show figure.where(kind: table): set figure(..sup("Таблица", "табл."))
-  show figure.where(kind: table): set figure.caption(position: top, separator: [ . ])
+  show figure.where(kind: table): set figure.caption(position: top, separator: [. ])
   show figure.caption.where(kind: table): set align(right)
   show figure.where(kind: raw): set figure(..sup("Листинг", "лист."))
-  show figure.where(kind: raw): set figure.caption(separator: [ . ])
+  show figure.where(kind: raw): set figure.caption(separator: [. ])
   show raw: set text(font: "New Computer Modern", size: 14pt)
   show figure: set block(breakable: true)
   show heading: set align(center)
+  show heading: set block(below: line_margin)
   show heading.where(level: 2): it => {text(style: "italic", weight: "bold", it)}
   show heading.where(level: 3): it => {align(left, text(style: "italic", weight: "regular", it))}
   show heading.where(level: 4): it => {align(left, text(style: "italic", weight: "regular", it))}
@@ -28,6 +29,8 @@
 #set text(
     font: "New Computer Modern",
     size: 14pt,
+    lang: "ru",
+    hyphenate: false
 )
 #set math.equation(numbering: "(1)")
 
@@ -42,7 +45,6 @@
 )
 
 #set heading(numbering: "1.")
-#set text(lang: "ru")
 
 #include "title.typ"
 
