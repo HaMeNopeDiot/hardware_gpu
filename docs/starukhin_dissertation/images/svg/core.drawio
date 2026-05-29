@@ -1,6 +1,6 @@
-<mxfile host="Electron">
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
   <diagram name="Страница-1" id="jzah9mcNwF3jyrg3DA8Y">
-    <mxGraphModel dx="190" dy="111" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="auto">
+    <mxGraphModel dx="679" dy="461" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="simple">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -187,6 +187,9 @@
         </mxCell>
         <mxCell id="15qTdpBT1IdQSAM-EPcB-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=5;" value="pc_val" vertex="1">
           <mxGeometry height="21" width="28" x="209" y="536" as="geometry" />
+        </mxCell>
+        <mxCell id="Bhh3K6UGckDzDXp9OzoR-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="FSM" vertex="1">
+          <mxGeometry height="55" width="68" x="383" y="480" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
