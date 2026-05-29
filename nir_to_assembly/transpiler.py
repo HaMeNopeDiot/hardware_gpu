@@ -68,8 +68,6 @@ class Transpiler:
             if callable(method):
                 method(instr)
 
-        self._add_instruction("ret", [])
-
         return self.target_code
 
     # NIR instructions below

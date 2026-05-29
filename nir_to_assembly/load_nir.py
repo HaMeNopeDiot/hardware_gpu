@@ -14,6 +14,7 @@ lark_grammar = ""
 with open("lark.g4", "r") as file:
     lark_grammar = file.read()
 
+from basic_block_generation import BasicBlockGenerator
 from lark import Lark
 from nir_visitor import NirCodeLoader
 from optimizer import Optimizer
@@ -24,6 +25,16 @@ parser = Lark(lark_grammar, ambiguity="explicit")
 source_code = NirCodeLoader().transform(parser.parse(source_code))
 target_code = Transpiler().transpile(source_code)
 target_code = Optimizer().optimize(target_code)
+generator = BasicBlockGenerator()
+target_code = generator.generate(target_code)
 
-for instruction in target_code:
-    print(instruction)
+for i in range(len(target_code)):
+    print(f"{target_code[i]}")
+
+
+print("\n\n")
+print(f"Storage Registers: \n{generator.storage_registers}")
+print(f"Storage memory: \n{generator.storage_memory}")
+print(f"Storage stack: \n{generator.storage_stack}")
+for i in range(len(generator.registers)):
+    print(f"{i:<2} {generator.registers[i]}")

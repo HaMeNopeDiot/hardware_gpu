@@ -26,7 +26,7 @@ class NirCodeLoader(Transformer):
         return tree.value[1:]
 
     def LITERAL(self, tree):
-        return tree
+        return tree.value
         if "0x" in tree:
             return int(tree, base=16)
         elif "." in tree:
