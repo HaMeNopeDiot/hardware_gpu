@@ -169,3 +169,10 @@ dragon_book:
     - Jeffrey D. Ullman
   publisher:
     name: Pearson Education, Inc
+
+systemverilogstandard:
+  type: Book
+  title: IEEE Standard for SystemVerilog - Unified Hardware Design, Specificatrion, and Verification Language
+  author:
+    - IEEE Computer Society
+    - IEEE Standards Association Corporate Advisory Group
