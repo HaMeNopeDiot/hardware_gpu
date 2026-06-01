@@ -222,7 +222,7 @@ isa_wiki:
   title: Instruction Set Architecture
   url: https://en.wikipedia.org/wiki/Instruction_set_architecture
 
-guide_to_risc_proccessors:
+guide_to_risc_processors:
   type: chapter
   title: "RISC Principles"
   chapter: "3"
