@@ -70,8 +70,13 @@
 #include "intro.typ"
 #pagebreak()
 #include "contents.typ"
+
+#set heading(numbering: none)
 #pagebreak()
 #include "conclusion.typ"
 
 #pagebreak()
 #include "literature.typ"
+
+#pagebreak()
+#include "appendix.typ"
