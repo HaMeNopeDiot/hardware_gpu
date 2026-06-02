@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
   <diagram name="Страница-1" id="pah2SJQmmB-fadAgyysU">
-    <mxGraphModel dx="620" dy="421" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="328" dy="223" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -337,9 +337,10 @@
             <mxPoint as="offset" />
             <Array as="points">
               <mxPoint x="508" y="537" />
+              <mxPoint x="508" y="532" />
             </Array>
             <mxPoint x="488" y="537.11" as="sourcePoint" />
-            <mxPoint x="508" y="527" as="targetPoint" />
+            <mxPoint x="518" y="532" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
