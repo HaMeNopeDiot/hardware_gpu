@@ -1,5 +1,20 @@
-all: create_build_dir
-	typst compile main.typ build/diploma.pdf;
+DIPLOMA = build/diploma.pdf
+PRESENTATION = build/presentation.pdf
+PRES_MAIN = presentation/main.typ
+DIP_MAIN = main.typ
+
+all: create_build_dir $(DIPLOMA) $(PRESENTATION)
 
 create_build_dir:
 	mkdir -p build
+	
+$(DIPLOMA): $(DIP_MAIN)
+	typst compile $< $@;
+
+$(PRESENTATION): $(PRES_MAIN)
+	typst compile $< $@ --root presentation;
+
+.PHONY: clean
+
+clean:
+	rm -rf build
