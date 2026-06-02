@@ -1,0 +1,212 @@
+li sp, stack_base
+li x3, stack_size
+mul x3, x3, v_id
+add sp, x3, sp
+li x3, in_position_base
+li x4, in_position_stride
+mul x4, v_id, x4
+add x3, x3, x4
+lw x4, 0(x3)
+lw x5, 4(x3)
+lw x6, 8(x3)
+lw x3, 12(x3)
+li x7, in_normal_base
+li x8, in_normal_stride
+mul x8, v_id, x8
+add x7, x7, x8
+lw x8, 0(x7)
+lw x9, 4(x7)
+lw x7, 8(x7)
+li x10, in_color_base
+li x11, in_color_stride
+mul x11, v_id, x11
+add x10, x10, x11
+lw x11, 0(x10)
+lw x12, 4(x10)
+lw x10, 8(x10)
+li x13, 0x40000000
+li x14, 0x41a00000
+li x15, 0x00000040
+li x16, ubo_base
+add x15, x16, x15
+lw x17, 0(x15)
+lw x18, 4(x15)
+lw x19, 8(x15)
+lw x15, 12(x15)
+li x20, 0x00000050
+add x20, x16, x20
+lw x21, 0(x20)
+lw x22, 4(x20)
+lw x23, 8(x20)
+lw x20, 12(x20)
+li x24, 0x00000060
+add x24, x16, x24
+lw x25, 0(x24)
+lw x26, 4(x24)
+lw x27, 8(x24)
+lw x24, 12(x24)
+li x28, 0x00000070
+add x28, x16, x28
+lw x29, 0(x28)
+lw x30, 4(x28)
+lw x31, 8(x28)
+lw x28, 12(x28)
+fmul x29, x29, x3
+fmul x30, x30, x3
+fmul x31, x31, x3
+fmul x28, x28, x3
+fmul x25, x25, x6
+fmul x26, x26, x6
+fmul x27, x27, x6
+fmul x24, x24, x6
+fadd x25, x25, x29
+fadd x26, x26, x30
+fadd x27, x27, x31
+fadd x24, x24, x28
+fmul x21, x21, x5
+fmul x22, x22, x5
+fmul x23, x23, x5
+fmul x20, x20, x5
+fadd x21, x21, x25
+fadd x22, x22, x26
+fadd x23, x23, x27
+fadd x20, x20, x24
+fmul x17, x17, x4
+fmul x18, x18, x4
+fmul x19, x19, x4
+fmul x15, x15, x4
+fadd x17, x17, x21
+fadd x18, x18, x22
+fadd x19, x19, x23
+fadd x15, x15, x20
+li x20, 0x00000080
+add x20, x16, x20
+lw x21, 0(x20)
+lw x22, 4(x20)
+lw x20, 8(x20)
+li x23, 0x00000090
+add x23, x16, x23
+lw x24, 0(x23)
+lw x25, 4(x23)
+lw x23, 8(x23)
+li x26, 0x000000a0
+add x26, x16, x26
+lw x27, 0(x26)
+lw x28, 4(x26)
+lw x26, 8(x26)
+fmul x27, x27, x7
+fmul x28, x28, x7
+fmul x7, x26, x7
+fmul x24, x24, x9
+fmul x25, x25, x9
+fmul x9, x23, x9
+fadd x23, x24, x27
+fadd x24, x25, x28
+fadd x7, x9, x7
+fmul x9, x21, x8
+fmul x21, x22, x8
+fmul x8, x20, x8
+fadd x9, x9, x23
+fadd x20, x21, x24
+fadd x7, x8, x7
+lw x8, 0(x16)
+lw x21, 4(x16)
+lw x22, 8(x16)
+lw x23, 12(x16)
+li x24, 0x00000010
+add x24, x16, x24
+lw x25, 0(x24)
+lw x26, 4(x24)
+lw x27, 8(x24)
+lw x24, 12(x24)
+li x28, 0x00000020
+add x28, x16, x28
+lw x29, 0(x28)
+lw x30, 4(x28)
+lw x31, 8(x28)
+lw x28, 12(x28)
+sw x15, 0(sp)
+li x15, 0x00000030
+add x15, x16, x15
+lw x16, 0(x15)
+sw x19, 4(sp)
+lw x19, 4(x15)
+sw x18, 8(sp)
+lw x18, 8(x15)
+lw x15, 12(x15)
+fmul x16, x16, x3
+fmul x19, x19, x3
+fmul x18, x18, x3
+fmul x3, x15, x3
+fmul x15, x29, x6
+fmul x29, x30, x6
+fmul x30, x31, x6
+fmul x6, x28, x6
+fadd x15, x15, x16
+fadd x16, x29, x19
+fadd x18, x30, x18
+fadd x3, x6, x3
+fmul x6, x25, x5
+fmul x19, x26, x5
+fmul x25, x27, x5
+fmul x5, x24, x5
+fadd x6, x6, x15
+fadd x15, x19, x16
+fadd x16, x25, x18
+fadd x3, x5, x3
+fmul x5, x8, x4
+fmul x8, x21, x4
+fmul x18, x22, x4
+fmul x4, x23, x4
+fadd x5, x5, x6
+fadd x6, x8, x15
+fadd x8, x18, x16
+fadd x3, x4, x3
+fdiv x4, x5, x3
+fdiv x5, x6, x3
+fdiv x3, x8, x3
+fneg x4, x4
+fneg x5, x5
+fneg x3, x3
+fadd x4, x13, x4
+fadd x5, x13, x5
+fadd x3, x14, x3
+fmul x6, x3, x3
+fmul x8, x5, x5
+fadd x6, x6, x8
+fmul x8, x4, x4
+fadd x6, x6, x8
+fsqrt x6, x6
+fdiv x4, x4, x6
+fdiv x5, x5, x6
+fdiv x3, x3, x6
+fmul x3, x7, x3
+fmul x5, x20, x5
+fadd x3, x3, x5
+fmul x4, x9, x4
+fadd x3, x3, x4
+fmax x3, zero, x3
+fmul x4, x11, x3
+fmul x5, x12, x3
+fmul x3, x10, x3
+li x6, 0x3f800000
+li x7, vVaryingColor_base
+li x8, vVaryingColor_stride
+mul x8, v_id, x8
+add x7, x7, x8
+sw x4, 0(x7)
+sw x5, 4(x7)
+sw x3, 8(x7)
+sw x6, 12(x7)
+li x3, .gl_Position_base
+li x4, .gl_Position_stride
+mul x4, v_id, x4
+add x3, x3, x4
+sw x17, 0(x3)
+lw x4, 8(sp)
+sw x4, 4(x3)
+lw x4, 4(sp)
+sw x4, 8(x3)
+lw x4, 0(sp)
+sw x4, 12(x3)
+ret
