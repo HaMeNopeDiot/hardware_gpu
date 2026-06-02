@@ -19,6 +19,18 @@ c_programming_language:
   title: Язык программирования Си
   author: ["Брайан Керниган", "Деннис Ритчи"]
 
+language_classes:
+  type: Book
+  title: Introduction to Compilers and Language Design Second Edition
+  author:
+    - Prof. Douglas Thain
+  url: http://compilerbook.org
+
+gcc:
+  type: Web
+  title: GCC, the GNU Compiler Collection
+  url: https://gcc.gnu.org/
+
 flynn:
   type: Article
   title: Some Computer Organizations and Their Effectiveness
