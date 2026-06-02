@@ -1,4 +1,4 @@
-#let line_margin = 1.5em
+#let line_margin = 1em
 
 #let template(doc) = {
   let in-ref = state("in-ref", false)
