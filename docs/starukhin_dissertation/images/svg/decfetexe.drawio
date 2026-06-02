@@ -1,31 +1,40 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
   <diagram name="Страница-1" id="NCBinj6hSSvIZLYwvK5y">
-    <mxGraphModel dx="570" dy="387" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="679" dy="461" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="IQErcy7-kcQAirzN5IRM-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;dashed=1;verticalAlign=top;" value="Исполняющие блоки" vertex="1">
-          <mxGeometry height="100" width="170" x="310" y="630" as="geometry" />
+          <mxGeometry height="110" width="170" x="310" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Память" vertex="1">
+        <mxCell id="PbM2AOCR9R4myeqma9dM-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#FFD99C;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="327" y="656" as="geometry" />
+        </mxCell>
+        <mxCell id="PbM2AOCR9R4myeqma9dM-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#FFD99C;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="323" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="PbM2AOCR9R4myeqma9dM-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#FFD99C;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="319" y="664" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#B0FFDD;" value="Память инструкций" vertex="1">
           <mxGeometry height="60" width="170" x="310" y="300" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" value="TU" vertex="1">
-          <mxGeometry height="60" width="100" x="320" y="660" as="geometry" />
+        <mxCell id="IQErcy7-kcQAirzN5IRM-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#FFD99C;" value="TU" vertex="1">
+          <mxGeometry height="60" width="90" x="315" y="668" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Блок захвата инструкций (Fetcher)" vertex="1">
+        <mxCell id="IQErcy7-kcQAirzN5IRM-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#D6ECFF;" value="Блок захвата инструкций (Fetcher)" vertex="1">
           <mxGeometry height="60" width="170" x="310" y="410" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Блок декодирования инструкций (Decoder)" vertex="1">
+        <mxCell id="IQErcy7-kcQAirzN5IRM-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#D6ECFF;" value="Блок декодирования инструкций (Decoder)" vertex="1">
           <mxGeometry height="60" width="170" x="310" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="FPU" vertex="1">
-          <mxGeometry height="30" width="30" x="330" y="680" as="geometry" />
+        <mxCell id="IQErcy7-kcQAirzN5IRM-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#FFB8B8;" value="FPU" vertex="1">
+          <mxGeometry height="30" width="30" x="323" y="694" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ALU" vertex="1">
-          <mxGeometry height="30" width="30" x="375" y="680" as="geometry" />
+        <mxCell id="IQErcy7-kcQAirzN5IRM-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#FFB8B8;" value="ALU" vertex="1">
+          <mxGeometry height="30" width="30" x="368" y="694" as="geometry" />
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="LSU" vertex="1">
+        <mxCell id="IQErcy7-kcQAirzN5IRM-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#FFCCFF;" value="LSU" vertex="1">
           <mxGeometry height="60" width="40" x="430" y="660" as="geometry" />
         </mxCell>
         <mxCell id="IQErcy7-kcQAirzN5IRM-14" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-2" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-4" value="">
@@ -46,7 +55,7 @@
             <mxPoint x="390" y="650" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;" value="Регистровая карта (Regmap)" vertex="1">
+        <mxCell id="IQErcy7-kcQAirzN5IRM-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;gradientColor=none;gradientDirection=east;fillColor=#B0FFDD;" value="Регистры управления и статусов (CSR)" vertex="1">
           <mxGeometry height="170" width="110" x="140" y="410" as="geometry" />
         </mxCell>
         <mxCell id="IQErcy7-kcQAirzN5IRM-17" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-10" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-19" value="">
@@ -55,7 +64,7 @@
             <mxPoint x="230" y="680" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="IQErcy7-kcQAirzN5IRM-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="PC" vertex="1">
+        <mxCell id="IQErcy7-kcQAirzN5IRM-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#B0FFDD;" value="PC" vertex="1">
           <mxGeometry height="30" width="30" x="180" y="540" as="geometry" />
         </mxCell>
         <mxCell id="IQErcy7-kcQAirzN5IRM-21" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-19" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.995;exitY=0.181;exitDx=0;exitDy=0;exitPerimeter=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-2" value="">
