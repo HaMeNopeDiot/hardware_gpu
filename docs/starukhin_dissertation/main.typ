@@ -23,7 +23,6 @@
   show heading.where(level: 7): it => {align(left, text(style: "italic", weight: "regular", it))}
   doc
 }
-
 #show: template
 
 #set text(
@@ -59,6 +58,7 @@
     right: 1.5cm,
     left: 3cm,
   ),
+  paper: "a4"
 )
 
 #outline(
