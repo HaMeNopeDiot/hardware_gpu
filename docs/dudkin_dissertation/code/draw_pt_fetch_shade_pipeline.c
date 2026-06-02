@@ -57,15 +57,10 @@ bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *ve
 
 
 static void nir_deref_instr_handler(nir_deref_instr * deref_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
-    if (deref_instr->deref_type != nir_deref_type_var) {
-        fprintf(stderr, "Ne znayu takoi deref_type: %d\n", deref_instr->deref_type);
-        exit(0);
-    }
     int location = deref_instr->var->data.driver_location;
     int offset = buffer_offset;
     uint32_t *map = (uint32_t *) vbuffer->map;
     uint32_t *data_offset = map + offset / 4;
-    printf("driver location: %d\n", deref_instr->var->data.driver_location);
 
     uint32_t * temp = data_offset + vertex_id;
     inresults_save_new(inresults, (float*)&temp, 1);
@@ -649,23 +644,13 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
          elts = fetch_info->elts;
       }
 
-      clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
-
-      /* Run vertex fetch shader */
-      clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
-                                                &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
-                                                llvm_vert_info.verts,
-                                                draw->pt.user.vbuffer,
-                                                fetch_info->count,
-                                                start,
-                                                fpme->vertex_size,
-                                                draw->pt.vertex_buffer,
-                                                draw->instance_id,
-                                                vertex_id_offset,
-                                                draw->start_instance,
-                                                elts,
-                                                draw->pt.user.drawid,
-                                                draw->pt.user.viewid);
+      clipped = interpret_nir(vs->state.ir.nir,
+                              fetch_info->count,
+                              llvm_vert_info.verts,
+                              draw->pt.user.vbuffer,
+                              draw->pt.vertex_buffer->buffer_offset,
+                              vertex_id_offset,
+                              draw);
 
       /* Finished with fetch and vs */
       fetch_info = NULL;

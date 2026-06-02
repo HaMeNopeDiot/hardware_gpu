@@ -25,3 +25,7 @@
   sourcecode(lang: "python")[#raw(read("code/draw_pt_fetch_shade_pipeline.c"))]
   , caption: [Листинг файла draw_pt_fetch_shade_pipeline.c]
 )
+
+= Приложение 4
+
+#figure(image("assets/vkcube_fig0.png"), caption: [Работа приложения vkcube с использованием интерпретатора NIR])<vkcube_fig0>

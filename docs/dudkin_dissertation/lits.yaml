@@ -36,12 +36,13 @@ haris:
   title: Цифровая схемотехника и архитектура компьютера
   author:
     - Дэвид М. Хэррис
+  editor:
     - Сара Л. Хэррис
   publisher:
     name: Morgan Kaufman
 
 mesa:
-  type: Repository
+  type: Web
   title: Mesa 3D
   url: https://gitlab.freedesktop.org/mesa/mesa
 
@@ -66,7 +67,7 @@ tgsi_doc:
   url: https://docs.mesa3d.org/gallium/tgsi.html
 
 vulkan_doc:
-  type: Repository
+  type: Web
   title: Vulkan Docs
   url: https://github.com/KhronosGroup/Vulkan-Docs
 
@@ -154,3 +155,24 @@ nir_vs_tgsi:
   type: Article
   title: Running The RadeonSI NIR Back-End With Mesa 19.1 Git
   url: https://www.phoronix.com/review/radeonsi-nir-2019
+
+vkcube_git:
+   type: Web
+   title: vkcube
+   url:
+     value: https://github.com/krh/vkcube
+     date: 2026-05-29
+
+guide_to_risc_proccessors:
+  type: chapter
+  title: "RISC Principles"
+  author:
+    - "Сиварама П. Дандамуди"
+  chapter: "3"
+  page-range: 39-44
+  parent:
+    type: Book
+    title: "Guide to RISC Processors for Programmers and Engineers"
+    publisher:
+      name: Springer
+    date: "2005"
