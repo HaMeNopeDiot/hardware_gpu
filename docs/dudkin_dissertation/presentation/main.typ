@@ -157,7 +157,13 @@
 
 #slide[
   == Запуск реального приложения с использованием интерпретатора
-  #align(center, image("vkcube.png", height: 75%))
+  #grid(
+    columns: 2,
+    gutter: 2mm,
+    [#image("vkcube.png", height: 75%)],
+    [#image("vkcube1.png", height: 75%)]
+  )
+
 ]
 
 #slide[
