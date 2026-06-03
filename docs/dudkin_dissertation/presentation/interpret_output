@@ -1,0 +1,137 @@
+vendor id 10005, device name interpret_nir
+type: deref_type_var, dst: 0, src: 0
+type: intrinsic, dst: 1, src0: 0, src1: 246338544
+type: deref_type_var, dst: 2, src: 0
+type: intrinsic, dst: 3, src0: 2, src1: 246338544
+type: deref_type_var, dst: 4, src: 0
+type: intrinsic, dst: 5, src0: 4, src1: 246338544
+type: load_const, dst: 6, src: 2.000000
+type: load_const, dst: 7, src: 0.000000
+type: load_const, dst: 8, src: 0.000000
+type: load_const, dst: 9, src: 0.000000
+type: intrinsic, dst: 10, src0: 8, src1: 246338544
+type: intrinsic, dst: 11, src0: 10, src1: 9
+type: load_const, dst: 12, src: 0.000000
+type: intrinsic, dst: 13, src0: 10, src1: 12
+type: load_const, dst: 14, src: 0.000000
+type: intrinsic, dst: 15, src0: 10, src1: 14
+type: load_const, dst: 16, src: 0.000000
+type: intrinsic, dst: 17, src0: 10, src1: 16
+type: fmul, dst: 18, src0: 17, src1: 1
+type: fmul, dst: 19, src0: 17, src1: 1
+type: fmul, dst: 20, src0: 17, src1: 1
+type: fmul, dst: 21, src0: 17, src1: 1
+type: fmul, dst: 22, src0: 15, src1: 1
+type: fmul, dst: 23, src0: 15, src1: 1
+type: fmul, dst: 24, src0: 15, src1: 1
+type: fmul, dst: 25, src0: 15, src1: 1
+type: fadd, dst: 26, src0: 22, src1: 18
+type: fadd, dst: 27, src0: 23, src1: 19
+type: fadd, dst: 28, src0: 24, src1: 20
+type: fadd, dst: 29, src0: 25, src1: 21
+type: fmul, dst: 30, src0: 13, src1: 1
+type: fmul, dst: 31, src0: 13, src1: 1
+type: fmul, dst: 32, src0: 13, src1: 1
+type: fmul, dst: 33, src0: 13, src1: 1
+type: fadd, dst: 34, src0: 30, src1: 26
+type: fadd, dst: 35, src0: 31, src1: 27
+type: fadd, dst: 36, src0: 32, src1: 28
+type: fadd, dst: 37, src0: 33, src1: 29
+type: fmul, dst: 38, src0: 11, src1: 1
+type: fmul, dst: 39, src0: 11, src1: 1
+type: fmul, dst: 40, src0: 11, src1: 1
+type: fmul, dst: 41, src0: 11, src1: 1
+type: fadd, dst: 42, src0: 38, src1: 34
+type: fadd, dst: 43, src0: 39, src1: 35
+type: fadd, dst: 44, src0: 40, src1: 36
+type: fadd, dst: 45, src0: 41, src1: 37
+type: load_const, dst: 46, src: 0.000000
+type: intrinsic, dst: 47, src0: 10, src1: 46
+type: load_const, dst: 48, src: 0.000000
+type: intrinsic, dst: 49, src0: 10, src1: 48
+type: load_const, dst: 50, src: 0.000000
+type: intrinsic, dst: 51, src0: 10, src1: 50
+type: fmul, dst: 52, src0: 51, src1: 3
+type: fmul, dst: 53, src0: 51, src1: 3
+type: fmul, dst: 54, src0: 51, src1: 3
+type: fmul, dst: 55, src0: 49, src1: 3
+type: fmul, dst: 56, src0: 49, src1: 3
+type: fmul, dst: 57, src0: 49, src1: 3
+type: fadd, dst: 58, src0: 55, src1: 52
+type: fadd, dst: 59, src0: 56, src1: 53
+type: fadd, dst: 60, src0: 57, src1: 54
+type: fmul, dst: 61, src0: 47, src1: 3
+type: fmul, dst: 62, src0: 47, src1: 3
+type: fmul, dst: 63, src0: 47, src1: 3
+type: fadd, dst: 64, src0: 61, src1: 58
+type: fadd, dst: 65, src0: 62, src1: 59
+type: fadd, dst: 66, src0: 63, src1: 60
+type: intrinsic, dst: 67, src0: 10, src1: 7
+type: load_const, dst: 68, src: 0.000000
+type: intrinsic, dst: 69, src0: 10, src1: 68
+type: load_const, dst: 70, src: 0.000000
+type: intrinsic, dst: 71, src0: 10, src1: 70
+type: load_const, dst: 72, src: 0.000000
+type: intrinsic, dst: 73, src0: 10, src1: 72
+type: fmul, dst: 74, src0: 73, src1: 1
+type: fmul, dst: 75, src0: 73, src1: 1
+type: fmul, dst: 76, src0: 73, src1: 1
+type: fmul, dst: 77, src0: 73, src1: 1
+type: fmul, dst: 78, src0: 71, src1: 1
+type: fmul, dst: 79, src0: 71, src1: 1
+type: fmul, dst: 80, src0: 71, src1: 1
+type: fmul, dst: 81, src0: 71, src1: 1
+type: fadd, dst: 82, src0: 78, src1: 74
+type: fadd, dst: 83, src0: 79, src1: 75
+type: fadd, dst: 84, src0: 80, src1: 76
+type: fadd, dst: 85, src0: 81, src1: 77
+type: fmul, dst: 86, src0: 69, src1: 1
+type: fmul, dst: 87, src0: 69, src1: 1
+type: fmul, dst: 88, src0: 69, src1: 1
+type: fmul, dst: 89, src0: 69, src1: 1
+type: fadd, dst: 90, src0: 86, src1: 82
+type: fadd, dst: 91, src0: 87, src1: 83
+type: fadd, dst: 92, src0: 88, src1: 84
+type: fadd, dst: 93, src0: 89, src1: 85
+type: fmul, dst: 94, src0: 67, src1: 1
+type: fmul, dst: 95, src0: 67, src1: 1
+type: fmul, dst: 96, src0: 67, src1: 1
+type: fmul, dst: 97, src0: 67, src1: 1
+type: fadd, dst: 98, src0: 94, src1: 90
+type: fadd, dst: 99, src0: 95, src1: 91
+type: fadd, dst: 100, src0: 96, src1: 92
+type: fadd, dst: 101, src0: 97, src1: 93
+type: fdiv, dst: 102, src0: 98, src1: 101
+type: fdiv, dst: 103, src0: 99, src1: 101
+type: fdiv, dst: 104, src0: 100, src1: 101
+type: fneg, dst: 105, src0: 102
+type: fneg, dst: 106, src0: 103
+type: fneg, dst: 107, src0: 104
+type: fadd, dst: 108, src0: 6, src1: 105
+type: fadd, dst: 109, src0: 6, src1: 106
+type: fadd, dst: 110, src0: 6, src1: 107
+type: fmul, dst: 111, src0: 110, src1: 110
+type: fmul, dst: 112, src0: 109, src1: 109
+type: fadd, dst: 113, src0: 111, src1: 112
+type: fmul, dst: 114, src0: 108, src1: 108
+type: fadd, dst: 115, src0: 113, src1: 114
+type: fsqrt, dst: 116, src0: 115
+type: fdiv, dst: 117, src0: 108, src1: 116
+type: fdiv, dst: 118, src0: 109, src1: 116
+type: fdiv, dst: 119, src0: 110, src1: 116
+type: fmul, dst: 120, src0: 66, src1: 119
+type: fmul, dst: 121, src0: 65, src1: 118
+type: fadd, dst: 122, src0: 120, src1: 121
+type: fmul, dst: 123, src0: 64, src1: 117
+type: fadd, dst: 124, src0: 122, src1: 123
+type: fmax, dst: 125, src0: 7
+type: fmul, dst: 126, src0: 5, src1: 125
+type: fmul, dst: 127, src0: 5, src1: 125
+type: fmul, dst: 128, src0: 5, src1: 125
+type: load_const, dst: 129, src: 1.000000
+type: deref_type_var, dst: 130, src: 0
+type: vec4, dst: 131, src0: 126, src1: 127, src2: 128, src3: 129
+type: intrinsic, dst: 0, src0: 130, src1: 131
+type: deref_type_var, dst: 132, src: 0
+type: vec4, dst: 133, src0: 42, src1: 43, src2: 44, src3: 45
+type: intrinsic, dst: 0, src0: 132, src1: 133
