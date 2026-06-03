@@ -1,28 +1,28 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
   <diagram name="Страница-1" id="jzah9mcNwF3jyrg3DA8Y">
-    <mxGraphModel dx="815" dy="553" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="simple">
+    <mxGraphModel dx="679" dy="461" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="simple">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="15qTdpBT1IdQSAM-EPcB-39" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=#FFFFFF;gradientDirection=north;fillColor=#E6E6E6;" value="Графическое ядро" vertex="1">
           <mxGeometry height="325" width="406" x="153" y="247" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="LSU" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#C1BAEB,#FFFFFF);" value="LSU" vertex="1">
           <mxGeometry height="136" width="68" x="177" y="279" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="TU" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A1A9BB,#FFFFFF);" value="TU" vertex="1">
           <mxGeometry height="30" width="30" x="446" y="279" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="Интерконнект" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFDAE;" value="Интерконнект" vertex="1">
           <mxGeometry height="135" width="103" x="299" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="TU" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A1A9BB,#FFFFFF);" value="TU" vertex="1">
           <mxGeometry height="30" width="30" x="446" y="314" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="TU" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A1A9BB,#FFFFFF);" value="TU" vertex="1">
           <mxGeometry height="30" width="30" x="446" y="349" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="TU" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A1A9BB,#FFFFFF);" value="TU" vertex="1">
           <mxGeometry height="30" width="30" x="446" y="384" as="geometry" />
         </mxCell>
         <mxCell id="15qTdpBT1IdQSAM-EPcB-16" edge="1" parent="1" source="15qTdpBT1IdQSAM-EPcB-11" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=1.002;exitY=0.105;exitDx=0;exitDy=0;exitPerimeter=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;fillColor=default;fontSize=6;" target="15qTdpBT1IdQSAM-EPcB-10" value="lsu2tu">
@@ -55,10 +55,10 @@
             <mxPoint x="269" y="354" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="Fetcher" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D6ECFF;" value="Fetcher" vertex="1">
           <mxGeometry height="55" width="68" x="180" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="Decoder" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D6ECFF;" value="Decoder" vertex="1">
           <mxGeometry height="55" width="68" x="300" y="480" as="geometry" />
         </mxCell>
         <mxCell id="15qTdpBT1IdQSAM-EPcB-24" edge="1" parent="1" source="15qTdpBT1IdQSAM-EPcB-21" style="shape=flexArrow;endArrow=classic;startArrow=none;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;fontSize=6;startFill=0;fillColor=default;" target="15qTdpBT1IdQSAM-EPcB-22" value="inst_reg">
@@ -134,7 +134,7 @@
             <mxPoint x="497" y="294" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="CSR" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A6C0FF,#FFFFFF);" value="CSR" vertex="1">
           <mxGeometry height="55" width="109" x="425" y="480" as="geometry" />
         </mxCell>
         <mxCell id="15qTdpBT1IdQSAM-EPcB-38" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=default;fontSize=6;" value="APB Bus">
@@ -186,7 +186,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A9C4EB;" value="PC" vertex="1">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A6C0FF,#FFFFFF);" value="PC" vertex="1">
           <mxGeometry height="24" width="24" x="428" y="509" as="geometry" />
         </mxCell>
         <mxCell id="15qTdpBT1IdQSAM-EPcB-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=5;" value="pc_val" vertex="1">

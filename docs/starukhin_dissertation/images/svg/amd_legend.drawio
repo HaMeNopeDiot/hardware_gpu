@@ -1,0 +1,37 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
+  <diagram name="Страница-1" id="6FDIYROreeqy4mw_xrV0">
+    <mxGraphModel dx="679" dy="461" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CU" vertex="1">
+          <mxGeometry height="20" width="70" x="170" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Compute Unit" vertex="1">
+          <mxGeometry height="20" width="180" x="240" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Ядро" vertex="1">
+          <mxGeometry height="20" width="240" x="420" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="vGPR" vertex="1">
+          <mxGeometry height="20" width="70" x="170" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Vector General Purpose Register" vertex="1">
+          <mxGeometry height="20" width="180" x="240" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Векторные регистры общего назначения" vertex="1">
+          <mxGeometry height="20" width="240" x="420" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="sGPR" vertex="1">
+          <mxGeometry height="20" width="70" x="170" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Scalar General Purpose Register" vertex="1">
+          <mxGeometry height="20" width="180" x="240" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="ZIYUOfhLWGSujJVYYBJu-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Скалярные регистры общего назначения" vertex="1">
+          <mxGeometry height="20" width="240" x="420" y="570" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

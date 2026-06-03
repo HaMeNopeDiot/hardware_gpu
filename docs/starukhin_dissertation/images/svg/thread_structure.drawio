@@ -7,10 +7,10 @@
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-112" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacing=-15;" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;Thread unit (TU)&lt;/font&gt;" vertex="1">
           <mxGeometry height="171" width="255" x="332" y="478" as="geometry" />
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-1" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=#000000;labelBackgroundColor=none;" value="&lt;span style=&quot;&quot;&gt;&lt;font style=&quot;&quot;&gt;FPU&lt;/font&gt;&lt;/span&gt;" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-1" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=light-dark(#C1BAEB,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=#000000;labelBackgroundColor=none;" value="&lt;span style=&quot;&quot;&gt;&lt;font style=&quot;&quot;&gt;FPU&lt;/font&gt;&lt;/span&gt;" vertex="1">
           <mxGeometry height="50" width="50" x="343" y="501" as="geometry" />
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-3" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=#000000;labelBackgroundColor=none;" value="&lt;span style=&quot;&quot;&gt;&lt;font style=&quot;&quot;&gt;Regfile&lt;/font&gt;&lt;/span&gt;" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-3" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=light-dark(#A6C0FF,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=#000000;labelBackgroundColor=none;" value="&lt;span style=&quot;&quot;&gt;&lt;font style=&quot;&quot;&gt;Regfile&lt;/font&gt;&lt;/span&gt;" vertex="1">
           <mxGeometry height="50" width="50" x="438" y="501" as="geometry" />
         </mxCell>
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-12" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;fontColor=light-dark(#000000,#000000);labelBackgroundColor=none;strokeColor=light-dark(#000000,#000000);endSize=3.893548387096774;startSize=3.3274193548387094;strokeWidth=1;startWidth=4.516129032258064;endWidth=4.67741935483871;fontSize=7;fillColor=light-dark(#FFFFFF,#FFFFFF);" value="Handshake bus">
@@ -49,7 +49,7 @@
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-52" connectable="0" parent="1" style="group;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;rotation=90;" value="" vertex="1">
           <mxGeometry height="19" width="47" x="500" y="567" as="geometry" />
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-40" parent="Cwwvso7p_kTdC0-_JQVS-52" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);size=10;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacing=-11;rotation=90;" value="" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-40" parent="Cwwvso7p_kTdC0-_JQVS-52" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#C1BAEB;strokeColor=light-dark(#000000,#000000);size=10;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;spacing=-11;rotation=90;" value="" vertex="1">
           <mxGeometry height="18.344827586206897" width="47" as="geometry" />
         </mxCell>
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-44" connectable="0" parent="Cwwvso7p_kTdC0-_JQVS-52" style="group;rotation=90;" value="" vertex="1">
@@ -102,7 +102,7 @@
             <mxPoint x="393" y="521" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-63" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFFFF,#FFFFFF);size=5;direction=south;" value="" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-63" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#A1A9BB,#FFFFFF);size=5;direction=south;" value="" vertex="1">
           <mxGeometry height="28" width="10" x="407" y="552" as="geometry" />
         </mxCell>
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-65" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#000000,#000000);entryX=0.837;entryY=0.259;entryDx=0;entryDy=0;endSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=5;spacing=1;entryPerimeter=0;" target="Cwwvso7p_kTdC0-_JQVS-40" value="alu_instr">
@@ -178,7 +178,7 @@
             <mxPoint x="527" y="548" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-88" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFFFF,#FFFFFF);size=5;direction=south;" value="" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-88" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#A1A9BB,#FFFFFF);size=5;direction=south;" value="" vertex="1">
           <mxGeometry height="28" width="10" x="562" y="542" as="geometry" />
         </mxCell>
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-89" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#000000,#000000);endSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;fontSize=5;spacing=1;targetPerimeterSpacing=0;spacingLeft=0;entryX=0.641;entryY=1.041;entryDx=0;entryDy=0;entryPerimeter=0;" target="Cwwvso7p_kTdC0-_JQVS-88" value="alu_res">
@@ -304,7 +304,7 @@
             <mxPoint x="407" y="570" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Cwwvso7p_kTdC0-_JQVS-105" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFFFF,#FFFFFF);size=5;direction=south;" value="" vertex="1">
+        <mxCell id="Cwwvso7p_kTdC0-_JQVS-105" parent="1" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);fillColor=light-dark(#A1A9BB,#FFFFFF);size=5;direction=south;" value="" vertex="1">
           <mxGeometry height="28" width="10" x="498" y="575" as="geometry" />
         </mxCell>
         <mxCell id="Cwwvso7p_kTdC0-_JQVS-106" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#000000,#000000);endSize=1;labelBackgroundColor=none;fontColor=light-dark(#000000,#000000);labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=5;spacing=1;targetPerimeterSpacing=0;spacingLeft=0;" value="">
