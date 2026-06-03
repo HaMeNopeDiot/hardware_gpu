@@ -157,13 +157,13 @@ alu_haris:
   type: chapter
   title: "Арифметико-логическое устройство"
   chapter: 5.2.4
+  author:
+  - Дэвид М. Хэррис
+  - Сара Л. Хэррис
   page-range: 304-309
   parent:
     type: Book
     title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
-    author:
-      - Дэвид М. Хэррис
-      - Сара Л. Хэррис
     publisher:
       name: ДМК Пресс
 
@@ -171,13 +171,13 @@ fpn_haris:
   type: chapter
   title: "Числа с плавающей точкой"
   chapter: 5.3.2
+  author:
+    - Дэвид М. Хэррис
+    - Сара Л. Хэррис
   page-range: 315-316
   parent:
     type: Book
     title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
-    author:
-      - Дэвид М. Хэррис
-      - Сара Л. Хэррис
     publisher:
       name: ДМК Пресс
 
@@ -209,11 +209,11 @@ cvfpu:
 archi_proc_sys_regfile:
   type: chapter
   title: "Лабораторная работа №3 \"Регистровый файл и память инструкций\""
+  author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
   page-range: 87-90
   parent:
     type: Book
     title: Архитектуры процессорных систем
-    author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
     publisher:
       name: "АО \"РИЦ \"Техносфера\"\""
 
@@ -223,27 +223,27 @@ isa_wiki:
   url: https://en.wikipedia.org/wiki/Instruction_set_architecture
 
 guide_to_risc_processors:
-  type: chapter
-  title: "RISC Principles"
-  chapter: "3"
-  page-range: 39-44
-  parent:
-    type: Book
-    title: "Guide to RISC Processors for Programmers and Engineers"
+    type: chapter
+    title: "RISC Principles"
     author:
-      - Сиварама П. Дандамуди
-    publisher:
-      name: Springer
-    date: "2005"
+        - "Сиварама П. Дандамуди"
+    chapter: "3"
+    page-range: 39-44
+    parent:
+        type: Book
+        title: "Guide to RISC Processors for Programmers and Engineers"
+        publisher:
+            name: Springer
+        date: "2005"
 
 archi_proc_sys_lsu:
   type: chapter
   title: "Лабораторная работа №8 \"Блок загрузки и сохранения\""
+  author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
   page-range: 155-156
   parent:
     type: Book
     title: Архитектуры процессорных систем
-    author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
     publisher:
       name: "АО \"РИЦ \"Техносфера\"\""
 
