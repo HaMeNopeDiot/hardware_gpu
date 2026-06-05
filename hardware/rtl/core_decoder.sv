@@ -29,12 +29,12 @@ module core_decoder
 
 #() (
     /*=======================### COMMON SIGNALS ###===========================*/
-    // input  logic                clk,
-    // input  logic                rst_n,
+    input  logic                clk,
+    input  logic                rst_n,
 
     /*===================### SIGNALS FROM CONTROL UNIT ###====================*/
     input  cmd_t                instr_i,
-    input                       instr_valid,
+    input  logic                instr_valid,
 
     /*=======================### CMD SIGNALS ###==============================*/
     output cmd_union_t          cmd,
