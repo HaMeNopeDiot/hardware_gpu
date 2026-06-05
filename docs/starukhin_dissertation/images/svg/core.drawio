@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
   <diagram name="Страница-1" id="jzah9mcNwF3jyrg3DA8Y">
-    <mxGraphModel dx="983" dy="668" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="simple">
+    <mxGraphModel dx="328" dy="223" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0" adaptiveColors="simple">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -70,13 +70,13 @@
             <mxPoint x="407" y="453" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-25" edge="1" parent="1" source="oCUCU-hAXwPd9wAtvRCC-1" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;fillColor=default;fontSize=6;exitX=1.005;exitY=0.592;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="15qTdpBT1IdQSAM-EPcB-9" value="AHB Bus">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-25" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;fillColor=default;fontSize=6;exitX=1.005;exitY=0.592;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="15qTdpBT1IdQSAM-EPcB-9" value="AHB Bus">
           <mxGeometry height="100" relative="1" width="100" as="geometry">
-            <mxPoint x="234" y="331" as="sourcePoint" />
+            <mxPoint x="209.28999999999996" y="364.31999999999994" as="sourcePoint" />
             <mxPoint x="277" y="332" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="15qTdpBT1IdQSAM-EPcB-26" edge="1" parent="1" source="oCUCU-hAXwPd9wAtvRCC-2" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=default;fontSize=6;exitX=1.024;exitY=0.578;exitDx=0;exitDy=0;exitPerimeter=0;" target="15qTdpBT1IdQSAM-EPcB-21" value="AHB Bus">
+        <mxCell id="15qTdpBT1IdQSAM-EPcB-26" edge="1" parent="1" source="oCUCU-hAXwPd9wAtvRCC-3" style="shape=flexArrow;endArrow=classic;startArrow=classic;html=1;rounded=0;endSize=4.878504672897197;startSize=5.1196261682243;targetPerimeterSpacing=0;sourcePerimeterSpacing=0;startWidth=6.822429906542056;endWidth=6.822429906542056;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=default;fontSize=6;exitX=0.998;exitY=0.812;exitDx=0;exitDy=0;exitPerimeter=0;" target="15qTdpBT1IdQSAM-EPcB-21" value="AHB Bus">
           <mxGeometry height="100" relative="1" width="100" as="geometry">
             <mxPoint x="238" y="491" as="sourcePoint" />
             <mxPoint x="252" y="441" as="targetPoint" />
@@ -195,18 +195,6 @@
         <mxCell id="15qTdpBT1IdQSAM-EPcB-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=5;" value="pc_val" vertex="1">
           <mxGeometry height="21" width="28" x="317" y="519" as="geometry" />
         </mxCell>
-        <mxCell id="oCUCU-hAXwPd9wAtvRCC-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#7EA6E0,#7EA6E0);" value="Data cache" vertex="1">
-          <mxGeometry height="85" width="58" x="151" y="314" as="geometry" />
-        </mxCell>
-        <mxCell id="oCUCU-hAXwPd9wAtvRCC-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#7EA6E0,#7EA6E0);" value="Instruction cache" vertex="1">
-          <mxGeometry height="85" width="58" x="151" y="441" as="geometry" />
-        </mxCell>
-        <mxCell id="oCUCU-hAXwPd9wAtvRCC-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#0000001A,#0000001A);" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="85" width="58" x="151" y="441" as="geometry" />
-        </mxCell>
-        <mxCell id="oCUCU-hAXwPd9wAtvRCC-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#0000001A,#0000001A);" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="85" width="58" x="151" y="314" as="geometry" />
-        </mxCell>
         <mxCell id="oCUCU-hAXwPd9wAtvRCC-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;" value="" vertex="1">
           <mxGeometry height="157" width="497" x="195" y="578" as="geometry" />
         </mxCell>
@@ -302,6 +290,15 @@
         </mxCell>
         <mxCell id="oCUCU-hAXwPd9wAtvRCC-47" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Внутрненний\Внешний блок" vertex="1">
           <mxGeometry height="25" width="168" x="500" y="703" as="geometry" />
+        </mxCell>
+        <mxCell id="RxTSkE2WMeAFz-FbmaEB-1" connectable="0" parent="1" style="group" value="ь" vertex="1">
+          <mxGeometry height="194" width="58" x="151" y="333" as="geometry" />
+        </mxCell>
+        <mxCell id="oCUCU-hAXwPd9wAtvRCC-2" parent="RxTSkE2WMeAFz-FbmaEB-1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#7EA6E0,#7EA6E0);" value="Memory" vertex="1">
+          <mxGeometry height="193" width="58" as="geometry" />
+        </mxCell>
+        <mxCell id="oCUCU-hAXwPd9wAtvRCC-3" parent="RxTSkE2WMeAFz-FbmaEB-1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fillColor=light-dark(#0000001A,#0000001A);" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="193" width="58" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
