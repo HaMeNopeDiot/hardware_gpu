@@ -1,6 +1,9 @@
 // package for creating presentations
 #import "@preview/polylux:0.4.0": *
 
+// package for inserting source code
+#import "@preview/codelst:2.0.2": sourcecode
+
 
 // make the paper dimensions fit for a presentation format and the text larger
 #set page(
@@ -18,14 +21,13 @@
   footer: context [
     #set align(right)
     #set text(size: 14pt, fill: rgb("000000"))
-    // #rect(fill: rgb("444453"), width: 100%)[#counter(page).display("1")]
     #counter(page).display("1")
   ]
 )
 
 #set text(size: 14pt, font: "Times New Roman")
-// #show heading: it => rect(fill: rgb("444444"), [#text(fill: rgb("ffffff"), it)])
 
+// #show heading: it => rect(fill: rgb("444444"), [#text(fill: rgb("ffffff"), it)])
 
 // title page
 #slide[
@@ -139,10 +141,51 @@
 ]
 
 #slide[
-  = Извлечение данных KCacheGrind
-
+  #show raw: set text(size: 5pt)
+  = Извлечение данных
   Чтобы разобраться с принципами работы Mesa3D использовалась утилита KCacheGrind
-  #align(center, image("kcachegrind.png", height: 65%))
+  #align(center, grid(
+    columns: 2,
+    gutter: 1cm,
+    image("kcachegrind.png", height: 65%),
+    // image("mem_dump.png", height: 65%),
+    sourcecode(numbering: none, ```
+    // draw->pt.user.vbuffer contents
+    // modelView
+    3f4b31a9 3e93aaf9 3f0919eb 0
+    3e39677b 3f3a7fc5 bf2921d0 0
+    bf14a8f3 3f1f1169 3f06a937 0
+    0 0 c1000000 3f800000
+
+    // modelViewProjection
+    3fd9b535 3f52f43f bfab6066 bf0919eb
+    3ec6a5ba 400536b1 3fd36a44 3f2921d0
+    bf9f474d 3fe33d72 bfa85385 bf06a937
+    0 0 40a00000 41000000
+
+    // normals are laid as 3 vec4 instances
+    3f4b31a9 3e93aaf9 3f0919eb 0
+    3e39677b 3f3a7fc5 bf2921d0 0
+    bf14a8f3 3f1f1169 3f06a937 0
+
+    // vVertices
+    // front
+    bf800000 bf800000 3f800000
+    3f800000 bf800000 3f800000
+    bf800000 3f800000 3f800000
+    3f800000 3f800000 3f800000
+    //back
+    3f800000 bf800000 bf800000
+    bf800000 bf800000 bf800000
+    3f800000 3f800000 bf800000
+    bf800000 3f800000 bf800000
+    // right
+    3f800000 bf800000 3f800000
+    3f800000 bf800000 bf800000
+    3f800000 3f800000 3f800000
+    3f800000 3f800000 bf800000
+    ```)
+  ))
 ]
 
 #slide[
@@ -168,8 +211,8 @@
   #grid(
     columns: 2,
     gutter: 2mm,
-    [#image("vkcube.png", height: 73%)],
-    [#image("vkcube1.png", height: 73%)]
+    [#rect(image("vkcube.png", height: 73%))],
+    [#rect(image("vkcube1.png", height: 73%))]
   )
 
 ]
