@@ -19,8 +19,8 @@ module core
     import tu_pkg::LSU_CMD;
     import tu_pkg::dw_value_t;
 #(
-    parameter  int unsigned DW               = 64,
-    parameter  int unsigned MEM_AW           = 64,
+    parameter  int unsigned DW               = 32,
+    parameter  int unsigned MEM_AW           = 32,
     parameter  int unsigned TU_REGILE_SZ     = 8,
     parameter  int unsigned TU_LATCH_R_ADDR  = 1,
     parameter  bit          ONLY_LINT        = `ifdef LINT 1 `else 0 `endif,
@@ -95,8 +95,8 @@ region INSTANCES
 //                   *** CORE DECODER ***                    //
 core_decoder #() core_decoder_u (
     //================### COMMON SIGNALS ###=================//
-    // .clk            (clk          ),    // <-
-    // .rst_n          (rst_n        ),    // <-
+    .clk            (clk          ),    // <-
+    .rst_n          (rst_n        ),    // <-
     //===========### SIGNALS FROM CONTROL UNIT ###===========//
     .instr_i        (instr_i      ),    // <-
     .instr_valid    (instr_valid_i),    // <-

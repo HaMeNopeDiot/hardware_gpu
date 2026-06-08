@@ -10,8 +10,8 @@
 /* verilator lint_off UNUSEDSIGNAL */
 interface simple_bus_if
 #(
-	parameter int unsigned DW = 64,
-	parameter int unsigned MEM_AW = 64
+	parameter int unsigned DW = 32,
+	parameter int unsigned MEM_AW = 32
 ) ();
 	logic [DW - 1: 0]        read_data;
 	logic [MEM_AW - 1: 0]    read_address;

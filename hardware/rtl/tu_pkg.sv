@@ -17,7 +17,7 @@ package tu_pkg;
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 8;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
-    localparam int unsigned DW              = 64;
+    localparam int unsigned DW              = 32;
 
     typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
 
@@ -124,30 +124,30 @@ package tu_pkg;
     region TYPE OF COMMANDS FROM DECODER
     //==========================================================================*/
 
-    localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + 3 + DEC_OP_W);
+    localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + DEC_OP_W + 3);
     // fpu
     typedef struct packed {
         op_union_t              operand;         // 5
         regfile_addr_t          a1, a2, a3, ar;  // 3 * 4 = 12
         logic [2:0]             extra;           // 3
-        logic [F_IMM_W - 1: 0]  imm;
+        logic [F_IMM_W - 1: 0]  imm;             //
     } f_cmd_t;
 
 
     localparam int unsigned L_IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W + DEC_OP_W);
     // lsu
     typedef struct packed {
-        op_union_t              operand;
-        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;
-        logic [L_IMM_W - 1: 0]  imm;
+        op_union_t              operand;                        // 5
+        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;    // 3 * 3 = 9
+        logic [L_IMM_W - 1: 0]  imm;                            //
     } l_cmd_t;
 
-    localparam int unsigned U_OFS_IMM_W = REGFILE_AW + DEC_OP_W;
+    localparam int unsigned U_OFS_IMM_W = REGFILE_AW + DEC_OP_W; // + LSU_OP_W
     localparam int unsigned U_IMM_W     = DW - U_OFS_IMM_W;
     // upper imid
     typedef struct packed {
-        op_union_t              operand;
-        regfile_addr_t          rd_addr;
+        // op_union_t              operand; // 5
+        regfile_addr_t          rd_addr; // 3
         logic [U_IMM_W - 1: 0]  imm;
     } u_cmd_t;
 

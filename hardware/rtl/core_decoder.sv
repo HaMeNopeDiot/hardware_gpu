@@ -38,7 +38,7 @@ module core_decoder
 
     /*=======================### CMD SIGNALS ###==============================*/
     output cmd_union_t          cmd,
-    output dec_op_type_e        cmd_op_type,
+    output dec_op_type_e        cmd_op_type, // by this you can get type and valid
 
     /*=========================### SIGNALS TO FPU ###=========================*/
     output thread_command_t     fpu_cmd,
@@ -47,34 +47,69 @@ module core_decoder
     //========================================================================//
 );
 
-always_comb begin
-    if (instr_valid)
-        cmd_op_type = instr_i.op_type;
+// always_comb begin
+//     if (instr_valid)
+//         cmd_op_type = instr_i.op_type;
+//     else
+//         cmd_op_type = NO_CMD;
+// end
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        cmd_op_type <= NO_CMD;
+    else if (instr_valid)
+        cmd_op_type <= instr_i.op_type;
     else
-        cmd_op_type = NO_CMD;
+        cmd_op_type <= NO_CMD;
 end
+
 
 logic  lsu_cmd_valid, upp_cmd_valid;
 assign lsu_cmd_valid    = (instr_valid && instr_i.op_type == LSU_CMD);
 assign upp_cmd_valid    = (instr_valid && instr_i.op_type == UPP_CMD);
 assign fpu_valid        = (instr_valid && instr_i.op_type == FPU_CMD);
 
-assign cmd              = lsu_cmd_valid || upp_cmd_valid? instr_i.cmd: '0;
+// assign cmd              = lsu_cmd_valid || upp_cmd_valid? instr_i.cmd: '0;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        cmd <= '0;
+    else if (lsu_cmd_valid || upp_cmd_valid)
+        cmd <= instr_i.cmd;
+    else
+        cmd <= '0;
+end
 
-always_comb begin
-    if (fpu_valid) begin
-        fpu_cmd.op      = instr_i.cmd.f.operand.fpu_op.t;
-        fpu_cmd.op_mod  = instr_i.cmd.f.operand.fpu_op.mod;
-        fpu_cmd.a1      = instr_i.cmd.f.a1;
-        fpu_cmd.a2      = instr_i.cmd.f.a2;
-        fpu_cmd.a3      = instr_i.cmd.f.a3;
-        fpu_cmd.ar      = instr_i.cmd.f.ar;
-        fpu_cmd.tag     = (tags_t)'(instr_i.cmd.f.imm);
-        fpu_cmd.rnd     = (roundmode_e)'(instr_i.cmd.f.extra);
+// always_comb begin
+//     if (fpu_valid) begin
+//         fpu_cmd.op      = instr_i.cmd.f.operand.fpu_op.t;
+//         fpu_cmd.op_mod  = instr_i.cmd.f.operand.fpu_op.mod;
+//         fpu_cmd.a1      = instr_i.cmd.f.a1;
+//         fpu_cmd.a2      = instr_i.cmd.f.a2;
+//         fpu_cmd.a3      = instr_i.cmd.f.a3;
+//         fpu_cmd.ar      = instr_i.cmd.f.ar;
+//         fpu_cmd.tag     = (tags_t)'(instr_i.cmd.f.imm);
+//         fpu_cmd.rnd     = (roundmode_e)'(instr_i.cmd.f.extra);
+//     end
+//     else begin
+//         fpu_cmd = '0;
+//     end
+// end
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        fpu_cmd <= '0;
+    else if (fpu_valid) begin
+        fpu_cmd.op      <= instr_i.cmd.f.operand.fpu_op.t;
+        fpu_cmd.op_mod  <= instr_i.cmd.f.operand.fpu_op.mod;
+        fpu_cmd.a1      <= instr_i.cmd.f.a1;
+        fpu_cmd.a2      <= instr_i.cmd.f.a2;
+        fpu_cmd.a3      <= instr_i.cmd.f.a3;
+        fpu_cmd.ar      <= instr_i.cmd.f.ar;
+        fpu_cmd.tag     <= (tags_t)'(instr_i.cmd.f.imm);
+        fpu_cmd.rnd     <= (roundmode_e)'(instr_i.cmd.f.extra);
     end
-    else begin
-        fpu_cmd = '0;
-    end
+    else
+        fpu_cmd <= '0;
 end
 
 endmodule

@@ -23,12 +23,18 @@ module thread_unit
     // Types for src/dst/int
 
     import fpnew_pkg::FP64;
+    import fpnew_pkg::FP32;
     import fpnew_pkg::INT64;
+    import fpnew_pkg::INT32;
 
     import fpnew_pkg::RV64D_Xsflt;
+    import fpnew_pkg::RV32F_Xsflt;
     import fpnew_pkg::DEFAULT_NOREGS;
     import fpnew_pkg::THMULTI;
 
+    import fpnew_pkg::fp_format_e;
+    import fpnew_pkg::int_format_e;
+    import fpnew_pkg::fpu_features_t;
 
     // Operation
     import tu_pkg::cmd_union_t;
@@ -58,7 +64,10 @@ module thread_unit
     parameter  int unsigned REGFILE_SIZE = 8,
     localparam int unsigned AW = $clog2(REGFILE_SIZE),
     parameter  bit          LATCH_R_ADDR = 1,
-    parameter  bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif
+    parameter  bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif,
+
+
+    localparam fpu_features_t FPU_FEATURES = DW == 64? RV64D_Xsflt: RV32F_Xsflt
 ) (
     /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                clk,
@@ -263,6 +272,23 @@ end
 assign rs2          = data_rs2;
 assign rs2_valid    = '1;
 
+
+/*============================================================================//
+region INSTANCES HELPERS
+//============================================================================*/
+
+fp_format_e  fp_format_data;
+int_format_e int_format_data;
+
+if (DW == 32) begin: gen_32_dw_format
+    assign fp_format_data   = FP32;
+    assign int_format_data  = INT32;
+end
+else if (DW == 64) begin: gen_64_dw_format
+    assign fp_format_data   = FP64;
+    assign int_format_data  = INT64;
+end
+
 /*============================================================================//
 region INSTANCES
 //============================================================================*/
@@ -356,9 +382,9 @@ if (ONLY_LINT == 0) begin: gen_real_fpu
         .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
         .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
         /*==============### SET FORMAT SIGNALS ###===============*/
-        .src_fmt_i      (FP64),                         // <- (type of incoming data)
-        .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
-        .int_fmt_i      (INT64),                        // <- (type of data, if it int)
+        .src_fmt_i      (fp_format_data),               // <- (type of incoming data)
+        .dst_fmt_i      (fp_format_data),               // <- (type of outcoming data)
+        .int_fmt_i      (int_format_data),              // <- (type of data, if it int)
         /*==============### PROPERTIES SIGNALS ###===============*/
         .vectorial_op_i ('0),                           // <- (vectorial mode)
         .simd_mask_i    ('0),                           // <-
@@ -383,7 +409,7 @@ else begin: gen_dummy_fpu
         fpu_dummy #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
         // Type of FPU configuration. Do not touch
-        .Features       (RV64D_Xsflt),
+        .Features       (FPU_FEATURES),
         .Implementation (DEFAULT_NOREGS),
         .DivSqrtSel     (THMULTI),
         .TagType        (tags_t),
@@ -399,9 +425,9 @@ else begin: gen_dummy_fpu
         .op_i           (dec_cmd.op),                   // <- (type of operation in expression)
         .op_mod_i       (dec_cmd.op_mod),               // <- (alt option for operation type)
         /*==============### SET FORMAT SIGNALS ###===============*/
-        .src_fmt_i      (FP64),                         // <- (type of incoming data)
-        .dst_fmt_i      (FP64),                         // <- (type of outcoming data)
-        .int_fmt_i      (INT64),                        // <- (type of data, if it int)
+        .src_fmt_i      (fp_format_data),               // <- (type of incoming data)
+        .dst_fmt_i      (fp_format_data),               // <- (type of outcoming data)
+        .int_fmt_i      (int_format_data),              // <- (type of data, if it int)
         /*==============### PROPERTIES SIGNALS ###===============*/
         .vectorial_op_i ('0),                           // <- (vectorial mode)
         .simd_mask_i    ('0),                           // <-

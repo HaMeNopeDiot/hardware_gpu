@@ -11,10 +11,10 @@
 
 interface ahb4_bus_if
 #(
-    parameter int unsigned  DW = 64,
-    parameter int unsigned  AW = 64,
+    parameter int unsigned  DW = 32,
+    parameter int unsigned  AW = 32,
     parameter int unsigned  SLAVES = 1,
-	localparam int unsigned BUS_SEL_W = $clog2(SLAVES)
+	localparam int unsigned BUS_SEL_W = $clog2(SLAVES) == 0? 1: $clog2(SLAVES)
 ) ();
 	// select
 	logic [BUS_SEL_W - 1: 0] 	hsel;
@@ -30,18 +30,17 @@ interface ahb4_bus_if
 	// data
 	logic [DW - 1:0]			hwdata;
 	// transfer responce
-	logic						hreadyout;
 	logic						hresp;
 	// data
 	logic [DW - 1: 0]			hrdata;
 
 	modport master (
-		input hreadyout, hresp, hrdata,
-		output hsel, haddr, hwrite, hsize, hburst, hprot, htrans, hmastlock, hready, hwdata
+		input hready, hresp, hrdata,
+		output haddr, hwrite, hsize, hburst, hprot, htrans, hmastlock, hwdata
 	);
 
 	modport slave (
-		output hreadyout, hresp, hrdata,
+		output hresp, hrdata,
 		input hsel, haddr, hwrite, hsize, hburst, hprot, htrans, hmastlock, hready, hwdata
 	);
 
