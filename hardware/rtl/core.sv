@@ -18,6 +18,8 @@ module core
     import tu_pkg::lsu_op_e;
     import tu_pkg::LSU_CMD;
     import tu_pkg::dw_value_t;
+    import tu_pkg::TU_STATE_REQUEST;
+    import tu_pkg::tu_state_e;
 #(
     parameter  int unsigned DW               = 32,
     parameter  int unsigned MEM_AW           = 32,
@@ -36,13 +38,8 @@ module core
 
     simple_bus_if.lsu                   m_if,
 
-    input  logic [THREAD_CNT - 1: 0]    fpu_valid_m,
-    output logic [THREAD_CNT - 1: 0]    fpu_ready_m,
     // simple_hndh_if.slave             fpu_hndh_if,
-    simple_hndh_if.slave                lsu_hndh_if,
-    output thread_info_t                thread_info,
-
-    input  logic [THREAD_W - 1: 0]      thread_sel
+    output thread_info_t                thread_info
     //========================================================================//
 );
 
@@ -66,11 +63,24 @@ assign              lsu_op_valid = lsu_cmd_valid;
 region THREAD INTERCONNECT
 //============================================================================*/
 
+logic [THREAD_W - 1: 0]      thread_sel;
+
 reg_if              rt_if [THREAD_CNT](); // registers thread interface
 reg_if              rl_if ();             // registers lsu interface
 
-thread_info_t        thread_unit_info [THREAD_CNT];
-assign thread_info = thread_unit_info[thread_sel];
+
+thread_info_t        thread_unit_info   [THREAD_CNT];
+tu_state_e           thread_states      [THREAD_CNT];
+assign thread_info = thread_unit_info   [thread_sel];
+
+
+logic lsu_r2_thread [THREAD_CNT];
+for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_lsu_ready_demux
+    assign lsu_r2_thread[i] = lsu_done && (i == thread_sel);
+end
+
+logic  thread_req, lsu_done;
+assign thread_req = thread_states[thread_sel] == TU_STATE_REQUEST;
 
 dw_value_t  rd_arr[THREAD_CNT];
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_arr
@@ -90,6 +100,21 @@ end
 /*============================================================================//
 region INSTANCES
 //============================================================================*/
+
+// ///////////////////////////////////////////////////////// //
+//                  *** CORE ARBITRAGE ***                   //
+core_arbiter #(
+    .THREAD_CNT (THREAD_CNT)
+) core_arbitrage_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk          (clk),                    // <-
+    .rst_n        (rst_n),                  // <-
+    .threads_state(thread_states),          // <-
+    .thread_sel   (thread_sel)              // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
+
 
 // ///////////////////////////////////////////////////////// //
 //                   *** CORE DECODER ***                    //
@@ -127,8 +152,8 @@ core_lsu #(
     //============### SIGNALS FROM MEMORY BUS ###============//
     .m_if              (m_if           ),   // <->
     //================### HANDSHAKE SIGNALS ###==============//
-    .lsu_ready_o       (lsu_hndh_if.ready), // ->
-    .lsu_valid_i       (lsu_hndh_if.valid)  // <-
+    .lsu_ready_o       (lsu_done       ),   // ->
+    .lsu_valid_i       (thread_req     )    // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -150,14 +175,13 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         .cmd_op_type    (cmd_op_type        ),  // <-
         //===============### REGISTER SIGNALS ###================//
         .r_if           (rt_if[i].tu        ),  // <->
+        .lsu_ready_i    (lsu_r2_thread[i]   ),  // <-
         //==================### DEC SIGNALS ###==================//
         .dec_cmd        (fpu_cmd            ),  // <-
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
-        //================### HANDSHAKE SIGNALS ###==============//
-        .fpu_valid_i    (fpu_valid_m[i]     ),  // <-
-        .fpu_ready_o    (fpu_ready_m[i]     ),  // ->
         //==================### OUT SIGNALS ###==================//
-        .thread_info    (thread_unit_info[i])   // ->
+        .thread_info    (thread_unit_info[i]),  // ->
+        .thread_state   (thread_states[i]   )   // ->
         //=======================================================//
     );
     // ///////////////////////////////////////////////////////// //

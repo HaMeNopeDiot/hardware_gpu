@@ -47,13 +47,6 @@ module core_decoder
     //========================================================================//
 );
 
-// always_comb begin
-//     if (instr_valid)
-//         cmd_op_type = instr_i.op_type;
-//     else
-//         cmd_op_type = NO_CMD;
-// end
-
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         cmd_op_type <= NO_CMD;
@@ -78,22 +71,6 @@ always_ff @(posedge clk or negedge rst_n) begin
     else
         cmd <= '0;
 end
-
-// always_comb begin
-//     if (fpu_valid) begin
-//         fpu_cmd.op      = instr_i.cmd.f.operand.fpu_op.t;
-//         fpu_cmd.op_mod  = instr_i.cmd.f.operand.fpu_op.mod;
-//         fpu_cmd.a1      = instr_i.cmd.f.a1;
-//         fpu_cmd.a2      = instr_i.cmd.f.a2;
-//         fpu_cmd.a3      = instr_i.cmd.f.a3;
-//         fpu_cmd.ar      = instr_i.cmd.f.ar;
-//         fpu_cmd.tag     = (tags_t)'(instr_i.cmd.f.imm);
-//         fpu_cmd.rnd     = (roundmode_e)'(instr_i.cmd.f.extra);
-//     end
-//     else begin
-//         fpu_cmd = '0;
-//     end
-// end
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)

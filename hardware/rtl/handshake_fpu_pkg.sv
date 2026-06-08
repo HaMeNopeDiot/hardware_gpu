@@ -14,11 +14,11 @@ package handshake_fpu_pkg;
     localparam int unsigned FSM_FPU_STATE_NUM = 5;
     localparam int unsigned FSM_FPU_STATE_W = $clog2(FSM_FPU_STATE_NUM);
     typedef enum logic [FSM_FPU_STATE_W - 1:0] {
-        FPU_IDLE    = (FSM_FPU_STATE_W)'(0),
-        FPU_PRELOAD = (FSM_FPU_STATE_W)'(1),
-        FPU_LOAD    = (FSM_FPU_STATE_W)'(2), // in_ready_o = 1
-        FPU_PROCESS = (FSM_FPU_STATE_W)'(3), // out_valid_o != 1
-        FPU_RESULT  = (FSM_FPU_STATE_W)'(4)  // out_valid_o = 1
+        FPU_IDLE    = (FSM_FPU_STATE_W)'(0), // nothing suspicious here
+        FPU_PRELOAD = (FSM_FPU_STATE_W)'(1), // thread ready to give, but fpu not ready to get
+        FPU_LOAD    = (FSM_FPU_STATE_W)'(2), // thread ready to give, fpu ready to get
+        FPU_PROCESS = (FSM_FPU_STATE_W)'(3), // fpu calc
+        FPU_RESULT  = (FSM_FPU_STATE_W)'(4)  // fpu ready to give
     } fsm_fpu_state_e;
 
     typedef struct packed {

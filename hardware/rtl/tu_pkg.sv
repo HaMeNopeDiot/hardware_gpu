@@ -14,10 +14,11 @@ package tu_pkg;
     import fpnew_pkg::operation_e;
     import fpnew_pkg::OP_BITS;
 
+    import base_pkg::DW;
+
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 8;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
-    localparam int unsigned DW              = 32;
 
     typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
 
@@ -142,11 +143,11 @@ package tu_pkg;
         logic [L_IMM_W - 1: 0]  imm;                            //
     } l_cmd_t;
 
-    localparam int unsigned U_OFS_IMM_W = REGFILE_AW + DEC_OP_W; // + LSU_OP_W
+    localparam int unsigned U_OFS_IMM_W = REGFILE_AW + LSU_OP_W + DEC_OP_W;
     localparam int unsigned U_IMM_W     = DW - U_OFS_IMM_W;
     // upper imid
     typedef struct packed {
-        // op_union_t              operand; // 5
+        op_union_t              operand; // 5
         regfile_addr_t          rd_addr; // 3
         logic [U_IMM_W - 1: 0]  imm;
     } u_cmd_t;
@@ -183,11 +184,9 @@ package tu_pkg;
     typedef enum logic [CORE_STATE_W - 1: 0] {
         CORE_STATE_FETCH   = 0,
         CORE_STATE_DECODE  = 1,
-        CORE_STATE_REQUEST = 2,
-        CORE_STATE_WAIT    = 3,
-        CORE_STATE_EXECUTE = 4,
-        CORE_STATE_UPDATE  = 5,
-        CORE_STATE_DONE    = 6
+        CORE_STATE_LOAD    = 2,
+        CORE_STATE_EXECUTE = 3,
+        CORE_STATE_STORE   = 4
     } core_state_e;
 
     localparam int unsigned TU_STATE_W = 2;

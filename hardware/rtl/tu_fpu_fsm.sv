@@ -5,7 +5,7 @@
 // Purpose: Thread unit FSM
 //-------------------------------------------------------------------------------//
 
-module tu_fsm
+module tu_fpu_fsm
     import handshake_fpu_pkg::proccess_t;
     import handshake_fpu_pkg::fsm_fpu_state_e;
     // FSM states
@@ -21,10 +21,10 @@ module tu_fsm
     /*===========================### CONTROL SIGNALS ###==========================*/
     input  logic            ready,
     /*==========================### HANDSHAKE SIGNALS ###=========================*/
-    input  logic            in_ready_o,
-    input  logic            out_valid_o,
-    output logic            out_ready_i,
-    output logic            in_valid_i,
+    input  logic            in_ready_o,     // fpu ready to get     (iro) <-
+    input  logic            out_valid_o,    // fpu give valid       (ovo) <-
+    output logic            out_ready_i,    // thread give valid    (ori) ->
+    output logic            in_valid_i,     // thread ready to get  (ivi) ->
     /*===========================### STATUS SIGNALS ###-==========================*/
     output fsm_fpu_state_e  state
     //============================================================================//
@@ -56,11 +56,10 @@ always_comb begin
             if (in_valid_i)
                 if (in_ready_o)
                     state = FPU_LOAD;
+                else if (out_valid_o)
+                    state = FPU_RESULT;
                 else
-                    if (out_valid_o)
-                        state = FPU_RESULT;
-                    else
-                        state = FPU_PRELOAD;
+                    state = FPU_PRELOAD;
             else
                 state = FPU_IDLE;
         end
@@ -83,13 +82,12 @@ always_comb begin
         end
         FPU_RESULT: begin
             if (out_ready_i)
-                if(in_valid_i)
-                    if(in_ready_o)
-                        state = FPU_LOAD;
-                    else
-                        state = FPU_PRELOAD;
-                else
+                if(~in_valid_i)
                     state = FPU_IDLE;
+                else if(in_ready_o)
+                    state = FPU_LOAD;
+                else
+                    state = FPU_PRELOAD;
             else
                 state = FPU_RESULT;
         end

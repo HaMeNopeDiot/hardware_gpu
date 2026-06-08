@@ -3,7 +3,7 @@
 // Author's e-mail:       sniperusus2002@gmail.com
 // ------------------------------------------------------------------------------//
 // Purpose: GPU Core LSU
-// Date: 2026/05
+// Date: 2026/06
 //-------------------------------------------------------------------------------//
 
 /*===================================================================================//
@@ -67,15 +67,14 @@ logic [MEM_AW - 1: 0]   read_addr, write_addr;
 logic read_ready, read_valid, write_ready, write_valid;
 
 assign read_data            =   m_if.read_data;
-assign read_ready           =  m_if.read_ready;
-assign write_ready          = m_if.write_ready;
+assign read_ready           =   m_if.read_ready;
+assign write_ready          =   m_if.write_ready;
 
 assign m_if.read_address    =   read_addr;
-assign m_if.write_address   =  write_addr;
-assign m_if.read_valid      =  read_valid;
-assign m_if.write_valid     = write_valid;
-assign m_if.write_data      =  write_data;
-
+assign m_if.write_address   =   write_addr;
+assign m_if.read_valid      =   read_valid;
+assign m_if.write_valid     =   write_valid;
+assign m_if.write_data      =   write_data;
 
 /*============================================================================//
 region FSM

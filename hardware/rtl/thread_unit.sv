@@ -47,6 +47,13 @@ module thread_unit
     import tu_pkg::thread_info_t;
     import tu_pkg::tu_alu_t;
 
+    // FSM STATE
+    import tu_pkg::tu_state_e;
+    import tu_pkg::TU_STATE_IDLE   ;
+    import tu_pkg::TU_STATE_REQUEST;
+    import tu_pkg::TU_STATE_WAIT   ;
+    import tu_pkg::TU_STATE_DONE   ;
+
     import tu_pkg::U_OFS_IMM_W;
 
 
@@ -73,23 +80,21 @@ module thread_unit
     input  logic                clk,
     input  logic                rst_n,
 
-    /*===========================### LSU SIGNALS ###==========================*/
+    /*===========================### CMD SIGNALS ###==========================*/
     input  cmd_union_t          cmd,
     input  dec_op_type_e        cmd_op_type,
 
-    /*=========================### REGISTER SIGNALS ###=======================*/
+    /*======================### REGISTER SIGNALS (LSU) ###====================*/
     reg_if.tu                   r_if,
+    input logic                 lsu_ready_i,
 
     /*===========================### DEC SIGNALS ###==========================*/
     input  thread_command_t     dec_cmd,
     input  logic                dec_cmd_valid,
 
-    /*=======================### HANDSHAKE SIGNALS ###========================*/
-    input  logic                fpu_valid_i,
-    output logic                fpu_ready_o,
-
     /*===========================### OUT SIGNALS ###==========================*/
-    output thread_info_t        thread_info
+    output thread_info_t        thread_info,
+    output tu_state_e           thread_state
     //========================================================================//
 );
 
@@ -120,6 +125,37 @@ assign  lsu_cmd = lsu_cmd_valid? cmd.l: '0;
 
 u_cmd_t upp_cmd;
 assign  upp_cmd = upp_cmd_valid? cmd.u: '0;
+
+/*============================================================================//
+region FSM
+//============================================================================*/
+tu_state_e next_thread_state;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        thread_state <= TU_STATE_IDLE;
+    else
+        thread_state <= next_thread_state;
+end
+
+always_comb begin
+    case (thread_state)
+        TU_STATE_IDLE:
+            if (lsu_cmd_valid)
+                next_thread_state   = TU_STATE_REQUEST;
+            else
+                next_thread_state   = TU_STATE_IDLE;
+        TU_STATE_REQUEST:
+            if (lsu_ready_i)
+                next_thread_state   = TU_STATE_DONE;
+            else
+                next_thread_state   = TU_STATE_REQUEST;
+        TU_STATE_DONE:
+            next_thread_state       = TU_STATE_IDLE;
+        default:
+            next_thread_state       = TU_STATE_IDLE;
+    endcase
+end
+
 
 /*============================================================================//
 region LOGIC
@@ -166,7 +202,7 @@ always_comb begin
         data_w = rd;
         wr_en  = '1;
     end
-    else if (upp_cmd_valid) begin
+    else if (upp_cmd_valid && upp_cmd.operand == '0) begin
         addr_w = upp_cmd.rd_addr;
         data_w = (DW)'(upp_cmd.imm << U_OFS_IMM_W);
         wr_en  = '1;
@@ -238,25 +274,6 @@ region OUT
 //============================================================================*/
 assign  thread_info     = fpu_result.info;
 
-logic   busy_prev;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        busy_prev <= '0;
-    else
-        busy_prev <= busy_o;
-end
-
-logic  done;
-assign done = ~busy_o && busy_prev;
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        fpu_ready_o <= '0;
-    else if (done)
-        fpu_ready_o <= '1;
-    else if (fpu_valid_i)
-        fpu_ready_o <= '0;
-end
 
 always_comb begin
     if(lsu_cmd_valid) begin
@@ -342,7 +359,7 @@ tu_regfile #(
 // ///////////////////////////////////////////////////////// //
 //                      *** CU FSM ***                       //
 // NOTE: write a purpose here
-tu_fsm tu_fsm_u (
+tu_fpu_fsm tu_fpu_fsm_u (
     //================### COMMON SIGNALS ###=================//
     .clk         (clk),             // <-
     .rst_n       (rst_n),           // <-
