@@ -15,9 +15,14 @@ module core_fetcher
     import ahb_pkg::hburst_e;
     import ahb_pkg::HBURST_SINGLE;
     import ahb_pkg::HBURST_INCR;
-
+    import ahb_pkg::HBURST_INCR4;
+    import ahb_pkg::HBURST_INCR8;
+    import ahb_pkg::HBURST_INCR16;
 
     import ahb_pkg::htrans_e;
+    import ahb_pkg::HTRANS_IDLE;
+    import ahb_pkg::HTRANS_NONSEQ;
+    import ahb_pkg::HTRANS_SEQ;
 
     import ahb_pkg::hprot_t;
 
@@ -44,7 +49,8 @@ module core_fetcher
     parameter   int unsigned DW           = 32,
     parameter   int unsigned AW           = 32,
     parameter   int unsigned INST_Q_SZ    = 8,
-    localparam  int unsigned INST_Q_W     = $clog2(INST_Q_SZ)
+    localparam  int unsigned INST_Q_W     = $clog2(INST_Q_SZ),
+    localparam  int unsigned BUFFERABLE   = INST_Q_SZ == 1? HTRANS_BUFE_OFF: HTRANS_BUFE_ON
 
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
@@ -73,7 +79,7 @@ hsize_e     hsize;
 hburst_e    hburst;
 hprot_t     hprot;
 htrans_e    htrans;
-logic hsel, hwrite, hmastlock;
+logic       hwrite, hmastlock;
 logic hresp,  hready;
 
 logic [DW - 1: 0] hrdata, hwdata;
@@ -111,8 +117,11 @@ logic [INST_Q_W     : 0]    inst_buf_len;
 logic  inst_q_empty;
 logic  inst_q_full;
 
-assign inst_q_empty = inst_buf_len == '0;
-assign inst_q_full  = inst_buf_len == INST_Q_SZ;
+logic [INST_Q_W     : 0]    free_buf_space;
+assign free_buf_space = (INST_Q_W + 1)'(INST_Q_W) - inst_buf_len;
+
+assign inst_q_empty = inst_buf_len   == '0;
+assign inst_q_full  = free_buf_space == '0;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -137,9 +146,9 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_buf_len <= '0;
-    else if (q_data_get && ~inst_q_empty)
+    else if (q_data_get && ~inst_q_full)
         inst_buf_len <= inst_buf_len + (INST_Q_W + 1)'(1);
-    else if (q_data_give && ~inst_q_full)
+    else if (q_data_give && ~inst_q_empty)
         inst_buf_len <= inst_buf_len - (INST_Q_W + 1)'(1);
 end
 
@@ -167,28 +176,36 @@ always_comb begin
             else
                 fst_state_next = AHB_IDLE;
         end
-        AHB_ACTIVE: AHB_STALL: begin
+        AHB_ACTIVE, AHB_STALL: begin
             if (hresp)
                 fst_state_next = AHB_ERROR;
             else
-                if (en_i)
+                if (en_i && ~inst_q_full)
                     if (hready)
                         fst_state_next = AHB_STALL;
                     else
                         fst_state_next = AHB_ACTIVE;
                 else
-                    fst_state = AHB_IDLE;
+                    fst_state_next = AHB_IDLE;
+        end
+        AHB_ERROR: begin
+            if (hresp)
+                fst_state_next = AHB_ERROR;
+            else
+                fst_state_next = AHB_IDLE; // maybe need fix this
         end
         default:
             fst_state_next = AHB_IDLE;
     endcase
 end
 
-logic  mng_is_wait, mng_is_active, mng_is_err, mng_is_idle;
+logic  mng_is_wait, mng_is_active, mng_is_idle; // mng_is_err,
 assign mng_is_wait      = fst_state_next == AHB_STALL;
 assign mng_is_active    = fst_state_next == AHB_ACTIVE;
-assign mng_is_err       = fst_state_next == AHB_ERROR;
+// assign mng_is_err       = fst_state_next == AHB_ERROR;
 assign mng_is_idle      = fst_state_next == AHB_IDLE;
+
+logic mng_is_stable_active = mng_is_active || mng_is_wait;
 
 //============================================================================*/
 // AHB LOGIC
@@ -200,7 +217,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         hprot <= '0;
     else if (~mng_is_idle) begin
         hprot.cache         <= HTRANS_CACH_OFF;
-        hprot.buffer        <= INST_Q_SZ == 1? HTRANS_BUFE_OFF: HTRANS_BUFE_ON;
+        hprot.buffer        <= BUFFERABLE;
         hprot.access_type   <= HTRANS_ACCS_PRIV;
         hprot.txn_type      <= HTRANS_DORO_OPCODE;
     end
@@ -223,26 +240,128 @@ end
 
 // hburst
 if (INST_Q_SZ < 4) begin: gen_buffer_sz_less_4
+    logic  bfsm2; // bus (have) 2 free space or more
+    assign bfsm2 = free_buf_space[1] == 1'b1;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
             hburst <= HBURST_SINGLE;
-        else if ((INST_Q_W + 1) - inst_buf_len > (INST_Q_W + 1)'(1))
+        else if (bfsm2)
             hburst <= HBURST_INCR;
         else
             hburst <= HBURST_SINGLE;
     end
 end
 else if (INST_Q_SZ < 8) begin: gen_buffer_sz_less_8
-    // Write something here
+    // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
+    logic  bfsm2, bfsm4;
+    assign bfsm2 = free_buf_space[1] == 1'b1;
+    assign bfsm4 = free_buf_space[2] == 1'b1;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n)
+            hburst <= HBURST_SINGLE;
+        else if (bfsm4)
+            hburst <= HBURST_INCR4;
+        else if (bfsm2)
+            hburst <= HBURST_INCR;
+        else
+            hburst <= HBURST_SINGLE;
+    end
+end
+else if (INST_Q_SZ < 16) begin: gen_buffer_sz_less_16
+    // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
+    logic  bfsm2, bfsm4, bfsm8;
+    assign bfsm2 = free_buf_space[1] == 1'b1;
+    assign bfsm4 = free_buf_space[2] == 1'b1;
+    assign bfsm8 = free_buf_space[3] == 1'b1;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n)
+            hburst <= HBURST_SINGLE;
+        else if (bfsm8)
+            hburst <= HBURST_INCR8;
+        else if (bfsm4)
+            hburst <= HBURST_INCR4;
+        else if (bfsm2)
+            hburst <= HBURST_INCR;
+        else
+            hburst <= HBURST_SINGLE;
+    end
+end
+else begin: gen_buffer_sz_more_16
+    // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
+    logic  bfsm2, bfsm4, bfsm8, bfsm16;
+    assign bfsm2    = free_buf_space[1] == 1'b1;
+    assign bfsm4    = free_buf_space[2] == 1'b1;
+    assign bfsm8    = free_buf_space[3] == 1'b1;
+    assign bfsm16   = free_buf_space[4] == 1'b1;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n)
+            hburst <= HBURST_SINGLE;
+        else if (bfsm16)
+            hburst <= HBURST_INCR16;
+        else if (bfsm8)
+            hburst <= HBURST_INCR8;
+        else if (bfsm4)
+            hburst <= HBURST_INCR4;
+        else if (bfsm2)
+            hburst <= HBURST_INCR;
+        else
+            hburst <= HBURST_SINGLE;
+    end
 end
 
 // htrans
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         htrans <= HTRANS_IDLE;
+    else if (mng_is_stable_active && htrans == HTRANS_IDLE)
+        htrans <= HTRANS_NONSEQ;
+    else if (mng_is_stable_active && htrans == HTRANS_NONSEQ)
+        htrans <= HTRANS_SEQ;
     else
-        htrans <= HTRANS_IDLE;
+        htrans <= HTRANS_IDLE; // BUSY write later. mng can hold
 end
+
+// hwrite
+assign hwrite = '0; // Fetcher always read
+
+// hwdata
+assign hwdata = '0; // Fetcher always read
+
+// hmastlock
+assign hmastlock = ~mng_is_idle;
+
+// haddr
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        haddr <= '0;
+    else
+        haddr <= (AW)'(pc_i);
+end
+
+// get data
+assign q_data_get = (~hwrite) && (hready) && (fst_state == AHB_STALL || fst_state == AHB_ACTIVE);
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        for (int unsigned i = 0; i < INST_Q_SZ; i++) begin: gen_reset_inst_q
+            inst_q[i] <= '0;
+        end
+    else if (q_data_get && ~inst_q_full)
+        inst_q[inst_ptr_q] <= hrdata;
+
+end
+
+//============================================================================*/
+// FETCH LOGIC
+//============================================================================*/
+
+assign instr_valid_o = ~inst_q_empty;
+
+assign instr_i = inst_q[next_inst_ptr_q];
 
 //============================================================================*/
 
