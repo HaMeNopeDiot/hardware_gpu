@@ -30,6 +30,7 @@ VERILOG_SOURCES +=  $(FPU_PWD)/common_cells/src/cf_math_pkg.sv \
 					$(FPU_PWD)/fpnew_pkg.sv \
 					$(FPU_PWD)/fpnew_top.sv \
 					$(MAIN_PWD)/utils/base_pkg.sv \
+					$(MAIN_PWD)/utils/lsu_pkg.sv \
 					$(MAIN_PWD)/fpu_dummy.sv \
 					$(MAIN_PWD)/handshake_fpu_pkg.sv \
 					$(MAIN_PWD)/tu_pkg.sv \

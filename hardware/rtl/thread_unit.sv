@@ -42,8 +42,6 @@ module thread_unit
 
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_result_t;
-    import tu_pkg::l_cmd_t;
-    import tu_pkg::u_cmd_t;
     import tu_pkg::thread_info_t;
     import tu_pkg::tu_alu_t;
 
@@ -57,11 +55,18 @@ module thread_unit
     import tu_pkg::U_OFS_IMM_W;
 
 
-    import tu_pkg::LSU_CMD;
-    import tu_pkg::UPP_CMD;
+    // INSTR TYPES
+    import tu_pkg::L_CMD;
+    import tu_pkg::U_CMD;
+    import tu_pkg::S_CMD;
+
+    import tu_pkg::l_cmd_t;
+    import tu_pkg::u_cmd_t;
+    import tu_pkg::s_cmd_t;
+
 
     import tu_pkg::LOP_LW;
-    import tu_pkg::LOP_SW;
+    import tu_pkg::SOP_SW;
     import tu_pkg::AOP_ADD;
 
 
@@ -115,16 +120,19 @@ assign rd               = r_if.rd.value;
 assign rd_valid         = r_if.rd.valid;
 
 // Dec
-logic  lsu_cmd_valid;
-logic  upp_cmd_valid;
-assign lsu_cmd_valid = cmd_op_type == LSU_CMD;
-assign upp_cmd_valid = cmd_op_type == UPP_CMD;
+logic  l_cmd_valid, u_cmd_valid, s_cmd_valid;
+assign l_cmd_valid = cmd_op_type == L_CMD;
+assign u_cmd_valid = cmd_op_type == U_CMD;
+assign s_cmd_valid = cmd_op_type == S_CMD;
 
-l_cmd_t lsu_cmd;
-assign  lsu_cmd = lsu_cmd_valid? cmd.l: '0;
+l_cmd_t l_cmd;
+assign  l_cmd = l_cmd_valid? cmd.l: '0;
 
-u_cmd_t upp_cmd;
-assign  upp_cmd = upp_cmd_valid? cmd.u: '0;
+u_cmd_t u_cmd;
+assign  u_cmd = u_cmd_valid? cmd.u: '0;
+
+s_cmd_t s_cmd;
+assign  s_cmd = s_cmd_valid? cmd.s: '0;
 
 /*============================================================================//
 region FSM
@@ -140,7 +148,7 @@ end
 always_comb begin
     case (thread_state)
         TU_STATE_IDLE:
-            if (lsu_cmd_valid)
+            if (l_cmd_valid || s_cmd_valid) // TU wants request to LSU
                 next_thread_state   = TU_STATE_REQUEST;
             else
                 next_thread_state   = TU_STATE_IDLE;
@@ -197,14 +205,17 @@ end
 
 // write
 always_comb begin
-    if (rd_valid && lsu_cmd_valid) begin
-        addr_w = lsu_cmd.rd_addr;
+    if (rd_valid && (l_cmd_valid || s_cmd_valid)) begin
+        if (l_cmd_valid)
+            addr_w = l_cmd.rd_addr;
+        else
+            addr_w = s_cmd.rd_addr;
         data_w = rd;
         wr_en  = '1;
     end
-    else if (upp_cmd_valid && upp_cmd.operand == '0) begin
-        addr_w = upp_cmd.rd_addr;
-        data_w = (DW)'(upp_cmd.imm << U_OFS_IMM_W);
+    else if (u_cmd_valid && u_cmd.operand == '0) begin
+        addr_w = u_cmd.rd_addr;
+        data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
         wr_en  = '1;
     end
     else if (state == FPU_RESULT) begin
@@ -223,9 +234,15 @@ end
 logic [AW - 1: 0] addr_rs1, addr_rs2;
 
 always_comb begin
-    addr_rs1 = lsu_cmd_valid? lsu_cmd.rs1_addr: '0;
-    addr_rs2 = lsu_cmd_valid? lsu_cmd.rs2_addr: '0;
+    if (s_cmd_valid)
+        addr_rs1 = s_cmd.rs1_addr;
+    else if (l_cmd_valid)
+        addr_rs1 = l_cmd.rs1_addr;
+    else
+        addr_rs1 = '0;
 end
+
+assign addr_rs2 = s_cmd_valid? s_cmd.rs2_addr: '0;
 
 // handshake sig
 logic out_ready_i;
@@ -242,17 +259,24 @@ region ALU
 tu_alu_t alu_struct;
 always_comb begin
     case (cmd_op_type)
-        LSU_CMD: begin
-            case (lsu_cmd.operand.lsu_op)
+        L_CMD: begin
+            case (l_cmd.operand)
                 LOP_LW: begin
                     alu_struct.o1       = data_rs1;
-                    alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                    alu_struct.o2       = (DW)'(l_cmd.imm);
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
-                LOP_SW: begin
+                default: begin
+                    alu_struct = '0;
+                end
+            endcase
+        end
+        S_CMD: begin
+            case (s_cmd.operand)
+                SOP_SW: begin
                     alu_struct.o1       = data_rs1;
-                    alu_struct.o2       = (DW)'(lsu_cmd.imm);
+                    alu_struct.o2       = (DW)'(s_cmd.imm);
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
@@ -276,7 +300,7 @@ assign  thread_info     = fpu_result.info;
 
 
 always_comb begin
-    if(lsu_cmd_valid) begin
+    if(l_cmd_valid || s_cmd_valid) begin
         rs1         = alu_or;
         rs1_valid   = alu_rr;
     end

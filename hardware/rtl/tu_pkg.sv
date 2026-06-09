@@ -60,25 +60,17 @@ package tu_pkg;
     } thread_result_t;
 
     /*==========================================================================//
-    region LSU
+    region L-type
     //==========================================================================*/
 
     parameter int unsigned LSU_OP_W = 4 + 1;
     typedef enum logic[LSU_OP_W - 1: 0] {
         LOP_LW     = 0, // rd = M[rs1 + imm]
-        LOP_SW     = 1, // M[rs1 + imm] = rs2
-        LOP_ADDI   = 2, // rd = r1 + imm
-        LOP_ADD    = 3, // rd = r1 + r2
-        LOP_MUL    = 4  // rd = r1 * r2
-    } lsu_op_e;
-
-    typedef struct packed {
-        lsu_op_e        op;
-        regfile_addr_t  rd, rs1, rs2;
-    } lsu_cmd_t;
+        LOP_ADDI   = 1  // rd = r1 + imm
+    } l_op_e;
 
     /*==========================================================================//
-    region UPPER
+    region U-type
     //==========================================================================*/
 
     parameter int unsigned U_OP_W = 4 + 1;
@@ -87,6 +79,16 @@ package tu_pkg;
         UOP_APC = 1     // PC = PC + 4
     } u_op_e;
 
+    /*==========================================================================//
+    region S-type
+    //==========================================================================*/
+
+    parameter int unsigned S_OP_W = 4 + 1;
+    typedef enum logic[S_OP_W - 1: 0] {
+        SOP_SW     = 0, // M[rs1 + imm] = rs2
+        SOP_ADD    = 1, // rd = r1 + r2
+        SOP_MUL    = 2  // rd = r1 * r2
+    } s_op_e;
 
     /*==========================================================================//
     region OP
@@ -98,9 +100,10 @@ package tu_pkg;
     } fpu_op_t;
 
     typedef union packed {
-        lsu_op_e    lsu_op;
+        l_op_e      lsu_op;
         fpu_op_t    fpu_op;
         u_op_e      upp_op;
+        s_op_e      s_op;
     } op_union_t;
 
 
@@ -129,29 +132,41 @@ package tu_pkg;
     localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + DEC_OP_W + 3);
     // fpu
     typedef struct packed {
-        op_union_t              operand;         // 5
+        fpu_op_t                operand;         // 5
         regfile_addr_t          a1, a2, a3, ar;  // 3 * 4 = 12
         logic [2:0]             extra;           // 3
         logic [F_IMM_W - 1: 0]  imm;             //
     } f_cmd_t;
 
 
-    localparam int unsigned L_IMM_W = DW - (REGFILE_AW * 3 + LSU_OP_W + DEC_OP_W);
+    localparam int unsigned L_OFS_IMM_W = REGFILE_AW * 2 + LSU_OP_W + DEC_OP_W;
+    localparam int unsigned L_IMM_W     = DW - L_OFS_IMM_W;
     // lsu
     typedef struct packed {
-        op_union_t              operand;                        // 5
-        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;    // 3 * 3 = 9
-        logic [L_IMM_W - 1: 0]  imm;                            //
+        l_op_e                  operand;
+        regfile_addr_t          rs1_addr, rd_addr;
+        logic [L_IMM_W - 1: 0]  imm;
     } l_cmd_t;
 
     localparam int unsigned U_OFS_IMM_W = REGFILE_AW + LSU_OP_W + DEC_OP_W;
     localparam int unsigned U_IMM_W     = DW - U_OFS_IMM_W;
     // upper imid
     typedef struct packed {
-        op_union_t              operand; // 5
-        regfile_addr_t          rd_addr; // 3
+        u_op_e                  operand;
+        regfile_addr_t          rd_addr;
         logic [U_IMM_W - 1: 0]  imm;
     } u_cmd_t;
+
+
+    localparam int unsigned S_OFS_IMM_W = REGFILE_AW * 3 + LSU_OP_W + DEC_OP_W;
+    localparam int unsigned S_IMM_W     = DW - S_OFS_IMM_W;
+    // upper imid
+    typedef struct packed {
+        s_op_e                  operand;
+        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;
+        logic [S_IMM_W - 1: 0]  imm;
+    } s_cmd_t;
+
 
     /*==========================================================================//
     region DECODER COMMAND MAIN
@@ -160,14 +175,15 @@ package tu_pkg;
         f_cmd_t f;
         l_cmd_t l;
         u_cmd_t u;
+        s_cmd_t s;
     } cmd_union_t;
 
     // DEC INSTR
     typedef enum logic [DEC_OP_W - 1: 0] {
-        NO_CMD  = 0,
-        LSU_CMD = 1,
-        FPU_CMD = 2,
-        UPP_CMD = 3
+        U_CMD     = 0,
+        L_CMD     = 1,
+        F_CMD     = 2,
+        S_CMD     = 3
     } dec_op_type_e;
 
 
@@ -196,6 +212,7 @@ package tu_pkg;
         TU_STATE_WAIT    = 2,
         TU_STATE_DONE    = 3
     } tu_state_e;
+
 
     // ======================================================================== //
 endpackage

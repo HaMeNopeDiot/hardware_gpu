@@ -15,14 +15,18 @@ module core
     import tu_pkg::cmd_t;
     import tu_pkg::dec_op_type_e;
     import tu_pkg::cmd_union_t;
-    import tu_pkg::lsu_op_e;
-    import tu_pkg::LSU_CMD;
+    import tu_pkg::l_op_e;
+    import tu_pkg::L_CMD;
     import tu_pkg::dw_value_t;
     import tu_pkg::TU_STATE_REQUEST;
     import tu_pkg::tu_state_e;
 
+    // AHB
     import ahb_pkg::ahb_mports_t;
     import ahb_pkg::ahb_sports_t;
+
+    // LSU
+    import lsu_pkg::lsu_cmd_e;
 #(
     parameter  int unsigned DW               = 32,
     parameter  int unsigned MEM_AW           = 32,
@@ -51,16 +55,12 @@ region LOGIC
 //============================================================================*/
 cmd_union_t         cmd;
 dec_op_type_e       cmd_op_type;
-logic               lsu_cmd_valid;
-assign              lsu_cmd_valid = cmd_op_type == LSU_CMD;
 
 thread_command_t    fpu_cmd;
 logic               fpu_cmd_valid;
 
-lsu_op_e            lsu_op;
-logic               lsu_op_valid;
-assign              lsu_op       = cmd.l.operand.lsu_op;
-assign              lsu_op_valid = lsu_cmd_valid;
+lsu_cmd_e   lsu_cmd;
+logic       lsu_cmd_valid;
 
 /*============================================================================//
 region THREAD INTERCONNECT
@@ -133,9 +133,12 @@ core_decoder #() core_decoder_u (
     //==================### CMD SIGNALS ###==================//
     .cmd            (cmd          ),    // ->
     .cmd_op_type    (cmd_op_type  ),    // ->
+    //================### SIGNALS TO LSU ###=================//
+    .lsu_cmd        (lsu_cmd      ),    // ->
+    .lsu_cmd_valid  (lsu_cmd_valid),    // ->
     //================### SIGNALS TO FPU ###=================//
     .fpu_cmd        (fpu_cmd      ),    // ->
-    .fpu_valid      (fpu_cmd_valid)     // ->
+    .fpu_cmd_valid  (fpu_cmd_valid)     // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -150,8 +153,8 @@ core_lsu #(
     .clk               (clk            ),   // <-
     .rst_n             (rst_n          ),   // <-
     //=============### SIGNALS FROM DECODER ###==============//
-    .lsu_op            (lsu_op         ),   // <-
-    .lsu_op_valid      (lsu_op_valid   ),   // <-
+    .lsu_op            (lsu_cmd        ),   // <-
+    .lsu_op_valid      (lsu_cmd_valid  ),   // <-
     //===========### SIGNALS FROM THREAD UNIT ###============//
     .r_if              (rl_if.lsu      ),   // <->
     //============### SIGNALS FROM MEMORY BUS ###============//

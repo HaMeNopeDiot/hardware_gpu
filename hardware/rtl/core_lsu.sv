@@ -12,9 +12,10 @@ region MODULE DEFINITION
 module core_lsu
     import tu_pkg::dw_value_t;
     // LSU
-    import tu_pkg::lsu_op_e;
-    import tu_pkg::LOP_LW;
-    import tu_pkg::LOP_SW;
+    import lsu_pkg::lsu_cmd_e;
+    import lsu_pkg::LSU_L;
+    import lsu_pkg::LSU_S;
+
     // LSU FSM
     import core_lsu_fsm_pkg::lsu_fsm_t;
     import core_lsu_fsm_pkg::LSU_IDLE;
@@ -33,7 +34,7 @@ module core_lsu
     input  logic                    rst_n,
 
     /*=========================### SIGNALS FROM DECODER ###===================*/
-    input  lsu_op_e                 lsu_op,
+    input  lsu_cmd_e                lsu_op,
     input  logic                    lsu_op_valid,
     /*=======================### SIGNALS FROM MEMORY BUS ###==================*/
     input  ahb_sports_t             ahb_i,
@@ -120,8 +121,8 @@ assign  get_res = next_state == LSU_DONE;
 region COMMON
 //============================================================================*/
 logic  op_is_load, op_is_store;
-assign op_is_load   = lsu_op == LOP_LW;
-assign op_is_store  = lsu_op == LOP_SW;
+assign op_is_load   = lsu_op == LSU_L;
+assign op_is_store  = lsu_op == LSU_S;
 
 logic  rw_req;
 assign rw_req = op_is_load? '0: '1;

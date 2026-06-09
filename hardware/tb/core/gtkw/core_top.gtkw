@@ -31,12 +31,12 @@ core.instr_i.cmd.u.imm[21:0]
 @200
 -DECODER
 @800201
--UPP_CMD
+-U_CMD
 @23
 core.core_decoder_u.cmd.u.imm[21:0]
 @29
 core.core_decoder_u.cmd.u.rd_addr[2:0]
 @1000201
--UPP_CMD
+-U_CMD
 [pattern_trace] 1
 [pattern_trace] 0
