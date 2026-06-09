@@ -212,7 +212,7 @@ Mesa 3D NIR (New Intermediate Representation). Не смотря на то, чт
     ),
     table.cell(align: center, colspan: 4)[Работа с памятью],
     [`lw rd, imm(rs1)`], [load word], [L], [`rd = M[rs1 + imm]`],
-    [`sw rs1, imm(rs2)`], [store word], [L], [`rd = M[rs1 + imm]`],
+    [`sw rs1, imm(rs2)`], [store word], [L], [`M[rs2 + imm] = rd`],
     table.cell(align: center, colspan: 4)[Арифметические и логические операции],
     [`lui rd,imm`], [U], [load upper immediate], [`rd = imm << 20`],
     [`addi rd,rs1,imm`], [add immediate], [L], [`rd = rs1 + imm`],
