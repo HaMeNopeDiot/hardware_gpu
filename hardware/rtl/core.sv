@@ -3,7 +3,7 @@
 // Author's e-mail:       sniperusus2002@gmail.com
 // ------------------------------------------------------------------------------//
 // Purpose: GPU Core
-// Date: 2026/05
+// Date: 2026/06
 //-------------------------------------------------------------------------------//
 
 /*===================================================================================//
@@ -20,6 +20,9 @@ module core
     import tu_pkg::dw_value_t;
     import tu_pkg::TU_STATE_REQUEST;
     import tu_pkg::tu_state_e;
+
+    import ahb_pkg::ahb_mports_t;
+    import ahb_pkg::ahb_sports_t;
 #(
     parameter  int unsigned DW               = 32,
     parameter  int unsigned MEM_AW           = 32,
@@ -29,17 +32,17 @@ module core
     parameter  int unsigned THREAD_CNT       = 4,
     localparam int unsigned THREAD_W         = $clog2(THREAD_CNT)
 ) (
-    /*============================### COMMON SIGNALS ###======================*/
+    /*==========================### COMMON SIGNALS ###========================*/
     input   logic                       clk,
     input   logic                       rst_n,
-
+    /*=========================### INSTRUCTION SIGNALS ###====================*/
     input   cmd_t                       instr_i,
     input   logic                       instr_valid_i,
-
-    simple_bus_if.lsu                   m_if,
-
-    // simple_hndh_if.slave             fpu_hndh_if,
-    output thread_info_t                thread_info
+    /*============================### AHB SIGNALS ###=========================*/
+    input   ahb_sports_t                lsu_ahb_i,
+    output  ahb_mports_t                lsu_ahb_o,
+    /*=============================### TU SIGNALS ###=========================*/
+    output  thread_info_t               thread_info
     //========================================================================//
 );
 
@@ -68,6 +71,8 @@ logic [THREAD_W - 1: 0]      thread_sel;
 reg_if              rt_if [THREAD_CNT](); // registers thread interface
 reg_if              rl_if ();             // registers lsu interface
 
+dw_value_t          rs1_arr[THREAD_CNT];
+dw_value_t          rs2_arr[THREAD_CNT];
 
 thread_info_t        thread_unit_info   [THREAD_CNT];
 tu_state_e           thread_states      [THREAD_CNT];
@@ -82,20 +87,20 @@ end
 logic  thread_req, lsu_done;
 assign thread_req = thread_states[thread_sel] == TU_STATE_REQUEST;
 
-dw_value_t  rd_arr[THREAD_CNT];
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_arr
-    assign rd_arr[i] = rt_if[i].rd;
+for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_if_interpretator
+    assign rs1_arr[i] = rt_if[i].rs1;
+    assign rs2_arr[i] = rt_if[i].rs2;
 end
-
 
 always_comb begin
-    rl_if.rd = rd_arr[thread_sel];
+    rl_if.rs1 = rs1_arr[thread_sel];
+    rl_if.rs2 = rs2_arr[thread_sel];
 end
 
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_demux
-    assign rt_if[i].rs1 = (THREAD_W)'(i) == thread_sel? rl_if.rs1: '0;
-    assign rt_if[i].rs2 = (THREAD_W)'(i) == thread_sel? rl_if.rs2: '0;
+for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_demux
+    assign rt_if[i].rd = (THREAD_W)'(i) == thread_sel? rl_if.rd: '0;
 end
+
 
 /*============================================================================//
 region INSTANCES
@@ -150,7 +155,8 @@ core_lsu #(
     //===========### SIGNALS FROM THREAD UNIT ###============//
     .r_if              (rl_if.lsu      ),   // <->
     //============### SIGNALS FROM MEMORY BUS ###============//
-    .m_if              (m_if           ),   // <->
+    .ahb_i             (lsu_ahb_i      ),   // <-
+    .ahb_o             (lsu_ahb_o      ),   // ->
     //================### HANDSHAKE SIGNALS ###==============//
     .lsu_ready_o       (lsu_done       ),   // ->
     .lsu_valid_i       (thread_req     )    // <-

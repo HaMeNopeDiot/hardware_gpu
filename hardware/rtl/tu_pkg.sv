@@ -124,6 +124,7 @@ package tu_pkg;
     /*==========================================================================//
     region TYPE OF COMMANDS FROM DECODER
     //==========================================================================*/
+    localparam int unsigned  DEC_OP_W = 2;
 
     localparam int unsigned F_IMM_W = DW - (REGFILE_AW * 4 + LSU_OP_W + DEC_OP_W + 3);
     // fpu
@@ -161,7 +162,6 @@ package tu_pkg;
         u_cmd_t u;
     } cmd_union_t;
 
-    localparam int unsigned  DEC_OP_W = 2;
     // DEC INSTR
     typedef enum logic [DEC_OP_W - 1: 0] {
         NO_CMD  = 0,

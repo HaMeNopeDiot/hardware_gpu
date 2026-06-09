@@ -9,5 +9,6 @@
 package base_pkg;
     // ======================= ### COMMON STRUCTS ### ========================= //
     localparam int unsigned DW              = 32;
+    parameter int unsigned  AW              = 32;
     // ======================================================================== //
 endpackage

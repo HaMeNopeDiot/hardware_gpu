@@ -7,7 +7,8 @@
 //-------------------------------------------------------------------------------//
 
 package ahb_pkg;
-
+    import base_pkg::AW;
+    import base_pkg::DW;
     // ========================= ### COMMON ENUMS ### ========================= //
 
     typedef enum logic [2: 0] {
@@ -73,6 +74,25 @@ package ahb_pkg;
         AHB_ERROR   = 2'b11
     } ahb_txn_e;
 
+    // - structs
+    // ======================================================================== //
+
+    typedef struct packed {
+        logic [AW - 1: 0]   haddr;
+        logic               hwrite;
+        hsize_e             hsize;
+        hburst_e            hburst;
+        hprot_t             hprot;
+        htrans_e            htrans;
+        logic               hmastlock;
+        logic [DW - 1: 0]   hwdata;
+    } ahb_mports_t;
+
+    typedef struct packed {
+        logic               hready;
+        logic               hresp;
+        logic [DW - 1: 0]   hrdata;
+    } ahb_sports_t;
 
     // ======================================================================== //
 endpackage

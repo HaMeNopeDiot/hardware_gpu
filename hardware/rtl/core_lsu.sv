@@ -1,14 +1,14 @@
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// ------------------------------------------------------------------------------//
+// ---------------------------------------------------------------------------//
 // Purpose: GPU Core LSU
 // Date: 2026/06
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
-/*===================================================================================//
+/*============================================================================//
 region MODULE DEFINITION
-//===================================================================================*/
+//============================================================================*/
 module core_lsu
     import tu_pkg::dw_value_t;
     // LSU
@@ -22,6 +22,8 @@ module core_lsu
     import core_lsu_fsm_pkg::LSU_RQ  ;
     import core_lsu_fsm_pkg::LSU_DONE;
 
+    import ahb_pkg::ahb_mports_t;
+    import ahb_pkg::ahb_sports_t;
 #(
     parameter int unsigned DW = 64,
     parameter int unsigned MEM_AW = 32
@@ -34,7 +36,8 @@ module core_lsu
     input  lsu_op_e                 lsu_op,
     input  logic                    lsu_op_valid,
     /*=======================### SIGNALS FROM MEMORY BUS ###==================*/
-    simple_bus_if.lsu               m_if,
+    input  ahb_sports_t             ahb_i,
+    output ahb_mports_t             ahb_o,
 
     /*=======================### SIGNALS FROM THREAD UNIT ###=================*/
     reg_if.lsu                      r_if,
@@ -61,24 +64,12 @@ assign rs2_valid        = r_if.rs2.valid;
 assign r_if.rd.value    = rd;
 assign r_if.rd.valid    = rd_valid;
 
-// Simple bus interface
-logic [DW - 1: 0]       read_data, write_data;
-logic [MEM_AW - 1: 0]   read_addr, write_addr;
-logic read_ready, read_valid, write_ready, write_valid;
-
-assign read_data            =   m_if.read_data;
-assign read_ready           =   m_if.read_ready;
-assign write_ready          =   m_if.write_ready;
-
-assign m_if.read_address    =   read_addr;
-assign m_if.write_address   =   write_addr;
-assign m_if.read_valid      =   read_valid;
-assign m_if.write_valid     =   write_valid;
-assign m_if.write_data      =   write_data;
-
 /*============================================================================//
 region FSM
 //============================================================================*/
+logic mem_ans_valid;
+logic [DW - 1: 0] mem_data;
+
 lsu_fsm_t state, next_state;
 
 always_ff @(posedge clk or negedge rst_n) begin
@@ -97,13 +88,13 @@ always_comb begin
                 next_state = LSU_IDLE;
         end
         LSU_SEND: begin // Wait info from TU and send it to SRAM
-            if (read_valid || write_valid)
+            if (req_valid)
                 next_state = LSU_RQ;
             else
                 next_state = LSU_SEND;
         end
         LSU_RQ: begin // Wait answer from SRAM
-            if (read_ready || write_ready)
+            if (mem_ans_valid)
                 next_state = LSU_DONE;
             else
                 next_state = LSU_RQ;
@@ -126,35 +117,36 @@ logic   get_res;
 assign  get_res = next_state == LSU_DONE;
 
 /*============================================================================//
+region COMMON
+//============================================================================*/
+logic  op_is_load, op_is_store;
+assign op_is_load   = lsu_op == LOP_LW;
+assign op_is_store  = lsu_op == LOP_SW;
+
+logic  rw_req;
+assign rw_req = op_is_load? '0: '1;
+
+logic [MEM_AW - 1: 0] mem_addr;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        mem_addr <= '0;
+    else if (rs1_valid && op_is_store)
+        mem_addr <= (MEM_AW)'(rs1);
+    else if (rs1_valid && op_is_load && send_rq)
+        mem_addr <= (MEM_AW)'(rs1);
+    else
+        mem_addr <= '0;
+end
+
+/*============================================================================//
 region READ
 //============================================================================*/
-
-logic  op_is_load;
-assign op_is_load = lsu_op == LOP_LW;
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        read_addr <= '0;
-    else if (send_rq && op_is_load && rs1_valid)
-        read_addr <= (MEM_AW)'(rs1); // <rs1 + imm> actually
-    else
-        read_addr <= '0;
-end
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        read_valid <= '0;
-    else if (send_rq && op_is_load)
-        read_valid <= rs1_valid;
-    else
-        read_valid <= '0;
-end
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         rd <= '0;
     else if (get_res && op_is_load)
-        rd <= read_data;
+        rd <= mem_data;
     else
         rd <= '0;
 end
@@ -163,7 +155,7 @@ always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         rd_valid <= '0;
     else if (get_res && op_is_load)
-        rd_valid <= read_ready;
+        rd_valid <= mem_ans_valid;
     else
         rd_valid <= '0;
 end
@@ -173,50 +165,58 @@ end
 region WRITE
 //============================================================================*/
 
+logic [DW -1 : 0] wdata;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        write_addr <= '0;
-    else if (send_rq) begin
-        case (lsu_op)
-            LOP_SW: begin
-                if (rs1_valid)
-                    write_addr <= (MEM_AW)'(rs1); // <rs1 + imm> actually
-                else
-                    write_addr <= '0;
-            end
-            default:
-                write_addr <= '0;
-        endcase
-    end
+        wdata <= '0;
+    else if (send_rq && op_is_store && rs2_valid)
+        wdata <= rs2;
+    else
+        wdata <= '0;
 end
 
+logic req_valid;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        write_data <= '0;
-    else if (send_rq) begin
-        case (lsu_op)
-            LOP_SW: begin
-                if (rs2_valid)
-                    write_data <= rs2;
-                else
-                    write_data <= '0;
-            end
-            default:
-                write_data <= '0;
-        endcase
-    end
+        req_valid <= '0;
+    else if (send_rq && op_is_store)
+        req_valid <= rs1_valid && rs2_valid;
+    else if (send_rq && op_is_load)
+        req_valid <= rs1_valid;
+    else
+        req_valid <= '0;
 end
+/*============================================================================//
+region INSTANCE
+//============================================================================*/
 
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        write_valid <= '0;
-    else if (send_rq) begin
-        case (lsu_op)
-            LOP_SW:     write_valid <= rs1_valid && rs2_valid;
-            default:    write_valid <= '0;
-        endcase
-    end
-end
+// ///////////////////////////////////////////////////////// //
+//                    *** AHB MASTER ***                     //
+// NOTE: Master AHB to memory for LSU
+ahb_master #(
+    .DW (DW),
+    .AW (MEM_AW),
+    .TW (2)
+) ahb_master_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk          (clk          ),  // <-
+    .rst_n        (rst_n        ),  // <-
+    //==================### AHB SIGNALS ###==================//
+    .ahb_i        (ahb_i        ),  // <-
+    .ahb_o        (ahb_o        ),  // ->
+    //================### CONTROL SIGNALS ###================//
+    .req_txn_i    (req_valid    ),  // <-
+    .rw_i         (rw_req       ),  // <-
+    .txn_amount_i (2'b01        ),  // <-
+    //==================### IN SIGNALS ###===================//
+    .addr_i       (mem_addr     ),  // <-
+    .data_i       (wdata        ),  // <-
+    //==================### OUT SIGNALS ###==================//
+    .data_o       (mem_data     ),  // ->
+    .data_valid_o (mem_ans_valid)   // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
 
 /*============================================================================//
 region OUT

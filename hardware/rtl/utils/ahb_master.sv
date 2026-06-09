@@ -42,34 +42,35 @@ module ahb_master
     import ahb_pkg::HSIZE_HWORD;
     import ahb_pkg::HSIZE_WORD ;
     import ahb_pkg::HSIZE_DWORD;
+
+
+    import ahb_pkg::ahb_mports_t;
+    import ahb_pkg::ahb_sports_t;
 #(
     parameter   int unsigned DW           = 32,
     parameter   int unsigned AW           = 32,
     parameter   int unsigned TW           = 2
-
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                    clk,
     input  logic                    rst_n,
 
     /*========================### AHB SIGNALS ###=============================*/
-    ahb4_bus_if.master              ahb_bus,
+    input  ahb_sports_t             ahb_i,
+    output ahb_mports_t             ahb_o,
     /*=====================### CONTROL SIGNALS ###============================*/
     input  logic                    req_txn_i,
     input  logic                    rw_i,
 
-    input  logic [INST_Q_W - 1: 0]  txn_amount_i,
+    input  logic [TW - 1: 0]        txn_amount_i,
     /*=========================### IN SIGNALS ###=============================*/
 
     input  logic [AW - 1: 0]        addr_i,
     input  logic [DW - 1: 0]        data_i,
-    input  logic                    txn_valid_i,
     /*========================### OUT SIGNALS ###=============================*/
 
     output logic [DW - 1: 0]        data_o,
-    output logic                    data_valid_o,
-    output logic                    ahb_ready_o
-
+    output logic                    data_valid_o
     //========================================================================//
 );
 
@@ -87,25 +88,27 @@ logic hresp,  hready;
 logic [DW - 1: 0] hrdata, hwdata;
 logic [AW - 1: 0] haddr;
 // out
-assign ahb_bus.haddr        = haddr;
-assign ahb_bus.hwdata       = hwdata;
-assign ahb_bus.hwrite       = hwrite;
-assign ahb_bus.hsize        = hsize;    // t
-assign ahb_bus.hburst       = hburst;   // t
-assign ahb_bus.hprot        = hprot;    // t
-assign ahb_bus.htrans       = htrans;   // t
-assign ahb_bus.hmastlock    = hmastlock;
+always_comb begin
+    ahb_o.haddr      = haddr;
+    ahb_o.hwdata     = hwdata;
+    ahb_o.hwrite     = hwrite;
+    ahb_o.hsize      = hsize;
+    ahb_o.hburst     = hburst;
+    ahb_o.hprot      = hprot;
+    ahb_o.htrans     = htrans;
+    ahb_o.hmastlock  = hmastlock;
+end
 // in
-assign hready               = ahb_bus.hready;
-assign hresp                = ahb_bus.hresp;
-assign hrdata               = ahb_bus.hrdata;
+assign hready           = ahb_i.hready;
+assign hresp            = ahb_i.hresp;
+assign hrdata           = ahb_i.hrdata;
 
 /*============================================================================//
 region LOGIC
 //============================================================================*/
 
 logic  req_active;
-assign req_active = req_txn_i && txn_valid_i;
+assign req_active = req_txn_i;
 
 //============================================================================*/
 // AHB FSM
@@ -171,14 +174,13 @@ always_ff @(posedge clk or negedge rst_n) begin
         hprot <= '0;
     else if (~mng_is_idle) begin
         hprot.cache         <= HTRANS_CACH_OFF;
-        hprot.buffer        <= BUFFERABLE;
+        hprot.buffer        <= HTRANS_BUFE_OFF;
         hprot.access_type   <= HTRANS_ACCS_PRIV;
         hprot.txn_type      <= HTRANS_DORO_OPCODE;
     end
 end
 
 // hsize
-
 if (DW == 8) begin: gen_byte_hsize
     assign hsize = HSIZE_BYTE;
 end
@@ -203,7 +205,7 @@ if (TW == 1) begin: gen_hburst_logic_eq_1
 end
 else if (TW == 2) begin: gen_hburst_logic_less_4
     logic  bfsm2; // bus (have) 2 free space or more
-    assign bfsm2 = txn_amount_i[1] == 1'b1;
+    assign bfsm2 = txn_amount_i >= (TW)'(2);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
@@ -217,8 +219,8 @@ end
 else if (TW < 3) begin: gen_hburst_logic_less_8
     // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
     logic  bfsm2, bfsm4;
-    assign bfsm2 = txn_amount_i[1] == 1'b1;
-    assign bfsm4 = txn_amount_i[2] == 1'b1;
+    assign bfsm2 = txn_amount_i >= (TW)'(2);
+    assign bfsm4 = txn_amount_i >= (TW)'(4);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
@@ -234,9 +236,9 @@ end
 else if (TW < 4) begin: gen_hburst_logic_less_16
     // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
     logic  bfsm2, bfsm4, bfsm8;
-    assign bfsm2 = txn_amount_i[1] == 1'b1;
-    assign bfsm4 = txn_amount_i[2] == 1'b1;
-    assign bfsm8 = txn_amount_i[3] == 1'b1;
+    assign bfsm2 = txn_amount_i >= (TW)'(2);
+    assign bfsm4 = txn_amount_i >= (TW)'(4);
+    assign bfsm8 = txn_amount_i >= (TW)'(8);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
@@ -254,10 +256,10 @@ end
 else begin: gen_hburst_logic_more_16
     // bus (have) <x> free space or more. (Where x typed in bfsmx var name)
     logic  bfsm2, bfsm4, bfsm8, bfsm16;
-    assign bfsm2    = txn_amount_i[1] == 1'b1;
-    assign bfsm4    = txn_amount_i[2] == 1'b1;
-    assign bfsm8    = txn_amount_i[3] == 1'b1;
-    assign bfsm16   = txn_amount_i[4] == 1'b1;
+    assign bfsm2    = txn_amount_i >= (TW)'(2);
+    assign bfsm4    = txn_amount_i >= (TW)'(4);
+    assign bfsm8    = txn_amount_i >= (TW)'(8);
+    assign bfsm16   = txn_amount_i >= (TW)'(16);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
@@ -311,6 +313,5 @@ region OUT
 assign data_o = data_get_ph? hrdata: '0;
 assign data_valid_o = data_get_ph;
 
-assign ahb_ready_o = mng_is_idle;
-
+//============================================================================*/
 endmodule
