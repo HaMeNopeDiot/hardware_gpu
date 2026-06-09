@@ -8,10 +8,7 @@ from fpu.fppconverter import ieee754_to_float
 from numbers import Real
 from decimal import Decimal
 
-from tu.tu_bfm import ThreadUnitBfm
-from tu.tu_item import TUCmdItem, Lsu2TUCmdItem
-
-from utility.enums import DirectionE, OperationE
+from core.core_instr_item import CILI, CIFI, CIUI, CoreInstItem
 
 def print_result(result):
     cocotb.log.info(result)
@@ -37,7 +34,18 @@ async def make_reset(clk, rst_n):
     await ClockCycles(clk, 1)
     rst_n.value = 1
 
-async def tu_test(dut):
+async def launch_inst(dut, clk, instr: CoreInstItem):
+    instr_valid_i = dut.instr_valid_i
+    instr_i = dut.instr_i
+    # set
+    await ClockCycles(clk, 1)
+    instr_i.value = instr.get_machine_code()
+    instr_valid_i.value = 1
+    await ClockCycles(clk, 1)
+    instr_valid_i.value = 0
+    instr_i.value       = 0
+
+async def core_test(dut):
     """Try accessing the design."""
     clk = dut.clk
     rst_n = dut.rst_n
@@ -47,5 +55,10 @@ async def tu_test(dut):
     await make_reset(clk, rst_n)
 
     await ClockCycles(clk, 30)
+
+    i1 = CIUI(0xAB, 2)
+    await launch_inst(dut, clk, i1)
+    cocotb.log.info(f"RES")
+    await ClockCycles(clk, 20)
 
 

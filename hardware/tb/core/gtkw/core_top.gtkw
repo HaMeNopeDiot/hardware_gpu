@@ -1,0 +1,42 @@
+[*]
+[*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
+[*] Tue Jun  9 11:48:51 2026
+[*]
+[dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
+[dumpfile_mtime] "Tue Jun  9 11:47:03 2026"
+[dumpfile_size] 7542823
+[savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
+[timestart] 422200
+[size] 1920 1116
+[pos] -1 -1
+*-15.900000 567400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] core.
+[treeopen] core.cmd.u.
+[treeopen] core.core_decoder_u.
+[treeopen] core.core_decoder_u.cmd.
+[treeopen] core.instr_i.cmd.
+[sst_width] 209
+[signals_width] 181
+[sst_expanded] 1
+[sst_vpaned_height] 336
+@28
+core.clk
+core.rst_n
+@200
+-M
+@28
+core.instr_valid_i
+@22
+core.instr_i.cmd.u.imm[21:0]
+@200
+-DECODER
+@800201
+-UPP_CMD
+@23
+core.core_decoder_u.cmd.u.imm[21:0]
+@29
+core.core_decoder_u.cmd.u.rd_addr[2:0]
+@1000201
+-UPP_CMD
+[pattern_trace] 1
+[pattern_trace] 0
