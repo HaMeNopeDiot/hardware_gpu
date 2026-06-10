@@ -30,7 +30,7 @@ module core
 #(
     parameter  int unsigned DW               = 32,
     parameter  int unsigned MEM_AW           = 32,
-    parameter  int unsigned TU_REGILE_SZ     = 8,
+    parameter  int unsigned TU_REGILE_SZ     = 32,
     parameter  int unsigned TU_LATCH_R_ADDR  = 1,
     parameter  bit          ONLY_LINT        = `ifdef LINT 1 `else 0 `endif,
     parameter  int unsigned THREAD_CNT       = 4,

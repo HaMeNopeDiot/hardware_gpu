@@ -17,7 +17,7 @@ package tu_pkg;
     import base_pkg::DW;
 
     // ========================= ### COMMON ENUMS ### ========================= //
-    localparam int unsigned REGFILE_SIZE    = 8;
+    localparam int unsigned REGFILE_SIZE    = 32;
     localparam int unsigned REGFILE_AW      = $clog2(REGFILE_SIZE);
 
     typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
@@ -133,7 +133,7 @@ package tu_pkg;
     // fpu
     typedef struct packed {
         fpu_op_t                operand;         // 5
-        regfile_addr_t          a1, a2, a3, ar;  // 3 * 4 = 12
+        regfile_addr_t          a1, a2, a3, ar;  // 5 * 4 = 20
         logic [2:0]             extra;           // 3
         logic [F_IMM_W - 1: 0]  imm;             //
     } f_cmd_t;
@@ -143,18 +143,18 @@ package tu_pkg;
     localparam int unsigned L_IMM_W     = DW - L_OFS_IMM_W;
     // lsu
     typedef struct packed {
-        l_op_e                  operand;
-        regfile_addr_t          rs1_addr, rd_addr;
-        logic [L_IMM_W - 1: 0]  imm;
+        l_op_e                  operand;            // 5
+        regfile_addr_t          rs1_addr, rd_addr;  // 5 * 2 = 10
+        logic [L_IMM_W - 1: 0]  imm;                // x
     } l_cmd_t;
 
     localparam int unsigned U_OFS_IMM_W = REGFILE_AW + LSU_OP_W + DEC_OP_W;
     localparam int unsigned U_IMM_W     = DW - U_OFS_IMM_W;
     // upper imid
     typedef struct packed {
-        u_op_e                  operand;
-        regfile_addr_t          rd_addr;
-        logic [U_IMM_W - 1: 0]  imm;
+        u_op_e                  operand;    // 5
+        regfile_addr_t          rd_addr;    // 5
+        logic [U_IMM_W - 1: 0]  imm;        // x
     } u_cmd_t;
 
 
