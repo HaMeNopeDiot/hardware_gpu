@@ -41,3 +41,5 @@ target_code = generator.generate(target_code)
 
 
 result = Assembler().assemble(target_code)
+with open("vertex_shader.bin", "bw") as file:
+    file.write(result)

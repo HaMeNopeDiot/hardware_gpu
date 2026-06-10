@@ -16,8 +16,8 @@ class Assembler:
         "in_normal_base": 0x1000_0000,
         "in_normal_stride": 0x0000_0010,
         #
-        ".glPosition_base": 0x2000_0000,
-        ".glPosition_stride": 0x0000_00C0,
+        ".gl_Position_base": 0x2000_0000,
+        ".gl_Position_stride": 0x0000_00C0,
         #
         "vVaryingColor_base": 0x2000_0010,
         "vVaryingColor_stride": 0x000_00C0,
@@ -77,6 +77,7 @@ class Assembler:
         "fmax": 0b100_0111,
         "add": 0b010_0011,
         "mul": 0b010_0100,
+        "ret": 0b000_0001,
     }
 
     def __init__(self) -> None:
@@ -100,28 +101,28 @@ class Assembler:
     def li(self, instr: Instruction):
         rd = self.REGISTER_NAMES[instr.result]
         imm = instr.args[0]
-        if imm[0:1] == "0x":
+        if imm[:2] == "0x":
             imm = int(imm, base=16)
         else:
             imm = self.DEFINITIONS[imm]
 
         rs1 = self.REGISTER_NAMES["zero"]
-        if imm.bit_length() > 10:
+        if imm.bit_length() > 12:
             # lui
             self.__U_type_instruction(
                 opcode=self.INSTRUCTION_OPCODES["lui"],
                 rd=rd,
-                imm=(imm >> 10),
+                imm=(imm >> 12),
             )
             rs1 = rd
 
-        if (imm & 0xF_FFFF) != 0:
+        if (imm & 0x7FF) != 0:
             # addi
-            self.__L_type_instruction(
+            self.__S_type_instruction(
                 opcode=self.INSTRUCTION_OPCODES["addi"],
                 rd=rd,
                 rs1=rs1,
-                imm=imm,
+                imm=imm & 0x7FF,
             )
 
     # instruction
@@ -144,7 +145,7 @@ class Assembler:
         rs2 = self.REGISTER_NAMES[instr.args[1]]
         imm = int(instr.args[2], base=16)
 
-        self.__L_type_instruction(
+        self.__S_type_instruction(
             opcode=opcode,
             rs1=rs1,
             rs2=rs2,
@@ -225,7 +226,7 @@ class Assembler:
         rs1 = self.REGISTER_NAMES[instr.args[0]]
         rs2 = self.REGISTER_NAMES[instr.args[1]]
 
-        self.__L_type_instruction(
+        self.__S_type_instruction(
             opcode=opcode,
             rs1=rs1,
             rs2=rs2,
@@ -238,15 +239,42 @@ class Assembler:
         rs1 = self.REGISTER_NAMES[instr.args[0]]
         rs2 = self.REGISTER_NAMES[instr.args[1]]
 
-        self.__L_type_instruction(
+        self.__S_type_instruction(
             opcode=opcode,
             rs1=rs1,
             rs2=rs2,
             rd=rd,
         )
 
+    def ret(self, instr: Instruction):
+        opcode = self.INSTRUCTION_OPCODES[instr.opcode]
+        self.__L_type_instruction(
+            opcode=opcode,
+        )
+
     # instruction types
     #
+    def __L_type_instruction(
+        self,
+        imm: int = 0,
+        rs1: int = 0,
+        rd: int = 0,
+        opcode: int = 0
+    ):
+        assert (
+            imm.bit_length() <= 15
+            and rd.bit_length() <= 5
+            and rs1.bit_length() <= 5
+            and opcode.bit_length() <= 7
+        ), "One of the elements requires more bits, than the instruction type allows"
+        code = (
+            (opcode << 0)
+            | (rd << 7)
+            | (rs1 << 12)
+            | (imm << 17)
+        )
+        self.binary += code.to_bytes(4, byteorder="big", signed=False)
+
     def __F_type_instruction(
         self,
         imm: int = 0,
@@ -277,7 +305,7 @@ class Assembler:
         )
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
 
-    def __L_type_instruction(
+    def __S_type_instruction(
         self, imm: int = 0, rd: int = 0, rs2: int = 0, rs1: int = 0, opcode: int = 0
     ):
         assert (
