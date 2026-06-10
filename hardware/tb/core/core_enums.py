@@ -8,19 +8,21 @@
 from enum import Enum
 
 class InstTE(Enum):
-    NONE = 0
-    LSU  = 1
-    FPU  = 2
-    UPP  = 3
+    UPP   = 0
+    LOAD  = 1
+    FPU   = 2
+    STORE = 3
 
-class LSUOpTE(Enum): # LSU operation type enum
+class LoadOpTE(Enum): # L-type operation type enum
     LW      = 0
-    SW      = 1
-    ADDI    = 2
-    ADD     = 3
-    MUL     = 4
+    ADDI    = 1
 
-class FPUopTE(Enum): # FPU operation type enum
+class StoreOpTE(Enum): # S-type opertation type enum
+    SW      = 0    
+    ADD     = 1
+    MUL     = 2
+
+class FPUopTE(Enum): # F-type operation type enum
     ADD     = 0b00010,
     MUL     = 0b00011,
     DIV     = 0b00100,
@@ -28,5 +30,5 @@ class FPUopTE(Enum): # FPU operation type enum
     NEG     = 0b00110,
     MAX     = 0b00111
 
-class UPPopTE(Enum): # UPP operation type enum
+class UPPopTE(Enum): # U-type operation type enum
     DUM     = 0b00000

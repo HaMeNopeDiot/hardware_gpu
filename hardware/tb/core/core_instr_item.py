@@ -6,7 +6,7 @@
 # Date: 2026/06
 #-----------------------------------------------------------------------------//
 
-from core.core_enums import InstTE, LSUOpTE, FPUopTE, UPPopTE
+from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE
 
 import cocotb
 DW = 32
@@ -14,26 +14,27 @@ AW = 5
 OP_W = 5
 OP_T_W = 2
 
-LIMM_W = DW - (AW * 3 + OP_W + OP_T_W)
+LIMM_W = DW - (AW * 2 + OP_W + OP_T_W)
 FIMM_W = DW - (AW * 4 + OP_W + OP_T_W + 3)
-UIMM_W = DW - (AW + OP_W + OP_T_W)
+UIMM_W = DW - (AW + OP_W + OP_T_W)          # 32 - 5 - 5 - 2 = 32 - 12 = 20
+SIMM_W = DW - (AW * 3 + OP_W + OP_T_W)
 
 class CoreInstItem():
-    def __init__(self, op_type = InstTE.NONE):
+    def __init__(self, op_type = InstTE.UPP):
         self.op_type    = op_type
 
     def get_machine_code(self) -> int:
         cocotb.log.info(f"Meh")
         return 0
 
-class CILI(CoreInstItem):
+class CISI(CoreInstItem):
     def __init__(self,
-                 op: LSUOpTE,
+                 op: StoreOpTE,
                  rs1_addr: int,
                  rs2_addr: int,
                  rd_addr: int,
                  imm = int,
-                 op_type = InstTE.LSU,
+                 op_type = InstTE.LOAD,
                  ):
         super().__init__(op_type)
         self.rs1_addr = rs1_addr
@@ -107,4 +108,31 @@ class CIUI(CoreInstItem):
             | (self.op_type.value  << (UIMM_W + AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.info(f"CIUI: {hex(res)}")
+        return res
+    
+    
+class CILI(CoreInstItem):
+    def __init__(self,
+                 op: LoadOpTE,
+                 rs1_addr: int,
+                 rd_addr: int,
+                 imm = int,
+                 op_type = InstTE.LOAD,
+                 ):
+        super().__init__(op_type)
+        self.rs1_addr = rs1_addr
+        self.rd_addr  = rd_addr
+        self.imm      = imm
+        self.op_type  = op_type
+        self.op       = op
+
+    def get_machine_code(self) -> int:
+        res = 0
+        res =  self.imm                                        \
+            | (self.rd_addr        <<  LIMM_W)                 \
+            | (self.rs1_addr       << (LIMM_W + 1 * AW))       \
+            | (self.op.value       << (LIMM_W + 2 * AW))       \
+            | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W))
+        assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
+        cocotb.log.info(f"Mewh")
         return res

@@ -8,7 +8,7 @@ from fpu.fppconverter import ieee754_to_float
 from numbers import Real
 from decimal import Decimal
 
-from core.core_instr_item import CILI, CIFI, CIUI, CoreInstItem
+from core.core_instr_item import CILI, CIFI, CISI, CIUI, CoreInstItem
 
 def print_result(result):
     cocotb.log.info(result)
@@ -56,7 +56,7 @@ async def core_test(dut):
 
     await ClockCycles(clk, 30)
 
-    i1 = CIUI(0xAB, 2)
+    i1 = CIUI(imm = 0xAB, rd_addr = 2)
     await launch_inst(dut, clk, i1)
     cocotb.log.info(f"RES")
     await ClockCycles(clk, 20)
