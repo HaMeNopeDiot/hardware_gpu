@@ -40,7 +40,7 @@
   </macro>
   <macro name="access">
     <group>
-      <text value=" -- "/>
+      <text value=" — "/>
       <text variable="URL" prefix="URL: "/>
       <group prefix=" (" suffix=").">
         <text term="accessed" suffix=": "/>
@@ -115,7 +115,7 @@
               <text macro="translator"/>
               <text variable="edition" suffix="-е изд.,"/>
             </group>
-            <text macro="publisher" prefix=" -- "/>
+            <text macro="publisher" prefix=" — "/>
             <text variable="number-of-pages" prefix=" " suffix=" c."/>
           </group>
         </if>
@@ -129,12 +129,12 @@
                 <text variable="container-title" prefix="// "/>
               </group>
             </group>
-            <text macro="publisher" prefix=" -- "/>
+            <text macro="publisher" prefix=" — "/>
             <!-- <group delimiter=" ">
               <label variable="chapter-number" prefix=" ,"/>
               <text variable="chapter-number" suffix=", "/>
             </group> -->
-            <text variable="page" prefix=" -- C. " suffix="."/>
+            <text variable="page" prefix=" — C. " suffix="."/>
           </group>
         </else-if>
         <else-if type="webpage post-weblog" match="any">

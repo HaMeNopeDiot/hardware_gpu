@@ -152,7 +152,7 @@ token_wiki:
   url: https://ru.wikipedia.org/wiki/Токен_(лексический_анализ)
 
 nir_vs_tgsi:
-  type: Article
+  type: Web
   title: Running The RadeonSI NIR Back-End With Mesa 19.1 Git
   url: https://www.phoronix.com/review/radeonsi-nir-2019
 
