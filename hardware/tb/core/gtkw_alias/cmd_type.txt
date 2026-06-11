@@ -1,0 +1,4 @@
+00 U_CMD
+01 L_CMD
+10 F_CMD
+11 S_CMD

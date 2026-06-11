@@ -18,7 +18,7 @@ class LoadOpTE(Enum): # L-type operation type enum
     ADDI    = 1
 
 class StoreOpTE(Enum): # S-type opertation type enum
-    SW      = 0    
+    SW      = 0
     ADD     = 1
     MUL     = 2
 
@@ -31,4 +31,5 @@ class FPUopTE(Enum): # F-type operation type enum
     MAX     = 0b00111
 
 class UPPopTE(Enum): # U-type operation type enum
-    DUM     = 0b00000
+    LUI     = 0b00000
+    RET     = 0b00001

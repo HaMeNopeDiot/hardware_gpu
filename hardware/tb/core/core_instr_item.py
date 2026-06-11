@@ -14,6 +14,9 @@ AW = 5
 OP_W = 5
 OP_T_W = 2
 
+VID_ADDR = 31
+ZERO_ADDR = 0
+
 LIMM_W = DW - (AW * 2 + OP_W + OP_T_W)
 FIMM_W = DW - (AW * 4 + OP_W + OP_T_W + 3)
 UIMM_W = DW - (AW + OP_W + OP_T_W)          # 32 - 5 - 5 - 2 = 32 - 12 = 20
@@ -34,7 +37,7 @@ class CISI(CoreInstItem):
                  rs2_addr: int,
                  rd_addr: int,
                  imm = int,
-                 op_type = InstTE.LOAD,
+                 op_type = InstTE.STORE,
                  ):
         super().__init__(op_type)
         self.rs1_addr = rs1_addr
@@ -47,13 +50,13 @@ class CISI(CoreInstItem):
     def get_machine_code(self) -> int:
         res = 0
         res =  self.imm                                        \
-            | (self.rd_addr        <<  LIMM_W)                 \
-            | (self.rs2_addr       << (LIMM_W + AW))           \
-            | (self.rs1_addr       << (LIMM_W + 2 * AW))       \
-            | (self.op.value       << (LIMM_W + 3 * AW))       \
-            | (self.op_type.value  << (LIMM_W + 3 * AW + OP_W))
+            | (self.rd_addr        <<  SIMM_W)                 \
+            | (self.rs2_addr       << (SIMM_W + AW))           \
+            | (self.rs1_addr       << (SIMM_W + 2 * AW))       \
+            | (self.op.value       << (SIMM_W + 3 * AW))       \
+            | (self.op_type.value  << (SIMM_W + 3 * AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
-        cocotb.log.info(f"Mewh")
+        cocotb.log.info(f"CISI: {hex(res)}")
         return res
 
 class CIFI(CoreInstItem):
@@ -85,20 +88,21 @@ class CIFI(CoreInstItem):
             | (self.argr_addr      << (FIMM_W + 3 + 3 * AW))       \
             | (self.op.value       << (FIMM_W + 3 + 4 * AW))       \
             | (self.op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W))
-        cocotb.log.info(f"Meow")
+        cocotb.log.info(f"CIFI: {hex(res)}")
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         return res
 
 
 class CIUI(CoreInstItem):
     def __init__(self,
+                 op: UPPopTE,
                  imm: int,
                  rd_addr: int,
                  op_type=InstTE.UPP):
         super().__init__(op_type)
         self.imm     = imm
         self.rd_addr = rd_addr
-        self.op      = UPPopTE.DUM
+        self.op      = op
 
     def get_machine_code(self) -> int:
         res = 0
@@ -109,8 +113,8 @@ class CIUI(CoreInstItem):
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.info(f"CIUI: {hex(res)}")
         return res
-    
-    
+
+
 class CILI(CoreInstItem):
     def __init__(self,
                  op: LoadOpTE,
@@ -134,5 +138,5 @@ class CILI(CoreInstItem):
             | (self.op.value       << (LIMM_W + 2 * AW))       \
             | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
-        cocotb.log.info(f"Mewh")
+        cocotb.log.info(f"CILI: {hex(res)}")
         return res
