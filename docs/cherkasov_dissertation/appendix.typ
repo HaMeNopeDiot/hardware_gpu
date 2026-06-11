@@ -77,3 +77,10 @@
   sourcecode(lang: "asm")[#raw(read("code/logged.asm"))]
   , caption: [Листинг файла vert_shader.asm]
 )
+
+
+= Приложение 12
+#figure(
+  sourcecode(lang: "python")[#raw(read("code/assembler.py"))]
+  , caption: [Листинг файла assembler.py]
+)
