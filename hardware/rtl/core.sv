@@ -1,14 +1,14 @@
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// ------------------------------------------------------------------------------//
+// ---------------------------------------------------------------------------//
 // Purpose: GPU Core
 // Date: 2026/06
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
-/*===================================================================================//
+/*============================================================================//
 region MODULE DEFINITION
-//===================================================================================*/
+//============================================================================*/
 module core
     import tu_pkg::thread_command_t;
     import tu_pkg::thread_info_t;
@@ -24,6 +24,11 @@ module core
     // AHB
     import ahb_pkg::ahb_mports_t;
     import ahb_pkg::ahb_sports_t;
+
+    import ahb_pkg::hsize_e;
+    import ahb_pkg::hburst_e;
+    import ahb_pkg::hprot_t;
+    import ahb_pkg::htrans_e;
 
     // LSU
     import lsu_pkg::lsu_cmd_e;
@@ -43,12 +48,45 @@ module core
     input   cmd_t                       instr_i,
     input   logic                       instr_valid_i,
     /*============================### AHB SIGNALS ###=========================*/
-    input   ahb_sports_t                lsu_ahb_i,
-    output  ahb_mports_t                lsu_ahb_o,
+    // input   ahb_sports_t                lsu_ahb_i,
+    output   logic [MEM_AW - 1: 0]       lsu_haddr,
+    output   logic                       lsu_hwrite,
+    output   hsize_e                     lsu_hsize,
+    output   hburst_e                    lsu_hburst,
+    output   hprot_t                     lsu_hprot,
+    output   htrans_e                    lsu_htrans,
+    output   logic                       lsu_hmastlock,
+    output   logic [DW - 1: 0]           lsu_hwdata,
+    // output  ahb_mports_t                lsu_ahb_o,
+    input   logic                       lsu_hready,
+    input   logic                       lsu_hresp,
+    input   logic [DW - 1: 0]           lsu_hrdata,
     /*=============================### TU SIGNALS ###=========================*/
     output  thread_info_t               thread_info
     //========================================================================//
 );
+/*============================================================================//
+region AHB
+//============================================================================*/
+ahb_sports_t lsu_ahb_i;
+ahb_mports_t lsu_ahb_o;
+
+always_comb begin
+    lsu_haddr     = lsu_ahb_o.haddr    ;
+    lsu_hwrite    = lsu_ahb_o.hwrite   ;
+    lsu_hsize     = lsu_ahb_o.hsize    ;
+    lsu_hburst    = lsu_ahb_o.hburst   ;
+    lsu_hprot     = lsu_ahb_o.hprot    ;
+    lsu_htrans    = lsu_ahb_o.htrans   ;
+    lsu_hmastlock = lsu_ahb_o.hmastlock;
+    lsu_hwdata    = lsu_ahb_o.hwdata   ;
+end
+
+always_comb begin
+    lsu_ahb_i.hready = lsu_hready;
+    lsu_ahb_i.hresp  = lsu_hresp ;
+    lsu_ahb_i.hrdata = lsu_hrdata;
+end
 
 /*============================================================================//
 region LOGIC
@@ -188,6 +226,8 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         //==================### DEC SIGNALS ###==================//
         .dec_cmd        (fpu_cmd            ),  // <-
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
+        //==================### VID SIGNALS ###==================//
+        .vid_i          ((DW)'(i)           ),  // <- fixme later
         //==================### OUT SIGNALS ###==================//
         .thread_info    (thread_unit_info[i]),  // ->
         .thread_state   (thread_states[i]   )   // ->

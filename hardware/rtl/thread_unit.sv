@@ -65,9 +65,9 @@ module thread_unit
     import tu_pkg::s_cmd_t;
 
 
-    import tu_pkg::LOP_LW;
-    import tu_pkg::SOP_SW;
-    import tu_pkg::AOP_ADD;
+    import tu_pkg::LOP_LW, tu_pkg::LOP_ADDI;
+    import tu_pkg::SOP_SW, tu_pkg::SOP_ADD, tu_pkg::SOP_MUL;
+    import tu_pkg::AOP_ADD, tu_pkg::AOP_MUL;
 
 
     import tu_pkg::dw_value_t;
@@ -94,9 +94,11 @@ module thread_unit
     input logic                 lsu_ready_i,
 
     /*===========================### DEC SIGNALS ###==========================*/
-    input  thread_command_t     dec_cmd,
-    input  logic                dec_cmd_valid,
+    input  thread_command_t     dec_cmd,        // fpu
+    input  logic                dec_cmd_valid,  // fpu valid
 
+    /*===========================### VID SIGNALS ###==========================*/
+    input logic [DW - 1: 0]     vid_i,
     /*===========================### OUT SIGNALS ###==========================*/
     output thread_info_t        thread_info,
     output tu_state_e           thread_state
@@ -134,6 +136,10 @@ assign  u_cmd = u_cmd_valid? cmd.u: '0;
 s_cmd_t s_cmd;
 assign  s_cmd = s_cmd_valid? cmd.s: '0;
 
+logic  store_op, load_op;
+assign store_op = s_cmd_valid? cmd.s.operand == SOP_SW: '0;
+assign load_op  = l_cmd_valid? cmd.l.operand == LOP_LW: '0;
+
 /*============================================================================//
 region FSM
 //============================================================================*/
@@ -148,7 +154,7 @@ end
 always_comb begin
     case (thread_state)
         TU_STATE_IDLE:
-            if (l_cmd_valid || s_cmd_valid) // TU wants request to LSU
+            if (load_op || store_op) // TU wants request to LSU
                 next_thread_state   = TU_STATE_REQUEST;
             else
                 next_thread_state   = TU_STATE_IDLE;
@@ -164,10 +170,20 @@ always_comb begin
     endcase
 end
 
+// logic  tu_idle;
+logic  tu_req;
+// logic  tu_done;
+// assign tu_idle = thread_state == TU_STATE_IDLE;
+assign tu_req  = thread_state == TU_STATE_REQUEST;
+// assign tu_done = thread_state == TU_STATE_DONE;
 
 /*============================================================================//
 region LOGIC
 //============================================================================*/
+
+logic [DW - 1: 0]   alu_or; // operation result
+logic               alu_rr; // result ready
+
 
 thread_result_t fpu_result;
 
@@ -205,13 +221,23 @@ end
 
 // write
 always_comb begin
-    if (rd_valid && (l_cmd_valid || s_cmd_valid)) begin
+    if (rd_valid && (load_op || store_op)) begin
         if (l_cmd_valid)
             addr_w = l_cmd.rd_addr;
         else
             addr_w = s_cmd.rd_addr;
         data_w = rd;
         wr_en  = '1;
+    end
+    else if (l_cmd_valid) begin
+        addr_w = l_cmd.rd_addr;
+        data_w = alu_or;
+        wr_en  = alu_rr;
+    end
+    else if (s_cmd_valid) begin
+        addr_w = s_cmd.rd_addr;
+        data_w = alu_or;
+        wr_en  = alu_rr;
     end
     else if (u_cmd_valid && u_cmd.operand == '0) begin
         addr_w = u_cmd.rd_addr;
@@ -242,7 +268,29 @@ always_comb begin
         addr_rs1 = '0;
 end
 
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         addr_rs1 <= '0;
+//     else if (~tu_req)
+//         if (s_cmd_valid)
+//             addr_rs1 <= s_cmd.rs1_addr;
+//         else if (l_cmd_valid)
+//             addr_rs1 <= l_cmd.rs1_addr;
+//         else
+//             addr_rs1 <= '0;
+//     else
+//         addr_rs1 <= addr_rs1;
+// end
+
 assign addr_rs2 = s_cmd_valid? s_cmd.rs2_addr: '0;
+
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         addr_rs2 <= '0;
+//     else if (~tu_req)
+//         addr_rs2 <= s_cmd_valid? s_cmd.rs2_addr: '0;
+// end
+
 
 // handshake sig
 logic out_ready_i;
@@ -261,7 +309,7 @@ always_comb begin
     case (cmd_op_type)
         L_CMD: begin
             case (l_cmd.operand)
-                LOP_LW: begin
+                LOP_LW, LOP_ADDI: begin
                     alu_struct.o1       = data_rs1;
                     alu_struct.o2       = (DW)'(l_cmd.imm);
                     alu_struct.op       = AOP_ADD;
@@ -280,6 +328,18 @@ always_comb begin
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
+                SOP_ADD: begin
+                    alu_struct.o1       = data_rs1;
+                    alu_struct.o2       = data_rs2;
+                    alu_struct.op       = AOP_ADD;
+                    alu_struct.valid    = '1;
+                end
+                SOP_MUL: begin
+                    alu_struct.o1       = data_rs1;
+                    alu_struct.o2       = data_rs2;
+                    alu_struct.op       = AOP_MUL;
+                    alu_struct.valid    = '1;
+                end
                 default: begin
                     alu_struct = '0;
                 end
@@ -290,23 +350,30 @@ always_comb begin
     endcase
 end
 
-logic [DW - 1: 0]   alu_or; // operation result
-logic               alu_rr; // result ready
 
 /*============================================================================//
 region OUT
 //============================================================================*/
 assign  thread_info     = fpu_result.info;
 
-
-always_comb begin
-    if(l_cmd_valid || s_cmd_valid) begin
-        rs1         = alu_or;
-        rs1_valid   = alu_rr;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        rs1         <= '0;
+        rs1_valid   <= '0;
+    end
+    else if (~tu_req) begin
+        if (l_cmd_valid || s_cmd_valid) begin
+            rs1         <= alu_or;
+            rs1_valid   <= alu_rr;
+        end
+        else begin
+            rs1         <= data_rs1;
+            rs1_valid   <= '1;
+        end
     end
     else begin
-        rs1         = data_rs1;
-        rs1_valid   = '1;
+        rs1         <= rs1;
+        rs1_valid   <= rs1_valid;
     end
 end
 
@@ -360,6 +427,7 @@ tu_regfile #(
 ) tu_regfile_u (
     //================### COMMON SIGNALS ###=================//
     .clk     (clk),                 // <-
+    .vid_i   (vid_i),               // <-
     //=================### WRITE SIGNALS ###=================//
     .wr_en   (wr_en),               // <-
     .addr_w  (addr_w),              // <-

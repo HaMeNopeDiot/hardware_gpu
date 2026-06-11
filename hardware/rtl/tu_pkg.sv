@@ -76,7 +76,7 @@ package tu_pkg;
     parameter int unsigned U_OP_W = 4 + 1;
     typedef enum logic[U_OP_W - 1: 0] {
         UOP_IMM = 0,    // rd = rs1 << 20
-        UOP_APC = 1     // PC = PC + 4
+        UOP_RET = 1     // End of program
     } u_op_e;
 
     /*==========================================================================//

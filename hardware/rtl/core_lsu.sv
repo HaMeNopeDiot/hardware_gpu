@@ -89,10 +89,7 @@ always_comb begin
                 next_state = LSU_IDLE;
         end
         LSU_SEND: begin // Wait info from TU and send it to SRAM
-            if (req_valid)
-                next_state = LSU_RQ;
-            else
-                next_state = LSU_SEND;
+            next_state = LSU_RQ;
         end
         LSU_RQ: begin // Wait answer from SRAM
             if (mem_ans_valid)
@@ -128,15 +125,24 @@ logic  rw_req;
 assign rw_req = op_is_load? '0: '1;
 
 logic [MEM_AW - 1: 0] mem_addr;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        mem_addr <= '0;
-    else if (rs1_valid && op_is_store)
-        mem_addr <= (MEM_AW)'(rs1);
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         mem_addr <= '0;
+//     else if (rs1_valid && op_is_store)
+//         mem_addr <= (MEM_AW)'(rs1);
+//     else if (rs1_valid && op_is_load && send_rq)
+//         mem_addr <= (MEM_AW)'(rs1);
+//     else
+//         mem_addr <= '0;
+// end
+
+always_comb begin
+    if (rs1_valid && op_is_store)
+        mem_addr = (MEM_AW)'(rs1);
     else if (rs1_valid && op_is_load && send_rq)
-        mem_addr <= (MEM_AW)'(rs1);
+        mem_addr = (MEM_AW)'(rs1);
     else
-        mem_addr <= '0;
+        mem_addr = '0;
 end
 
 /*============================================================================//
@@ -167,26 +173,43 @@ region WRITE
 //============================================================================*/
 
 logic [DW -1 : 0] wdata;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        wdata <= '0;
-    else if (send_rq && op_is_store && rs2_valid)
-        wdata <= rs2;
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         wdata <= '0;
+//     else if (send_rq && op_is_store && rs2_valid)
+//         wdata <= rs2;
+//     else
+//         wdata <= '0;
+// end
+
+always_comb begin
+    if (send_rq && op_is_store && rs2_valid)
+        wdata = rs2;
     else
-        wdata <= '0;
+        wdata = '0;
 end
 
 logic req_valid;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        req_valid <= '0;
-    else if (send_rq && op_is_store)
-        req_valid <= rs1_valid && rs2_valid;
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         req_valid <= '0;
+//     else if (send_rq && op_is_store)
+//         req_valid <= rs1_valid && rs2_valid;
+//     else if (send_rq && op_is_load)
+//         req_valid <= rs1_valid;
+//     else
+//         req_valid <= '0;
+// end
+
+always_comb begin
+    if (send_rq && op_is_store)
+        req_valid = rs1_valid && rs2_valid;
     else if (send_rq && op_is_load)
-        req_valid <= rs1_valid;
+        req_valid = rs1_valid;
     else
-        req_valid <= '0;
+        req_valid = '0;
 end
+
 /*============================================================================//
 region INSTANCE
 //============================================================================*/

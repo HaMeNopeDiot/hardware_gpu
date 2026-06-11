@@ -1,14 +1,14 @@
-//-------------------------------------------------------------------------------//
+//------------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// ------------------------------------------------------------------------------//
-// Purpose: GPU Core fetcher
+// -----------------------------------------------------------------------------//
+// Purpose: AHB Master
 // Date: 2026/06
-//-------------------------------------------------------------------------------//
+//------------------------------------------------------------------------------//
 
-/*===================================================================================//
+/*==============================================================================//
 region MODULE DEFINITION
-//===================================================================================*/
+//==============================================================================*/
 module ahb_master
     // imports here
     import ahb_pkg::hburst_e;
@@ -108,13 +108,25 @@ region LOGIC
 //============================================================================*/
 
 logic  req_active;
-assign req_active = req_txn_i;
+// assign req_active = req_txn_i;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        req_active <= '0;
+    else
+        req_active <= req_txn_i;
+end
 
 //============================================================================*/
 // AHB FSM
 //============================================================================*/
 
 ahb_txn_e fst_state, fst_state_next;
+
+// logic  req_ahb_txn;
+logic  res_ahb_txn;
+// assign req_ahb_txn = fst_state == AHB_IDLE && fst_state_next == AHB_ACTIVE;
+assign res_ahb_txn =    (fst_state == AHB_ACTIVE) || (fst_state == AHB_STALL)
+                    &&  hready;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
@@ -137,7 +149,7 @@ always_comb begin
             if (hresp)
                 fst_state_next = AHB_ERROR;
             else
-                if (req_active)
+                if (~(res_ahb_txn && ~req_active))
                     if (hready)
                         fst_state_next = AHB_STALL;
                     else
@@ -162,7 +174,8 @@ assign mng_is_active    = fst_state_next == AHB_ACTIVE;
 // assign mng_is_err       = fst_state_next == AHB_ERROR;
 assign mng_is_idle      = fst_state_next == AHB_IDLE;
 
-logic mng_is_stable_active = mng_is_active || mng_is_wait;
+logic  mng_is_stable_active;
+assign mng_is_stable_active = mng_is_active || mng_is_wait;
 
 //============================================================================*/
 // AHB LOGIC
@@ -290,28 +303,44 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 // hwrite
-assign hwrite = req_active? rw_i: '0;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        hwrite <= '0;
+    else
+        hwrite <= req_txn_i? rw_i: '0;
+end
+
 
 // hwdata
-assign hwdata = req_active? data_i: '0;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        hwdata <= '0;
+    else
+        hwdata <= req_txn_i? data_i: '0;
+end
 
 // hmastlock
-assign hmastlock = ~mng_is_idle;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        hmastlock <= '0;
+    else
+        hmastlock <= ~mng_is_idle;
+end
 
 // haddr
-assign haddr = req_active? addr_i: '0;
-
-// get data
-logic  data_get_ph;
-assign data_get_ph = (~hwrite) && (hready) && (fst_state == AHB_STALL || fst_state == AHB_ACTIVE);
-
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        haddr <= '0;
+    else
+        haddr <= req_txn_i? addr_i: '0;
+end
 
 /*============================================================================//
 region OUT
 //============================================================================*/
 
-assign data_o = data_get_ph? hrdata: '0;
-assign data_valid_o = data_get_ph;
+assign data_o = res_ahb_txn? hrdata: '0;
+assign data_valid_o = res_ahb_txn;
 
 //============================================================================*/
 endmodule
