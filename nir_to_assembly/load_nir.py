@@ -38,7 +38,7 @@ target_code = generator.generate(target_code)
 # print(f"Storage stack: \n{generator.storage_stack}")
 # for i in range(len(generator.registers)):
 #     print(f"{i:<2} {generator.registers[i]}")
-
+# print(generator.density_history)
 
 result = Assembler().assemble(target_code)
 with open("vertex_shader.bin", "bw") as file:

@@ -40,6 +40,7 @@ class BasicBlockGenerator:
         self.storage_registers = {}
 
         self.target_code = []
+        self.density_history = []
 
     def _remove_register_association(self, ir_name: str, regnum: int) -> None:
         self.registers[regnum] = self.DEFAULT_REGISTER_INFO
@@ -95,6 +96,7 @@ class BasicBlockGenerator:
                         args=[self.register_names[regnum], "sp", str(4 * i)],
                     )
                 )
+                self.density_history.append(self._calculate_register_density())
 
         self.storage_stack.append(ir_name)
         self.storage_memory[ir_name] = ["sp", str(4 * (len(self.storage_stack) - 1))]
@@ -110,6 +112,7 @@ class BasicBlockGenerator:
                 ],
             )
         )
+        self.density_history.append(self._calculate_register_density())
 
     def _get_register_for(self, ir_name: str, dont_touch: set, info: LiveInfo) -> int:
         # if the value we need is loaded into the registers just return it
@@ -132,9 +135,18 @@ class BasicBlockGenerator:
                     args=self.storage_memory[ir_name],
                 )
             )
+            self.density_history.append(self._calculate_register_density())
             return to_load
 
         return to_load
+
+    def _calculate_register_density(self) -> float:
+        count = 0
+        for i in range(self.FIRST_GP_REGISTER, self.NUM_OF_REGISTERS):
+            if self.registers[i].live:
+                count += 1
+
+        return count / (self.NUM_OF_REGISTERS - self.FIRST_GP_REGISTER)
 
     def generate(self, ir: list[Instruction]) -> list[Instruction]:
         """
@@ -148,6 +160,7 @@ class BasicBlockGenerator:
         self.target_code.append(
             Instruction(opcode="li", result="sp", result_size=1, args=["stack_base"])
         )
+        self.density_history.append(self._calculate_register_density())
         self.target_code.append(
             Instruction(
                 opcode="li",
@@ -155,6 +168,9 @@ class BasicBlockGenerator:
                 result_size=1,
                 args=["stack_size"],
             )
+        )
+        self.density_history.append(
+            1.0 / (self.NUM_OF_REGISTERS - self.FIRST_GP_REGISTER)
         )
         self.target_code.append(
             Instruction(
@@ -164,6 +180,9 @@ class BasicBlockGenerator:
                 args=[self.register_names[self.FIRST_GP_REGISTER], "v_id"],
             )
         )
+        self.density_history.append(
+            1.0 / (self.NUM_OF_REGISTERS - self.FIRST_GP_REGISTER)
+        )
         self.target_code.append(
             Instruction(
                 opcode="add",
@@ -172,6 +191,7 @@ class BasicBlockGenerator:
                 args=[self.register_names[self.FIRST_GP_REGISTER], "sp"],
             )
         )
+        self.density_history.append(self._calculate_register_density())
 
         for i in range(len(ir)):
             dont_touch = set()
@@ -206,6 +226,7 @@ class BasicBlockGenerator:
                     args=args,
                 )
             )
+            self.density_history.append(self._calculate_register_density())
 
         self.target_code.append(
             Instruction(
@@ -215,6 +236,7 @@ class BasicBlockGenerator:
                 args=[],
             )
         )
+        self.density_history.append(0.0)
 
         return self.target_code
 
