@@ -29,6 +29,7 @@ module core_csrm_hndl
     input  apb4_input_t             apb4_i,
     output apb4_output_t            apb4_o,
     /*=========================### OUT SIGNALS ###============================*/
+    input  logic                    ret_i,
     output logic                    en_o,
     output logic [DW - 1: 0]        vid_o [THREAD_CNT]
     //========================================================================//
@@ -81,21 +82,22 @@ region INSTANCES
 //                     *** CORE CSRM ***                     //
 // NOTE: write a purpose here
 core_csrm #(
-    .AW          (AW),
-    .DW          (DW),
+    .AW          (AW        ),
+    .DW          (DW        ),
     .THREAD_CNT  (THREAD_CNT),
-    .DEBUG_BUILD (0)
+    .DEBUG_BUILD (0         )
 ) core_csrm_u (
     //================### COMMON SIGNALS ###=================//
-    .clk    (clk),          // <-
-    .rst_n  (rst_n),        // <-
-    .addr   (paddr),        // <-
-    .wdata  (pwdata),       // <-
+    .clk    (clk        ),  // <-
+    .rst_n  (rst_n      ),  // <-
+    .addr   (paddr      ),  // <-
+    .wdata  (pwdata     ),  // <-
     .wedata (csrm_wedata),  // <-
-    .rdata  (csrm_rdata),   // ->
+    .rdata  (csrm_rdata ),  // ->
     //==============### ADDITIONAL SIGNALS ###===============//
-    .en_o   (en_o),         // ->
-    .vid_o  (vid_o)         // ->
+    .ret_i  (ret_i      ),  // <-
+    .en_o   (en_o       ),  // ->
+    .vid_o  (vid_o      )   // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -104,30 +106,30 @@ core_csrm #(
 //                     *** APB SLAVE ***                     //
 // NOTE: write a purpose here
 apb_slave #(
-    .AW       (AW),
-    .DW       (DW),
-    .MIN_ADDR (MIN_ADDR),
-    .MAX_ADDR (MAX_ADDR)
+    .AW       (AW       ),
+    .DW       (DW       ),
+    .MIN_ADDR (MIN_ADDR ),
+    .MAX_ADDR (MAX_ADDR )
 ) apb_slave_u (
     //================### COMMON SIGNALS ###=================//
-    .pclk         (clk),            // <-
-    .presetn      (rst_n),          // <-
+    .pclk         (clk        ),    // <-
+    .presetn      (rst_n      ),    // <-
     //===============### APB SLAVE SIGNALS ###===============//
     //                 --- INPUT SIGNALS ---                 //
-    .paddr        (paddr),          // <-
-    .pprot        (pprot),          // <-
-    .psel         (psel),           // <-
-    .penable      (penable),        // <-
-    .pwrite       (pwrite),         // <-
-    .pwdata       (pwdata),         // <-
-    .pstrb        (pstrb),          // <-
+    .paddr        (paddr      ),    // <-
+    .pprot        (pprot      ),    // <-
+    .psel         (psel       ),    // <-
+    .penable      (penable    ),    // <-
+    .pwrite       (pwrite     ),    // <-
+    .pwdata       (pwdata     ),    // <-
+    .pstrb        (pstrb      ),    // <-
     //                --- OUTPUT SIGNALS ---                 //
-    .pready       (pready),         // ->
-    .prdata       (prdata),         // ->
-    .pslverr      (pslverr),        // ->
+    .pready       (pready     ),    // ->
+    .prdata       (prdata     ),    // ->
+    .pslverr      (pslverr    ),    // ->
     //==============### ADDITIONAL SIGNALS ###===============//
-    .throw_pready ('0),             // <-
-    .rdata        (csrm_rdata),     // <-
+    .throw_pready ('0         ),    // <-
+    .rdata        (csrm_rdata ),    // <-
     .we_data_out  (csrm_wedata)     // ->
     //=======================================================//
 );

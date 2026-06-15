@@ -19,6 +19,7 @@ module core
     import tu_pkg::L_CMD;
     import tu_pkg::dw_value_t;
     import tu_pkg::TU_STATE_REQUEST;
+    import tu_pkg::TU_STATE_IDLE;
     import tu_pkg::tu_state_e;
 
     // AHB
@@ -97,14 +98,27 @@ dec_op_type_e       cmd_op_type;
 thread_command_t    fpu_cmd;
 logic               fpu_cmd_valid;
 
-lsu_cmd_e   lsu_cmd;
-logic       lsu_cmd_valid;
+lsu_cmd_e           lsu_cmd;
+logic               lsu_cmd_valid;
+
+logic               no_req_from_threads;
 
 /*============================================================================//
 region THREAD INTERCONNECT
 //============================================================================*/
 
-logic [THREAD_W - 1: 0]      thread_sel;
+logic [THREAD_W - 1: 0]      thread_sel, thread_sel_d1;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        thread_sel_d1 <= '0;
+    else
+        thread_sel_d1 <= thread_sel;
+end
+
+logic  thread_change;
+assign thread_change = thread_sel_d1 != thread_sel;
+
 
 reg_if              rt_if [THREAD_CNT](); // registers thread interface
 reg_if              rl_if ();             // registers lsu interface
@@ -123,7 +137,7 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_lsu_ready_demux
 end
 
 logic  thread_req, lsu_done;
-assign thread_req = thread_states[thread_sel] == TU_STATE_REQUEST;
+assign thread_req = thread_states[thread_sel] != TU_STATE_IDLE;
 
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_if_interpretator
     assign rs1_arr[i] = rt_if[i].rs1;
@@ -150,10 +164,11 @@ core_arbiter #(
     .THREAD_CNT (THREAD_CNT)
 ) core_arbitrage_u (
     //================### COMMON SIGNALS ###=================//
-    .clk          (clk),                    // <-
-    .rst_n        (rst_n),                  // <-
-    .threads_state(thread_states),          // <-
-    .thread_sel   (thread_sel)              // ->
+    .clk                    (clk),                    // <-
+    .rst_n                  (rst_n),                  // <-
+    .threads_state          (thread_states),          // <-
+    .thread_sel             (thread_sel),             // ->
+    .no_req_from_threads    (no_req_from_threads)     // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -176,7 +191,9 @@ core_decoder #() core_decoder_u (
     .lsu_cmd_valid  (lsu_cmd_valid),    // ->
     //================### SIGNALS TO FPU ###=================//
     .fpu_cmd        (fpu_cmd      ),    // ->
-    .fpu_cmd_valid  (fpu_cmd_valid)     // ->
+    .fpu_cmd_valid  (fpu_cmd_valid),     // ->
+    //===============### SIGNALS FROM FPU ###================//
+    .threads_valid  (no_req_from_threads) // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -184,23 +201,26 @@ core_decoder #() core_decoder_u (
 // ///////////////////////////////////////////////////////// //
 //                     *** CORE LSU ***                      //
 core_lsu #(
-    .DW     (DW),
-    .MEM_AW (MEM_AW)
+    .DW         (DW),
+    .MEM_AW     (MEM_AW),
+    .THREAD_CNT (THREAD_CNT)
 ) core_lsu_u (
     //================### COMMON SIGNALS ###=================//
-    .clk               (clk            ),   // <-
-    .rst_n             (rst_n          ),   // <-
+    .clk               (clk                ),   // <-
+    .rst_n             (rst_n              ),   // <-
     //=============### SIGNALS FROM DECODER ###==============//
-    .lsu_op            (lsu_cmd        ),   // <-
-    .lsu_op_valid      (lsu_cmd_valid  ),   // <-
+    .lsu_op            (lsu_cmd            ),   // <-
+    .lsu_op_valid      (lsu_cmd_valid      ),   // <-
+    .thread_req_start  (thread_change      ),   // <-
+    .threads_req_done  (no_req_from_threads),   // <-
     //===========### SIGNALS FROM THREAD UNIT ###============//
-    .r_if              (rl_if.lsu      ),   // <->
+    .r_if              (rl_if.lsu          ),   // <->
     //============### SIGNALS FROM MEMORY BUS ###============//
-    .ahb_i             (lsu_ahb_i      ),   // <-
-    .ahb_o             (lsu_ahb_o      ),   // ->
+    .ahb_i             (lsu_ahb_i          ),   // <-
+    .ahb_o             (lsu_ahb_o          ),   // ->
     //================### HANDSHAKE SIGNALS ###==============//
-    .lsu_ready_o       (lsu_done       ),   // ->
-    .lsu_valid_i       (thread_req     )    // <-
+    .lsu_ready_o       (lsu_done           ),   // ->
+    .lsu_valid_i       (thread_req         )    // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

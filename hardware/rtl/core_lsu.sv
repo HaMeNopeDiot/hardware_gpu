@@ -25,9 +25,13 @@ module core_lsu
 
     import ahb_pkg::ahb_mports_t;
     import ahb_pkg::ahb_sports_t;
+
 #(
-    parameter int unsigned DW = 64,
-    parameter int unsigned MEM_AW = 32
+    parameter int unsigned DW           = 64,
+    parameter int unsigned MEM_AW       = 32,
+    parameter int unsigned THREAD_CNT   = 4,
+
+    localparam int unsigned TW          = $clog2(THREAD_CNT)
 ) (
     /*============================### COMMON SIGNALS ###======================*/
     input  logic                    clk,
@@ -36,13 +40,41 @@ module core_lsu
     /*=========================### SIGNALS FROM DECODER ###===================*/
     input  lsu_cmd_e                lsu_op,
     input  logic                    lsu_op_valid,
+    input  logic                    thread_req_start,
+    input  logic                    threads_req_done,
     /*=======================### SIGNALS FROM MEMORY BUS ###==================*/
+`ifdef SIMPLE_AHB_PORTS
+    // input   ahb_sports_t                lsu_ahb_i,
+    output   logic [MEM_AW - 1: 0]  haddr,
+    output   logic                  hwrite,
+    output   hsize_e                hsize,
+    output   hburst_e               hburst,
+    output   hprot_t                hprot,
+    output   htrans_e               htrans,
+    output   logic                  hmastlock,
+    output   logic [DW - 1: 0]      hwdata,
+    // output  ahb_mports_t                lsu_ahb_o,
+    input   logic                   hready,
+    input   logic                   hresp,
+    input   logic [DW - 1: 0]       hrdata,
+`else
     input  ahb_sports_t             ahb_i,
     output ahb_mports_t             ahb_o,
+`endif
 
     /*=======================### SIGNALS FROM THREAD UNIT ###=================*/
-    reg_if.lsu                      r_if,
 
+`ifndef NO_IF_SUPPORT
+    reg_if.lsu                      r_if,
+`else
+    input  logic [DW - 1: 0]        rs1,
+    input  logic                    rs1_valid,
+    input  logic [DW - 1: 0]        rs2,
+    input  logic                    rs2_valid,
+
+    output logic [DW - 1: 0]        rd,
+    output logic                    rd_valid,
+`endif
     /*=========================### SIGNALS HANDSHAKE ###======================*/
     output logic                    lsu_ready_o,
     input  logic                    lsu_valid_i
@@ -51,19 +83,71 @@ module core_lsu
 );
 
 /*============================================================================//
+region HELPERS
+//============================================================================*/
+
+`ifdef SIMPLE_AHB_PORTS
+    ahb_sports_t ahb_i;
+    ahb_mports_t ahb_o;
+
+    always_comb begin
+        haddr     = ahb_o.haddr    ;
+        hwrite    = ahb_o.hwrite   ;
+        hsize     = ahb_o.hsize    ;
+        hburst    = ahb_o.hburst   ;
+        hprot     = ahb_o.hprot    ;
+        htrans    = ahb_o.htrans   ;
+        hmastlock = ahb_o.hmastlock;
+        hwdata    = ahb_o.hwdata   ;
+    end
+
+    always_comb begin
+        ahb_i.hready = hready;
+        ahb_i.hresp  = hresp ;
+        ahb_i.hrdata = hrdata;
+    end
+`endif
+
+`ifndef IF_SUPPORT
+    // Register interface
+    logic [DW - 1: 0] rs1,       rs2,       rd;
+    logic             rs1_valid, rs2_valid, rd_valid;
+    // in
+    assign rs1              = r_if.rs1.value;
+    assign rs1_valid        = r_if.rs1.valid;
+    assign rs2              = r_if.rs2.value;
+    assign rs2_valid        = r_if.rs2.valid;
+    // out
+    assign r_if.rd.value    = rd;
+    assign r_if.rd.valid    = rd_valid;
+`endif
+
+/*============================================================================//
 region LOGIC
 //============================================================================*/
 
-// Register interface
-logic [DW - 1: 0] rs1,       rs2,       rd;
-logic             rs1_valid, rs2_valid, rd_valid;
-assign rs1              = r_if.rs1.value;
-assign rs1_valid        = r_if.rs1.valid;
-assign rs2              = r_if.rs2.value;
-assign rs2_valid        = r_if.rs2.valid;
+logic lsu_active;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        lsu_active <= '0;
+    else if (lsu_op_valid)
+        lsu_active <= '1;
+    else if (threads_req_done)
+        lsu_active <= '0;
+    else
+        lsu_active <= lsu_active;
+end
 
-assign r_if.rd.value    = rd;
-assign r_if.rd.valid    = rd_valid;
+lsu_cmd_e lsu_op_ff;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        lsu_op_ff <= LSU_L;
+    else if (lsu_op_valid)
+        lsu_op_ff <= lsu_op;
+end
+
+logic  lsu_do;
+assign lsu_do = lsu_active && thread_req_start;
 
 /*============================================================================//
 region FSM
@@ -83,7 +167,7 @@ end
 always_comb begin
     case (state)
         LSU_IDLE: begin // Get command
-            if (lsu_op_valid)
+            if (lsu_do)
                 next_state = LSU_SEND;
             else
                 next_state = LSU_IDLE;
@@ -118,23 +202,13 @@ assign  get_res = next_state == LSU_DONE;
 region COMMON
 //============================================================================*/
 logic  op_is_load, op_is_store;
-assign op_is_load   = lsu_op == LSU_L;
-assign op_is_store  = lsu_op == LSU_S;
+assign op_is_load   = lsu_op_ff == LSU_L;
+assign op_is_store  = lsu_op_ff == LSU_S;
 
 logic  rw_req;
 assign rw_req = op_is_load? '0: '1;
 
 logic [MEM_AW - 1: 0] mem_addr;
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         mem_addr <= '0;
-//     else if (rs1_valid && op_is_store)
-//         mem_addr <= (MEM_AW)'(rs1);
-//     else if (rs1_valid && op_is_load && send_rq)
-//         mem_addr <= (MEM_AW)'(rs1);
-//     else
-//         mem_addr <= '0;
-// end
 
 always_comb begin
     if (rs1_valid && op_is_store)
@@ -149,23 +223,34 @@ end
 region READ
 //============================================================================*/
 
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        rd <= '0;
-    else if (get_res && op_is_load)
-        rd <= mem_data;
-    else
-        rd <= '0;
+always_comb begin
+    if (get_res && op_is_load) begin
+        rd = mem_data;
+        rd_valid = mem_ans_valid;
+    end
+    else begin
+        rd = '0;
+        rd_valid = '0;
+    end
 end
 
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        rd_valid <= '0;
-    else if (get_res && op_is_load)
-        rd_valid <= mem_ans_valid;
-    else
-        rd_valid <= '0;
-end
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         rd <= '0;
+//     else if (get_res && op_is_load)
+//         rd <= mem_data;
+//     else
+//         rd <= '0;
+// end
+
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         rd_valid <= '0;
+//     else if (get_res && op_is_load)
+//         rd_valid <= mem_ans_valid;
+//     else
+//         rd_valid <= '0;
+// end
 
 
 /*============================================================================//
@@ -173,14 +258,6 @@ region WRITE
 //============================================================================*/
 
 logic [DW -1 : 0] wdata;
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         wdata <= '0;
-//     else if (send_rq && op_is_store && rs2_valid)
-//         wdata <= rs2;
-//     else
-//         wdata <= '0;
-// end
 
 always_comb begin
     if (send_rq && op_is_store && rs2_valid)
@@ -190,16 +267,6 @@ always_comb begin
 end
 
 logic req_valid;
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         req_valid <= '0;
-//     else if (send_rq && op_is_store)
-//         req_valid <= rs1_valid && rs2_valid;
-//     else if (send_rq && op_is_load)
-//         req_valid <= rs1_valid;
-//     else
-//         req_valid <= '0;
-// end
 
 always_comb begin
     if (send_rq && op_is_store)
@@ -220,7 +287,7 @@ region INSTANCE
 ahb_master #(
     .DW (DW),
     .AW (MEM_AW),
-    .TW (2)
+    .TW (TW)
 ) ahb_master_u (
     //================### COMMON SIGNALS ###=================//
     .clk          (clk          ),  // <-

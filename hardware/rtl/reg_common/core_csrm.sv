@@ -32,8 +32,9 @@ region MODULE DEFINITION
 
     output logic [DW - 1: 0]                rdata,
     /*========================### ADDITIONAL SIGNALS ###========================*/
+    input  logic                            ret_i,
     output logic                            en_o,
-    output logic [DW - 1: 0]                vid_o
+    output logic [DW - 1: 0]                vid_o [THREAD_CNT]
     //==========================================================================//
 );
 
@@ -56,7 +57,7 @@ assign is_core_ctrl_addr = addr == (AW)'(R_CORE_CTRL_OFS);
 region WRITE ENABLE LOGIC
 //==============================================================================*/
 
-assign core_ctrl_wedata = is_core_ctrl_addr? wedata: '0;
+assign core_ctrl_wedata = ret_i? (DW)'(1): (is_core_ctrl_addr? wedata: '0);
 
 /*==============================================================================//
 region VID DATA LOGIC
@@ -98,6 +99,8 @@ assign            wdata_masked = wdata & wedata;
 
 logic [DW - 1: 0] core_ctrl_wdata;
 always_comb begin
+    if (ret_i)
+        core_ctrl_wdata[F_CORE_EN_OFS] = '0;
     if (is_core_ctrl_addr)
         core_ctrl_wdata = wdata;
     else
@@ -183,5 +186,5 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_vid_regs
     assign vid_o[i] = vid_rdata[i];
 end
 
-//===================================================================================//
+//==============================================================================//
 endmodule

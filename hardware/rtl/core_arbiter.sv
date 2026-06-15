@@ -23,7 +23,8 @@ module core_arbiter
 
     input  tu_state_e                       threads_state [THREAD_CNT],
 
-    output logic        [THREAD_W - 1: 0]   thread_sel
+    output logic        [THREAD_W - 1: 0]   thread_sel,
+    output logic                            no_req_from_threads
     //========================================================================//
 );
     /*========================================================================//
@@ -51,6 +52,14 @@ module core_arbiter
         else
             thread_ptr <= thread_ptr;
     end
+
+
+    logic [THREAD_CNT - 1: 0] is_req_from_tu;
+    for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_status_tu_req
+        assign is_req_from_tu[i] = threads_state[i] == TU_STATE_REQUEST;
+    end
+
+    assign no_req_from_threads = is_req_from_tu == '0;
 
 
     /*========================================================================//

@@ -181,6 +181,29 @@ assign tu_req  = thread_state == TU_STATE_REQUEST;
 region LOGIC
 //============================================================================*/
 
+logic               load_stall;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        load_stall <= '0;
+    else if (load_op)
+        load_stall <= '1;
+    else if (rd_valid)
+        load_stall <= '0;
+    else
+        load_stall <= load_stall;
+end
+
+logic [AW - 1: 0]   load_rd_addr;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        load_rd_addr <= '0;
+    else if (load_op)
+        load_rd_addr <= cmd.l.rd_addr;
+    else
+        load_rd_addr <= load_rd_addr;
+end
+
+
 logic [DW - 1: 0]   alu_or; // operation result
 logic               alu_rr; // result ready
 
@@ -221,15 +244,12 @@ end
 
 // write
 always_comb begin
-    if (rd_valid && (load_op || store_op)) begin
-        if (l_cmd_valid)
-            addr_w = l_cmd.rd_addr;
-        else
-            addr_w = s_cmd.rd_addr;
+    if (rd_valid && load_stall) begin
+        addr_w = load_rd_addr;
         data_w = rd;
         wr_en  = '1;
     end
-    else if (l_cmd_valid) begin
+    else if (l_cmd_valid && ~(load_op || store_op)) begin
         addr_w = l_cmd.rd_addr;
         data_w = alu_or;
         wr_en  = alu_rr;
@@ -268,28 +288,8 @@ always_comb begin
         addr_rs1 = '0;
 end
 
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         addr_rs1 <= '0;
-//     else if (~tu_req)
-//         if (s_cmd_valid)
-//             addr_rs1 <= s_cmd.rs1_addr;
-//         else if (l_cmd_valid)
-//             addr_rs1 <= l_cmd.rs1_addr;
-//         else
-//             addr_rs1 <= '0;
-//     else
-//         addr_rs1 <= addr_rs1;
-// end
 
 assign addr_rs2 = s_cmd_valid? s_cmd.rs2_addr: '0;
-
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         addr_rs2 <= '0;
-//     else if (~tu_req)
-//         addr_rs2 <= s_cmd_valid? s_cmd.rs2_addr: '0;
-// end
 
 
 // handshake sig

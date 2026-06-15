@@ -59,18 +59,18 @@ module ahb_master
     input  ahb_sports_t             ahb_i,
     output ahb_mports_t             ahb_o,
     /*=====================### CONTROL SIGNALS ###============================*/
-    input  logic                    req_txn_i,
-    input  logic                    rw_i,
+    input  logic                    req_txn_i,      // launch txn
+    input  logic                    rw_i,           // read/write mode
 
-    input  logic [TW - 1: 0]        txn_amount_i,
+    input  logic [TW - 1: 0]        txn_amount_i,   // how much need to get/give
     /*=========================### IN SIGNALS ###=============================*/
-
     input  logic [AW - 1: 0]        addr_i,
     input  logic [DW - 1: 0]        data_i,
-    /*========================### OUT SIGNALS ###=============================*/
 
+    /*========================### OUT SIGNALS ###=============================*/
     output logic [DW - 1: 0]        data_o,
     output logic                    data_valid_o
+
     //========================================================================//
 );
 
@@ -108,74 +108,76 @@ region LOGIC
 //============================================================================*/
 
 logic  req_active;
-// assign req_active = req_txn_i;
+assign req_active = req_txn_i;
+
+
+logic req_active_ff;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        req_active <= '0;
+        req_active_ff <= '0;
     else
-        req_active <= req_txn_i;
+        req_active_ff <= req_active;
 end
 
 //============================================================================*/
 // AHB FSM
 //============================================================================*/
 
-ahb_txn_e fst_state, fst_state_next;
+ahb_txn_e state, next_state;
 
 // logic  req_ahb_txn;
 logic  res_ahb_txn;
 // assign req_ahb_txn = fst_state == AHB_IDLE && fst_state_next == AHB_ACTIVE;
-assign res_ahb_txn =    (fst_state == AHB_ACTIVE) || (fst_state == AHB_STALL)
-                    &&  hready;
+assign res_ahb_txn =    ((state == AHB_ACTIVE) || (state == AHB_STALL))
+                    && hready && ~req_active_ff;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        fst_state <= AHB_IDLE;
+        state <= AHB_IDLE;
     end
     else begin
-        fst_state <= fst_state_next;
+        state <= next_state;
     end
 end
 
 always_comb begin
-    case (fst_state)
+    case (state)
         AHB_IDLE: begin
             if (req_active)
-                fst_state_next = AHB_ACTIVE;
+                next_state = AHB_ACTIVE;
             else
-                fst_state_next = AHB_IDLE;
+                next_state = AHB_IDLE;
         end
         AHB_ACTIVE, AHB_STALL: begin
             if (hresp)
-                fst_state_next = AHB_ERROR;
+                next_state = AHB_ERROR;
             else
                 if (~(res_ahb_txn && ~req_active))
                     if (hready)
-                        fst_state_next = AHB_STALL;
+                        next_state = AHB_STALL;
                     else
-                        fst_state_next = AHB_ACTIVE;
+                        next_state = AHB_ACTIVE;
                 else
-                    fst_state_next = AHB_IDLE;
+                    next_state = AHB_IDLE;
         end
         AHB_ERROR: begin
             if (hresp)
-                fst_state_next = AHB_ERROR;
+                next_state = AHB_ERROR;
             else
-                fst_state_next = AHB_IDLE; // maybe need fix this
+                next_state = AHB_IDLE; // maybe need fix this
         end
         default:
-            fst_state_next = AHB_IDLE;
+            next_state = AHB_IDLE;
     endcase
 end
 
-logic  mng_is_wait, mng_is_active, mng_is_idle; // mng_is_err,
-assign mng_is_wait      = fst_state_next == AHB_STALL;
-assign mng_is_active    = fst_state_next == AHB_ACTIVE;
+// logic  mng_is_wait, mng_is_active,
+logic  mng_is_idle; // mng_is_err,
+// assign mng_is_wait      = next_state == AHB_STALL;
+// assign mng_is_active    = next_state == AHB_ACTIVE;
 // assign mng_is_err       = fst_state_next == AHB_ERROR;
-assign mng_is_idle      = fst_state_next == AHB_IDLE;
+assign mng_is_idle      = next_state == AHB_IDLE;
 
-logic  mng_is_stable_active;
-assign mng_is_stable_active = mng_is_active || mng_is_wait;
 
 //============================================================================*/
 // AHB LOGIC
@@ -294,9 +296,9 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         htrans <= HTRANS_IDLE;
-    else if (mng_is_stable_active && htrans == HTRANS_IDLE)
+    else if (req_active && htrans == HTRANS_IDLE)
         htrans <= HTRANS_NONSEQ;
-    else if (mng_is_stable_active && htrans == HTRANS_NONSEQ)
+    else if (req_active && htrans == HTRANS_NONSEQ)
         htrans <= HTRANS_SEQ;
     else
         htrans <= HTRANS_IDLE; // BUSY write later. mng can hold

@@ -50,7 +50,10 @@ module core_decoder
 
     /*=========================### SIGNALS TO FPU ###=========================*/
     output thread_command_t     fpu_cmd,
-    output logic                fpu_cmd_valid
+    output logic                fpu_cmd_valid,
+
+    /*========================### SIGNALS FROM FPU ###========================*/
+    input  logic                threads_valid
 
     //========================================================================//
 );
@@ -68,6 +71,18 @@ always_ff @(posedge clk or negedge rst_n) begin
         cmd_op_type <= U_CMD;
 end
 
+logic inst_in_q;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        inst_in_q <= '0;
+    else if (instr_valid && (lsu_cmd_valid || ~threads_valid))
+        inst_in_q <= '1;
+    else if (fpu_cmd_valid || lsu_cmd_valid)
+        inst_in_q <= '0;
+    else
+        inst_in_q <= inst_in_q;
+end
+
 
 logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
 assign l_cmd_valid      = (instr_valid && instr_i.op_type == L_CMD);
@@ -75,11 +90,16 @@ assign u_cmd_valid      = (instr_valid && instr_i.op_type == U_CMD);
 assign f_cmd_valid      = (instr_valid && instr_i.op_type == F_CMD);
 assign s_cmd_valid      = (instr_valid && instr_i.op_type == S_CMD);
 
+logic  parseable_cmd;
+assign parseable_cmd = l_cmd_valid || u_cmd_valid || s_cmd_valid;
+
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         cmd <= '0;
-    else if (l_cmd_valid || u_cmd_valid || s_cmd_valid)
+    else if (parseable_cmd)
         cmd <= instr_i.cmd;
+    else if (~threads_valid)
+        cmd <= cmd;
     else
         cmd <= '0;
 end
@@ -97,6 +117,8 @@ always_ff @(posedge clk or negedge rst_n) begin
         lsu_cmd <= LSU_L;
     else if (is_lsu_store)
         lsu_cmd <= LSU_S;
+    else if (~threads_valid)
+        lsu_cmd <= lsu_cmd;
     else
         lsu_cmd <= LSU_L;
 end
@@ -104,7 +126,7 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         lsu_cmd_valid <= '0;
-    else if (is_lsu_load || is_lsu_store)
+    else if ((is_lsu_load || is_lsu_store || inst_in_q) && threads_valid)
         lsu_cmd_valid <= '1;
     else
         lsu_cmd_valid <= '0;
@@ -124,15 +146,17 @@ always_ff @(posedge clk or negedge rst_n) begin
         fpu_cmd.tag     <= (tags_t)'(instr_i.cmd.f.imm);
         fpu_cmd.rnd     <= (roundmode_e)'(instr_i.cmd.f.extra);
     end
+    else if (~threads_valid)
+        fpu_cmd         <= fpu_cmd;
     else
-        fpu_cmd <= '0;
+        fpu_cmd         <= '0;
 end
 
 /*============================================================================//
 region OUT
 //============================================================================*/
 
-assign fpu_cmd_valid = f_cmd_valid;
+assign fpu_cmd_valid = (f_cmd_valid || inst_in_q) && threads_valid;
 
 //============================================================================*/
 endmodule
