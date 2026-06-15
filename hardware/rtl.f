@@ -14,6 +14,7 @@ rtl/interfaces/simple_hndh_if.sv
 rtl/interfaces/ahb4_bus_if.sv
 rtl/utils/ahb_pkg.sv
 rtl/utils/ahb_master.sv
+rtl/decoder_pkg.sv
 rtl/core_decoder.sv
 rtl/core_lsu_fsm_pkg.sv
 rtl/core_lsu.sv

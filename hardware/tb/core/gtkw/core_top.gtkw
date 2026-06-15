@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Mon Jun 15 12:10:25 2026
+[*] Mon Jun 15 12:29:22 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Mon Jun 15 12:09:28 2026"
-[dumpfile_size] 7870065
+[dumpfile_mtime] "Mon Jun 15 12:14:00 2026"
+[dumpfile_size] 7884222
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 0
+[timestart] 353900
 [size] 1920 1116
 [pos] -1 -1
-*-17.999998 988000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.399998 1342300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd.
@@ -83,20 +83,19 @@ core.core_decoder_u.fpu_cmd_valid
 -THREADS
 @28
 core.no_req_from_threads
-@800200
+@c00200
 -T0
 @22
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[2][31:0]
 @2028
 ^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
 core.gen_threads[0].thread_unit_u.thread_state[1:0]
-@23
+@22
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[5][31:0]
-@1000200
+@1401200
 -T0
-@800200
--T1
 @c00200
+-T1
 -2LSU
 @22
 core.gen_threads[1].thread_unit_u.rs1[31:0]
@@ -130,9 +129,9 @@ core.gen_threads[1].thread_unit_u.next_thread_state[1:0]
 core.gen_threads[1].thread_unit_u.thread_state[1:0]
 @22
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[5][31:0]
-@1000200
+@1401200
 -T1
-@800200
+@c00200
 -T2
 @22
 core.gen_threads[2].thread_unit_u.data_w[31:0]
@@ -148,17 +147,18 @@ core.gen_threads[2].thread_unit_u.thread_state[1:0]
 @22
 core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[5][31:0]
-@1000200
+@1401200
 -T2
-@800200
+@c00200
 -T3
 @22
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[3][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[5][31:0]
-@1000200
+@1401200
 -T3
+@1000200
 -THREADS
 @200
 -Arbiter
@@ -233,5 +233,9 @@ core.core_decoder_u.instr_valid
 core.core_decoder_u.instr_i.op_type[1:0]
 @22
 core.core_decoder_u.cmd.l.rd_addr[4:0]
+@28
+core.core_decoder_u.lsu_cmd_valid
+@29
+core.core_decoder_u.inst_in_q
 [pattern_trace] 1
 [pattern_trace] 0

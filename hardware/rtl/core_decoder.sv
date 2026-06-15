@@ -1,14 +1,14 @@
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// ------------------------------------------------------------------------------//
+// ---------------------------------------------------------------------------//
 // Purpose: GPU Core decoder
-// Date: 2026/05
-//-------------------------------------------------------------------------------//
+// Date: 2026/06
+//----------------------------------------------------------------------------//
 
-/*===================================================================================//
+/*============================================================================//
 region MODULE DEFINITION
-//===================================================================================*/
+//============================================================================*/
 module core_decoder
     import fpnew_pkg::roundmode_e;
     import handshake_fpu_pkg::tags_t;
@@ -31,6 +31,11 @@ module core_decoder
     import lsu_pkg::LSU_S;
     import lsu_pkg::lsu_cmd_e;
 
+    import decoder_pkg::dec_fsm_t;
+    import decoder_pkg::DEC_IDLE;
+    import decoder_pkg::DEC_WAIT;
+    import decoder_pkg::DEC_GIVE;
+
 #() (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
@@ -42,7 +47,7 @@ module core_decoder
 
     /*=======================### CMD SIGNALS ###==============================*/
     output cmd_union_t          cmd,
-    output dec_op_type_e        cmd_op_type, // by this you can get type and valid
+    output dec_op_type_e        cmd_op_type,
 
     /*=========================### SIGNALS TO LSU ###=========================*/
     output lsu_cmd_e            lsu_cmd,
@@ -53,8 +58,8 @@ module core_decoder
     output logic                fpu_cmd_valid,
 
     /*========================### SIGNALS FROM FPU ###========================*/
-    input  logic                threads_valid
-
+    input  logic                threads_valid_i,
+    output logic                decoder_ready_o
     //========================================================================//
 );
 
@@ -62,101 +67,144 @@ module core_decoder
 region LOGIC
 //============================================================================*/
 
+dec_fsm_t state, next_state;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        cmd_op_type <= U_CMD;
-    else if (instr_valid)
-        cmd_op_type <= instr_i.op_type;
+        state <= DEC_IDLE;
     else
-        cmd_op_type <= U_CMD;
+        state <= next_state;
 end
 
-logic inst_in_q;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        inst_in_q <= '0;
-    else if (instr_valid && (lsu_cmd_valid || ~threads_valid))
-        inst_in_q <= '1;
-    else if (fpu_cmd_valid || lsu_cmd_valid)
-        inst_in_q <= '0;
-    else
-        inst_in_q <= inst_in_q;
+always_comb begin
+    case (state)
+        DEC_IDLE: begin
+            if (instr_valid)
+                if (threads_valid_i)
+                    next_state = DEC_GIVE;
+                else
+                    next_state = DEC_WAIT;
+            else
+                next_state = DEC_IDLE;
+        end
+        DEC_WAIT: begin
+            if (threads_valid_i)
+                next_state = DEC_GIVE;
+            else
+                next_state = DEC_WAIT;
+        end
+        DEC_GIVE: begin
+            if (instr_valid)
+                if (threads_valid_i)
+                    next_state = DEC_GIVE;
+                else
+                    next_state = DEC_WAIT;
+            else
+                next_state = DEC_IDLE;
+        end
+        default: begin
+            next_state = DEC_IDLE;
+        end
+    endcase
 end
 
+logic prepare_give;
+logic prepare_wait;
+logic prepare_idle;
+
+assign prepare_give = next_state == DEC_GIVE;
+assign prepare_wait = next_state == DEC_WAIT;
+assign prepare_idle = next_state == DEC_IDLE;
 
 logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
-assign l_cmd_valid      = (instr_valid && instr_i.op_type == L_CMD);
-assign u_cmd_valid      = (instr_valid && instr_i.op_type == U_CMD);
-assign f_cmd_valid      = (instr_valid && instr_i.op_type == F_CMD);
-assign s_cmd_valid      = (instr_valid && instr_i.op_type == S_CMD);
+assign l_cmd_valid      = instr_valid && (instr_i.op_type == L_CMD);
+assign u_cmd_valid      = instr_valid && (instr_i.op_type == U_CMD);
+assign f_cmd_valid      = instr_valid && (instr_i.op_type == F_CMD);
+assign s_cmd_valid      = instr_valid && (instr_i.op_type == S_CMD);
 
-logic  parseable_cmd;
-assign parseable_cmd = l_cmd_valid || u_cmd_valid || s_cmd_valid;
-
+thread_command_t fpu_cmd_ff;
+logic            fpu_cmd_valid_ff;
 always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        cmd <= '0;
-    else if (parseable_cmd)
-        cmd <= instr_i.cmd;
-    else if (~threads_valid)
-        cmd <= cmd;
-    else
-        cmd <= '0;
+    if (~rst_n) begin
+        fpu_cmd_ff          <= '0;
+        fpu_cmd_valid_ff    <= '0;
+    end
+    else if ((prepare_give || prepare_wait) && f_cmd_valid) begin
+        fpu_cmd_ff.op       <= instr_i.cmd.f.operand.t;
+        fpu_cmd_ff.op_mod   <= instr_i.cmd.f.operand.mod;
+        fpu_cmd_ff.a1       <= instr_i.cmd.f.a1;
+        fpu_cmd_ff.a2       <= instr_i.cmd.f.a2;
+        fpu_cmd_ff.a3       <= instr_i.cmd.f.a3;
+        fpu_cmd_ff.ar       <= instr_i.cmd.f.ar;
+        fpu_cmd_ff.tag      <= (tags_t)'(instr_i.cmd.f.imm);
+        fpu_cmd_ff.rnd      <= (roundmode_e)'(instr_i.cmd.f.extra);
+        fpu_cmd_valid_ff    <= '1;
+    end
+    else if (prepare_idle) begin
+        fpu_cmd_ff          <= '0;
+        fpu_cmd_valid_ff    <= '0;
+    end
 end
 
-logic is_lsu_load;
-logic is_lsu_store;
-
+logic is_lsu_load, is_lsu_store;
 assign is_lsu_load  = l_cmd_valid? (instr_i.cmd.l.operand == LOP_LW? 1: 0): 0;
 assign is_lsu_store = s_cmd_valid? (instr_i.cmd.s.operand == SOP_SW? 1: 0): 0;
 
+lsu_cmd_e   lsu_cmd_ff;
+logic       lsu_cmd_valid_ff;
 always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        lsu_cmd <= LSU_L;
-    else if (is_lsu_load)
-        lsu_cmd <= LSU_L;
-    else if (is_lsu_store)
-        lsu_cmd <= LSU_S;
-    else if (~threads_valid)
-        lsu_cmd <= lsu_cmd;
-    else
-        lsu_cmd <= LSU_L;
-end
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        lsu_cmd_valid <= '0;
-    else if ((is_lsu_load || is_lsu_store || inst_in_q) && threads_valid)
-        lsu_cmd_valid <= '1;
-    else
-        lsu_cmd_valid <= '0;
-end
-
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        fpu_cmd <= '0;
-    else if (f_cmd_valid) begin
-        fpu_cmd.op      <= instr_i.cmd.f.operand.t;
-        fpu_cmd.op_mod  <= instr_i.cmd.f.operand.mod;
-        fpu_cmd.a1      <= instr_i.cmd.f.a1;
-        fpu_cmd.a2      <= instr_i.cmd.f.a2;
-        fpu_cmd.a3      <= instr_i.cmd.f.a3;
-        fpu_cmd.ar      <= instr_i.cmd.f.ar;
-        fpu_cmd.tag     <= (tags_t)'(instr_i.cmd.f.imm);
-        fpu_cmd.rnd     <= (roundmode_e)'(instr_i.cmd.f.extra);
+    if (~rst_n) begin
+        lsu_cmd_ff              <= LSU_L;
+        lsu_cmd_valid_ff        <= '0;
     end
-    else if (~threads_valid)
-        fpu_cmd         <= fpu_cmd;
-    else
-        fpu_cmd         <= '0;
+    else if ((prepare_give || prepare_wait) && (is_lsu_load || is_lsu_store)) begin
+        if (is_lsu_load) begin
+            lsu_cmd_ff          <= LSU_L;
+            lsu_cmd_valid_ff    <= '1;
+        end
+        else begin
+            lsu_cmd_ff          <= LSU_S;
+            lsu_cmd_valid_ff    <= '1;
+        end
+    end
+    else if (prepare_idle) begin
+        lsu_cmd_ff              <= LSU_L;
+        lsu_cmd_valid_ff        <= '0;
+    end
+end
+
+cmd_union_t     cmd_ff;
+dec_op_type_e   cmd_op_type_ff;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        cmd_ff          <= '0;
+        cmd_op_type_ff  <= U_CMD; // so it's write in zero address zero, that prohibited.
+    end
+    else if ((prepare_give || prepare_wait) && (l_cmd_valid || u_cmd_valid || s_cmd_valid)) begin
+        cmd_ff          <= instr_i.cmd;
+        cmd_op_type_ff  <= instr_i.op_type;
+    end
+    else if (prepare_idle) begin
+        cmd_ff          <= '0;
+        cmd_op_type_ff  <= U_CMD;
+    end
 end
 
 /*============================================================================//
 region OUT
 //============================================================================*/
 
-assign fpu_cmd_valid = (f_cmd_valid || inst_in_q) && threads_valid;
+assign decoder_ready_o = state != DEC_WAIT;
+
+// cmd for threads
+assign cmd              = prepare_give? cmd_ff              : '0;
+assign cmd_op_type      = prepare_give? cmd_op_type_ff      : U_CMD;
+// lsu
+assign lsu_cmd          = prepare_give? lsu_cmd_ff          : LSU_L;
+assign lsu_cmd_valid    = prepare_give? lsu_cmd_valid_ff    : '0;
+// fpu
+assign fpu_cmd          = prepare_give? fpu_cmd_ff          : '0;
+assign fpu_cmd_valid    = prepare_give? fpu_cmd_valid_ff    : '0;
 
 //============================================================================*/
 endmodule

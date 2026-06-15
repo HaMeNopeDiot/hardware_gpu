@@ -87,7 +87,7 @@ async def core_test(dut):
     i4 = CILI(op=LoadOpTE.ADDI, imm = 0x4,    rd_addr = 3, rs1_addr = 4)
     i5 = CISI(op=StoreOpTE.MUL, imm = 0x4,    rd_addr = 4, rs1_addr = 3, rs2_addr=  VID_ADDR)
     i6 = CILI(op=LoadOpTE.LW,   imm = 0x4,    rd_addr = 5, rs1_addr = 4)
-    # i7 = CILI(op=LoadOpTE.LW,   imm = 0x14,   rd_addr = 6, rs1_addr = 4)
+    i7 = CILI(op=LoadOpTE.LW,   imm = 0x14,   rd_addr = 6, rs1_addr = 4)
 
     await launch_inst(dut, clk, i1)
     await launch_inst(dut, clk, i2)
@@ -95,10 +95,10 @@ async def core_test(dut):
     await launch_inst(dut, clk, i4)
     await launch_inst(dut, clk, i5)
     await launch_inst(dut, clk, i6)
-    #await launch_inst(dut, clk, i7)
+    await launch_inst(dut, clk, i7)
 
     await clear_instr_i(dut, clk)
-    await ClockCycles(clk, 40)
+    await ClockCycles(clk, 80)
     ahb_slave.stop()
 
 

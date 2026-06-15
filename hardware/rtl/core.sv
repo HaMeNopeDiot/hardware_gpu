@@ -63,7 +63,8 @@ module core
     input   logic                       lsu_hresp,
     input   logic [DW - 1: 0]           lsu_hrdata,
     /*=============================### TU SIGNALS ###=========================*/
-    output  thread_info_t               thread_info
+    output  thread_info_t               thread_info,
+    output  logic                       decoder_ready_o
     //========================================================================//
 );
 /*============================================================================//
@@ -193,7 +194,8 @@ core_decoder #() core_decoder_u (
     .fpu_cmd        (fpu_cmd      ),    // ->
     .fpu_cmd_valid  (fpu_cmd_valid),     // ->
     //===============### SIGNALS FROM FPU ###================//
-    .threads_valid  (no_req_from_threads) // <-
+    .threads_valid_i(no_req_from_threads), // <-
+    .decoder_ready_o(decoder_ready_o    )  // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

@@ -298,7 +298,7 @@ class AHBSlaveModel:
     async def _process_data_phase(self):
         """Process the data phase of the pipeline."""
         if self._addr_phase_valid:
-            self.log.error(f"I SAID I WANA 2 TWISTERS NOW")
+            self.log.error(f"AHB TXN CPTR")
 
             # Handle wait states
             for _ in range(self.wait_states):
