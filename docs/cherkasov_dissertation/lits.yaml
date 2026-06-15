@@ -188,3 +188,20 @@ systemverilogstandard:
   author:
     - IEEE Computer Society
     - IEEE Standards Association Corporate Advisory Group
+
+computer_organization:
+  type: Book
+  title: The Essentials of Computer Organization and Architecture
+  author:
+    - Linda Null
+    - Julia Lobur
+
+phillips_machine:
+  type: Web
+  title: Phillips Machine
+  url: https://en.wikipedia.org/wiki/Phillips_Machine
+
+vulkan_tutorial:
+  type: Web
+  title: Vulkan Tutorial
+  url: https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Introduction

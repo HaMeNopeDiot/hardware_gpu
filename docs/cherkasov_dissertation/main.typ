@@ -11,27 +11,30 @@
   show figure.caption.where(kind: table): set align(right)
   show figure.where(kind: raw): set figure(..sup("Листинг", "лист."))
   show figure.where(kind: raw): set figure.caption(separator: [. ])
-  show raw: set text(font: "New Computer Modern", size: 14pt)
+  show raw: set text(font: "Times New Roman", size: 14pt)
   show figure: set block(breakable: true)
   show heading: set align(center)
+  show heading: set text(size: 14pt)
   show heading: set block(below: line_margin)
-  show heading.where(level: 2): it => {text(style: "italic", weight: "bold", it)}
-  show heading.where(level: 3): it => {align(left, text(style: "italic", weight: "regular", it))}
-  show heading.where(level: 4): it => {align(left, text(style: "italic", weight: "regular", it))}
-  show heading.where(level: 5): it => {align(left, text(style: "italic", weight: "regular", it))}
-  show heading.where(level: 6): it => {align(left, text(style: "italic", weight: "regular", it))}
-  show heading.where(level: 7): it => {align(left, text(style: "italic", weight: "regular", it))}
+  show heading.where(level: 2): it => {text(style: "italic", weight: "bold", size: 14pt, it)}
+  show heading.where(level: 3): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
+  show heading.where(level: 4): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
+  show heading.where(level: 5): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
+  show heading.where(level: 6): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
+  show heading.where(level: 7): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
   doc
 }
 
 #show: template
 
 #set text(
-    font: "New Computer Modern",
+    font: "Times New Roman",
     size: 14pt,
     lang: "ru",
-    hyphenate: false
+    hyphenate: false,
+    weight: "medium"
 )
+
 #set math.equation(numbering: "(1)")
 
 #set par(
@@ -70,13 +73,10 @@
 #include "intro.typ"
 #pagebreak()
 #include "contents.typ"
-
-#set heading(numbering: none)
 #pagebreak()
+#set heading(numbering: none)
 #include "conclusion.typ"
-
 #pagebreak()
 #include "literature.typ"
-
 #pagebreak()
 #include "appendix.typ"
