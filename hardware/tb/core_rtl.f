@@ -1,6 +1,8 @@
+../cvfpu/src/common_cells/src/cf_math_pkg.sv
 ../cvfpu/src/fpnew_pkg.sv
 ../cvfpu/src/fpnew_top.sv
 ../rtl/utils/base_pkg.sv
+../rtl/utils/lsu_pkg.sv
 ../rtl/fpu_dummy.sv
 ../rtl/handshake_fpu_pkg.sv
 ../rtl/tu_pkg.sv

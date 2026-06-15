@@ -70,15 +70,24 @@ async def core_test(dut):
                               memory_size=2 ** 16,
                               data_width=DW, log= cocotb.log, wait_states=2)
 
-    ahb_slave.write_memory(0x124, 2, 0xBA0B_BAAB)
+    ahb_slave.write_memory(0x4 * 1, 2, 0xBA0B_BAAB)
+    ahb_slave.write_memory(0x4 * 2, 2, 0xB00B_1E55)
+    ahb_slave.write_memory(0x4 * 3, 2, 0xDEEA_AAAD)
+    ahb_slave.write_memory(0x4 * 4, 2, 0x1111_2345)
 
-    i1 = CIUI(op=UPPopTE.LUI,   imm = 0xAAAAA, rd_addr = 1)
-    i2 = CILI(op=LoadOpTE.ADDI, imm = 0xBBB,   rd_addr = 1, rs1_addr = 1)
+    ahb_slave.write_memory(0x4 * 5, 2, 0xABAB_BABA)
+    ahb_slave.write_memory(0x4 * 6, 2, 0xE6AA_1110)
+    ahb_slave.write_memory(0x4 * 7, 2, 0xBA5E_2A2A)
+    ahb_slave.write_memory(0x4 * 8, 2, 0x8888_8888)
+
+    i1 = CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1)
+    i2 = CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1)
     i3 = CISI(op=StoreOpTE.ADD, imm = 0x99,    rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR)
 
-    i4 = CILI(op=LoadOpTE.ADDI, imm = 0x124,   rd_addr = 3, rs1_addr = 3)
-    i5 = CISI(op=StoreOpTE.MUL, imm = 0x99,    rd_addr = 4, rs1_addr = 3, rs2_addr=  VID_ADDR)
-    i6 = CILI(op=LoadOpTE.LW,   imm = 0x2,     rd_addr = 5, rs1_addr = 4)
+    i4 = CILI(op=LoadOpTE.ADDI, imm = 0x4,    rd_addr = 3, rs1_addr = 4)
+    i5 = CISI(op=StoreOpTE.MUL, imm = 0x4,    rd_addr = 4, rs1_addr = 3, rs2_addr=  VID_ADDR)
+    i6 = CILI(op=LoadOpTE.LW,   imm = 0x4,    rd_addr = 5, rs1_addr = 4)
+    # i7 = CILI(op=LoadOpTE.LW,   imm = 0x14,   rd_addr = 6, rs1_addr = 4)
 
     await launch_inst(dut, clk, i1)
     await launch_inst(dut, clk, i2)
@@ -86,9 +95,10 @@ async def core_test(dut):
     await launch_inst(dut, clk, i4)
     await launch_inst(dut, clk, i5)
     await launch_inst(dut, clk, i6)
+    #await launch_inst(dut, clk, i7)
 
     await clear_instr_i(dut, clk)
-    await ClockCycles(clk, 20)
+    await ClockCycles(clk, 40)
     ahb_slave.stop()
 
 

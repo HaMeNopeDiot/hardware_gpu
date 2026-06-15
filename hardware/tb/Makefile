@@ -20,35 +20,16 @@ COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				--timescale 1ns/1ps \
 				-DTAG_TYPE="logic[3:0]"
 
+ifeq (SIM, iverilog)
+	COMPILE_ARGS += -DNO_IF_SUPPORT=1
+endif
 
 FPU_ROOT_PATH = ../cvfpu
 
 FPU_PWD = $(FPU_ROOT_PATH)/src
 MAIN_PWD = ../rtl
 
-VERILOG_SOURCES +=  $(FPU_PWD)/common_cells/src/cf_math_pkg.sv \
-					$(FPU_PWD)/fpnew_pkg.sv \
-					$(FPU_PWD)/fpnew_top.sv \
-					$(MAIN_PWD)/utils/base_pkg.sv \
-					$(MAIN_PWD)/utils/lsu_pkg.sv \
-					$(MAIN_PWD)/fpu_dummy.sv \
-					$(MAIN_PWD)/handshake_fpu_pkg.sv \
-					$(MAIN_PWD)/tu_pkg.sv \
-					$(MAIN_PWD)/tu_fpu_fsm.sv \
-					$(MAIN_PWD)/tu_regfile.sv \
-					$(MAIN_PWD)/tu_alu.sv \
-					$(MAIN_PWD)/thread_unit.sv \
-					$(MAIN_PWD)/interfaces/reg_if.sv \
-					$(MAIN_PWD)/interfaces/simple_bus_if.sv \
-					$(MAIN_PWD)/interfaces/simple_hndh_if.sv \
-					$(MAIN_PWD)/interfaces/ahb4_bus_if.sv \
-					$(MAIN_PWD)/utils/ahb_pkg.sv \
-					$(MAIN_PWD)/utils/ahb_master.sv \
-					$(MAIN_PWD)/core_decoder.sv \
-					$(MAIN_PWD)/core_lsu_fsm_pkg.sv \
-					$(MAIN_PWD)/core_lsu.sv \
-					$(MAIN_PWD)/core_arbiter.sv \
-					$(MAIN_PWD)/core.sv
+VERILOG_SOURCES +=  $(shell cat core_rtl.f)
 
 VERILOG_INCLUDE_DIRS += $(FPU_PWD) \
 						$(FPU_PWD)/common_cells/src \
