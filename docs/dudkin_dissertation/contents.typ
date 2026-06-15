@@ -142,13 +142,16 @@ uniform-переменных (блок, смещение, размер), дес�
 в виде гистограммы, на которой показана производительность современных 3D игр. На оси Х располагаются
 игры, с помощью которых проводилось тестирование. По оси Y расставлены значения кадров в секунду.
 Средний прирост производительности составил 1.199%.
-// Тестирование проводилось на ЭВМ со следующими характеристиками:
-// - Процессор: Intel Core i9-9900K \@ 5.00GHz (8 Cores / 16 Threads)
-// - Материнская плата: ASUS PRIME Z390-A (0602 BIOS)
-// - Чипсет: Intel Cannon Lake PCH Shared SRAM
-// - Память (ОЗУ): 16384 MB
-// - Диск: Samsung SSD 970 EVO 250GB + 2000GB SABRENT
-// - Графическая карта: AMD Radeon RX 64 8GB (1630/945MHz)
+Тестирование проводилось на ЭВМ со следующими характеристиками:
+#raw("
+- Процессор: Intel Core i9-9900K \@ 5.00GHz (8 Cores / 16 Threads)
+- Материнская плата: ASUS PRIME Z390-A (0602 BIOS)
+- Чипсет: Intel Cannon Lake PCH Shared SRAM
+- Память (ОЗУ): 16384 MB
+- Диск: Samsung SSD 970 EVO 250GB + 2000GB SABRENT
+- Графическая карта: AMD Radeon RX 64 8GB (1630/945MHz)
+")
+
 #figure(
   image("assets/tgsi_nir_comparison.png")
     , caption: [Производительность игр с использованием TGSI и NIR]
@@ -801,7 +804,7 @@ static void render_shader(nir_shader *nir, struct vertex_header *verts, struct d
   CPU: Intel i5-6500 (4) @ 3.600GHz
   GPU: Intel Skylake-S GT2 [HD Graphics 530]
   GPU: NVIDIA GeForce GT 730
-  Memory: 7899MiB / 15849MiB
+  Memory: 15849MiB
 ")
 
 Запуск приложения проводился в трех конфигурациях приложения.

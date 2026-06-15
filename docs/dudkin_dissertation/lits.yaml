@@ -176,3 +176,8 @@ guide_to_risc_proccessors:
     publisher:
       name: Springer
     date: "2005"
+
+gost_ip:
+   type: Book
+   title: Блоки сложно-функциональные. Термины и определения. ГОСТ Р 70916-2023.
+   date: 2024-01-01
