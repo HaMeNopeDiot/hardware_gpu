@@ -1,25 +1,33 @@
+from sys import byteorder
+
 from instruction import Instruction
 
 
 class Assembler:
     DEFINITIONS = {
+        # ubo_base should be the beginning of the vertex_buffer.mem file
         "ubo_base": 0x1000_0000,
         #
-        "in_position_base": 0x1000_00C0,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _00B0)
+        "in_position_base": 0x1000_00B0,
         "in_position_stride": 0x000_0010,
         #
-        "in_color_base": 0x1000_0000,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _0230)
+        "in_color_base": 0x1000_0230,
         "in_color_stride": 0x0000_0010,
         #
-        "in_normal_base": 0x1000_0000,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _03B0)
+        "in_normal_base": 0x1000_03B0,
         "in_normal_stride": 0x0000_0010,
         #
+        # All output atributes last 4 numbers shouldn't be changed, it is 1 to 1 with the llvmpipe output format
         ".gl_Position_base": 0x2000_0000,
         ".gl_Position_stride": 0x0000_00C0,
         #
         "vVaryingColor_base": 0x2000_0010,
         "vVaryingColor_stride": 0x000_00C0,
         #
+        # Set to whatever R/W memory you want. You need 0xc per thread minimum
         "stack_base": 0x3000_0000,
         "stack_size": 0x0000_0100,
     }
@@ -246,7 +254,7 @@ class Assembler:
 
     def ret(self, instr: Instruction):
         opcode = self.INSTRUCTION_OPCODES[instr.opcode]
-        self.__L_type_instruction(
+        self.__U_type_instruction(
             opcode=opcode,
         )
 
