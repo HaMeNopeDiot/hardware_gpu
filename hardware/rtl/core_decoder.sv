@@ -127,6 +127,12 @@ assign prepare_give = next_state == DEC_GIVE;
 assign prepare_wait = next_state == DEC_WAIT;
 assign prepare_idle = next_state == DEC_IDLE;
 
+logic  ff_are_free;
+assign ff_are_free = state != DEC_WAIT;
+
+logic  can_latch_for_wait;
+assign can_latch_for_wait = ff_are_free && prepare_wait;
+
 logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
 assign l_cmd_valid      = instr_valid && (instr_i.op_type == L_CMD);
 assign u_cmd_valid      = instr_valid && (instr_i.op_type == U_CMD);
@@ -144,7 +150,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         fpu_cmd_ff          <= '0;
         fpu_cmd_valid_ff    <= '0;
     end
-    else if ((prepare_give || prepare_wait) && f_cmd_valid) begin
+    else if ((prepare_give || can_latch_for_wait) && f_cmd_valid) begin
         fpu_cmd_ff.op       <= instr_i.cmd.f.operand.t;
         fpu_cmd_ff.op_mod   <= instr_i.cmd.f.operand.mod;
         fpu_cmd_ff.a1       <= instr_i.cmd.f.a1;
@@ -176,7 +182,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         lsu_cmd_ff              <= LSU_L;
         lsu_cmd_valid_ff        <= '0;
     end
-    else if ((prepare_give || prepare_wait) && (is_lsu_load || is_lsu_store)) begin
+    else if ((prepare_give || can_latch_for_wait) && (is_lsu_load || is_lsu_store)) begin
         if (is_lsu_load) begin
             lsu_cmd_ff          <= LSU_L;
             lsu_cmd_valid_ff    <= '1;
@@ -200,12 +206,15 @@ region MAIN CMD
 cmd_union_t     cmd_ff;
 dec_op_type_e   cmd_op_type_ff;
 
+logic  no_fpu_cmd_valid;
+assign no_fpu_cmd_valid = l_cmd_valid || u_cmd_valid || s_cmd_valid; // maked it dumb.
+
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         cmd_ff          <= '0;
         cmd_op_type_ff  <= U_CMD; // so it's write in zero address zero, that prohibited.
     end
-    else if ((prepare_give || prepare_wait) && (l_cmd_valid || u_cmd_valid || s_cmd_valid)) begin
+    else if ((prepare_give || can_latch_for_wait) && no_fpu_cmd_valid) begin
         cmd_ff          <= instr_i.cmd;
         cmd_op_type_ff  <= instr_i.op_type;
     end
@@ -219,7 +228,7 @@ end
 region OUT
 //============================================================================*/
 
-assign decoder_ready_o = state != DEC_WAIT;
+assign decoder_ready_o = next_state != DEC_WAIT;
 
 // cmd for threads
 assign cmd              = prepare_give? cmd_ff              : '0;

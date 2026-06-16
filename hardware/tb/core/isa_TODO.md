@@ -1,7 +1,7 @@
-# S-type (1/3)
-- [ ] SW        // `M[rs1 + imm] = rs2`
+# S-type (3/3)
+- [x] SW        // `M[rs1 + imm] = rs2`
 - [x] ADD       // `rd = rs1 + rs2`
-- [ ] MUL       // `rd = rs1 * rs2`
+- [x] MUL       // `rd = rs1 * rs2`
 
 # L-type (2/2)
 - [x] LW        // `rd = M[rs1 + imm]`

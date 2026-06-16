@@ -1,13 +1,14 @@
-//-------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// ------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Purpose: GPU Thread unit
-//-------------------------------------------------------------------------------//
+// Date: 2026/06
+//----------------------------------------------------------------------------//
 
-/*===================================================================================//
+/*============================================================================//
 region MODULE DEFINITION
-//===================================================================================*/
+//============================================================================*/
 module thread_unit
     import handshake_fpu_pkg::tags_t;
     import handshake_fpu_pkg::TAGS_NUM;
@@ -291,8 +292,24 @@ always_comb begin
         addr_rs1 = '0;
 end
 
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         addr_rs1 <= '0;
+//     else if (s_cmd_valid)
+//         addr_rs1 <= s_cmd.rs1_addr;
+//     else if (l_cmd_valid)
+//         addr_rs1 <= l_cmd.rs1_addr;
+// end
+
 
 assign addr_rs2 = s_cmd_valid? s_cmd.rs2_addr: '0;
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         addr_rs2 <= '0;
+//     else if (s_cmd_valid)
+//         addr_rs2 <= s_cmd.rs2_addr;
+// end
+
 
 
 // handshake sig
@@ -380,7 +397,14 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign rs2          = data_rs2;
+// assign rs2          = data_rs2;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        rs2 <= '0;
+    else if (~tu_req)
+        rs2 <= data_rs2;
+end
+
 assign rs2_valid    = '1;
 
 

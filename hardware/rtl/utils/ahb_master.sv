@@ -312,13 +312,32 @@ always_ff @(posedge clk or negedge rst_n) begin
         hwrite <= req_txn_i? rw_i: '0;
 end
 
-
 // hwdata
+logic [DW - 1: 0] hwdata_i;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        hwdata_i <= '0;
+    else
+        hwdata_i <= req_txn_i? data_i: '0;
+end
+
+logic req_txn_ff;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        req_txn_ff <= '0;
+    else
+        req_txn_ff <= req_txn_i;
+end
+
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         hwdata <= '0;
+    else if (req_txn_ff)
+        hwdata <= hwdata_i;
+    else if (hready)
+        hwdata <= '0;
     else
-        hwdata <= req_txn_i? data_i: '0;
+        hwdata <= hwdata;
 end
 
 // hmastlock
