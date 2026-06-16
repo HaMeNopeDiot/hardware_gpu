@@ -5,16 +5,22 @@ from instruction import Instruction
 
 class Assembler:
     DEFINITIONS = {
+        # ubo_base should be the beginning of the vertex_buffer.mem file
         "ubo_base": 0x1000_0000,
         #
-        "in_position_base": 0x1000_00C0,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _00B0)
+        "in_position_base": 0x1000_00B0,
         "in_position_stride": 0x000_0010,
         #
-        "in_color_base": 0x1000_0000,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _0230)
+        "in_color_base": 0x1000_0230,
         "in_color_stride": 0x0000_0010,
         #
-        "in_normal_base": 0x1000_0000,
+        # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _03B0)
+        "in_normal_base": 0x1000_03B0,
         "in_normal_stride": 0x0000_0010,
+        #
+        # I will not have any time to properly integrate your core into the llvmpipe, so set numbers below to whatever you want
         #
         ".gl_Position_base": 0x2000_0000,
         ".gl_Position_stride": 0x0000_00C0,
@@ -255,11 +261,7 @@ class Assembler:
     # instruction types
     #
     def __L_type_instruction(
-        self,
-        imm: int = 0,
-        rs1: int = 0,
-        rd: int = 0,
-        opcode: int = 0
+        self, imm: int = 0, rs1: int = 0, rd: int = 0, opcode: int = 0
     ):
         assert (
             imm.bit_length() <= 15
@@ -267,12 +269,7 @@ class Assembler:
             and rs1.bit_length() <= 5
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
-        code = (
-            (opcode << 0)
-            | (rd << 7)
-            | (rs1 << 12)
-            | (imm << 17)
-        )
+        code = (opcode << 0) | (rd << 7) | (rs1 << 12) | (imm << 17)
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
 
     def __F_type_instruction(
