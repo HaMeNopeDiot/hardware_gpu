@@ -42,6 +42,7 @@ def ieee754_to_float(hex_str, bits=32):
             dtype=np.float16
         )[0])
     elif bits == 32:
+        #print(f"DEBUG: binary_data = {binary_data}, type = {type(binary_data)}, len = {len(binary_data)}")
         return struct.unpack('!f', binary_data)[0]
     elif bits == 64:
         return struct.unpack('!d', binary_data)[0]

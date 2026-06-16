@@ -56,7 +56,7 @@ class CISI(CoreInstItem):
             | (self.op.value       << (SIMM_W + 3 * AW))       \
             | (self.op_type.value  << (SIMM_W + 3 * AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
-        cocotb.log.info(f"CISI: {hex(res)}")
+        cocotb.log.debug(f"CISI: {hex(res)}")
         return res
 
 class CIFI(CoreInstItem):
@@ -80,15 +80,15 @@ class CIFI(CoreInstItem):
 
     def get_machine_code(self) -> int:
         res = 0
-        res =  self.imm                                            \
-            | (self.extra          <<  FIMM_W)                     \
-            | (self.arg1_addr      << (FIMM_W + 3))                \
-            | (self.arg2_addr      << (FIMM_W + 3 + 1 * AW))       \
-            | (self.arg3_addr      << (FIMM_W + 3 + 2 * AW))       \
-            | (self.argr_addr      << (FIMM_W + 3 + 3 * AW))       \
-            | (self.op.value       << (FIMM_W + 3 + 4 * AW))       \
+        res =  self.imm                                             \
+            | (self.extra          <<  FIMM_W)                      \
+            | (self.argr_addr      << (FIMM_W + 3))                 \
+            | (self.arg3_addr      << (FIMM_W + 3 + 1 * AW))        \
+            | (self.arg2_addr      << (FIMM_W + 3 + 2 * AW))        \
+            | (self.arg1_addr      << (FIMM_W + 3 + 3 * AW))        \
+            | (self.op.value       << (FIMM_W + 3 + 4 * AW))        \
             | (self.op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W))
-        cocotb.log.info(f"CIFI: {hex(res)}")
+        cocotb.log.debug(f"CIFI: {hex(res)}")
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         return res
 
@@ -111,7 +111,7 @@ class CIUI(CoreInstItem):
             | (self.op.value       << (UIMM_W + AW))               \
             | (self.op_type.value  << (UIMM_W + AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
-        cocotb.log.info(f"CIUI: {hex(res)}")
+        cocotb.log.debug(f"CIUI: {hex(res)}")
         return res
 
 
@@ -138,5 +138,5 @@ class CILI(CoreInstItem):
             | (self.op.value       << (LIMM_W + 2 * AW))       \
             | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
-        cocotb.log.info(f"CILI: {hex(res)}")
+        cocotb.log.debug(f"CILI: {hex(res)}")
         return res

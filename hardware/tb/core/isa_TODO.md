@@ -12,12 +12,12 @@
 - [ ] RET       // `End of program`
 
 # F-type (0/6)
-- [ ] FADD      // `rd = rs1 + rs2`
-- [ ] FMUL      // `rd = rs1 * rs2`
-- [ ] FDIV      // `rd = rs1 / rs2`
-- [ ] FSQRT     // `rd = sqrt(rs1)`
-- [ ] FNEG      // `rd = -rs1`
-- [ ] FMAX      // `rd = max(rs1, rs2)`
+- [x] FADD      // `rd = rs1 + rs2`
+- [x] FMUL      // `rd = rs1 * rs2`
+- [x] FDIV      // `rd = rs1 / rs2`
+- [x] FSQRT     // `rd = sqrt(rs1)`
+- [x] FNEG      // `rd = -rs1`                  // with RTZ
+- [x] FMAX      // `rd = max(rs1, rs2)`
 
 
-- [ ] Проверка работы последовательных команд с задержкой
+- [x] Проверка работы последовательных команд с задержкой
