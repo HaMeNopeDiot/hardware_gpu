@@ -164,7 +164,10 @@ always_comb begin
             else
                 next_thread_state   = TU_STATE_REQUEST;
         TU_STATE_DONE:
-            next_thread_state       = TU_STATE_IDLE;
+            if (load_op || store_op) // In some case need instant be prepaired to next cmd
+                next_thread_state   = TU_STATE_REQUEST;
+            else
+                next_thread_state   = TU_STATE_IDLE;
         default:
             next_thread_state       = TU_STATE_IDLE;
     endcase

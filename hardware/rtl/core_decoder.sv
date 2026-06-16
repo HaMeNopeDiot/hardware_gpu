@@ -67,6 +67,18 @@ module core_decoder
 region LOGIC
 //============================================================================*/
 
+logic instr_valid_ff;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        instr_valid_ff <= '0;
+    else
+        instr_valid_ff <= instr_valid;
+end
+
+/*============================================================================//
+region FSM
+//============================================================================*/
+
 dec_fsm_t state, next_state;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -78,7 +90,7 @@ end
 always_comb begin
     case (state)
         DEC_IDLE: begin
-            if (instr_valid)
+            if (instr_valid_ff)
                 if (threads_valid_i)
                     next_state = DEC_GIVE;
                 else
@@ -93,7 +105,7 @@ always_comb begin
                 next_state = DEC_WAIT;
         end
         DEC_GIVE: begin
-            if (instr_valid)
+            if (instr_valid_ff)
                 if (threads_valid_i)
                     next_state = DEC_GIVE;
                 else
@@ -121,6 +133,10 @@ assign u_cmd_valid      = instr_valid && (instr_i.op_type == U_CMD);
 assign f_cmd_valid      = instr_valid && (instr_i.op_type == F_CMD);
 assign s_cmd_valid      = instr_valid && (instr_i.op_type == S_CMD);
 
+/*============================================================================//
+region FPU
+//============================================================================*/
+
 thread_command_t fpu_cmd_ff;
 logic            fpu_cmd_valid_ff;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -145,7 +161,11 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-logic is_lsu_load, is_lsu_store;
+/*============================================================================//
+region LSU
+//============================================================================*/
+
+logic  is_lsu_load, is_lsu_store;
 assign is_lsu_load  = l_cmd_valid? (instr_i.cmd.l.operand == LOP_LW? 1: 0): 0;
 assign is_lsu_store = s_cmd_valid? (instr_i.cmd.s.operand == SOP_SW? 1: 0): 0;
 
@@ -171,6 +191,11 @@ always_ff @(posedge clk or negedge rst_n) begin
         lsu_cmd_valid_ff        <= '0;
     end
 end
+
+/*============================================================================//
+region MAIN CMD
+//============================================================================*/
+
 
 cmd_union_t     cmd_ff;
 dec_op_type_e   cmd_op_type_ff;
