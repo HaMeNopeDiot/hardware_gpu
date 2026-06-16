@@ -1,26 +1,24 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Tue Jun 16 11:47:28 2026
+[*] Tue Jun 16 13:38:16 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Tue Jun 16 11:47:05 2026"
-[dumpfile_size] 6218494
+[dumpfile_mtime] "Tue Jun 16 13:37:22 2026"
+[dumpfile_size] 4075353
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 4671100
+[timestart] 197400
 [size] 1920 1116
 [pos] -1 -1
-*-15.599999 4834200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.100000 630420 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
-[treeopen] core.core_decoder_u.instr_i.
-[treeopen] core.core_decoder_u.instr_i.cmd.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
+[treeopen] core.core_fetcher_u.
 [treeopen] core.gen_threads[0].
 [treeopen] core.gen_threads[0].thread_unit_u.
 [treeopen] core.gen_threads[1].thread_unit_u.
 [treeopen] core.gen_threads[2].thread_unit_u.
 [treeopen] core.gen_threads[3].thread_unit_u.
-[treeopen] core.instr_i.cmd.
 [sst_width] 290
 [signals_width] 206
 [sst_expanded] 1
@@ -30,9 +28,6 @@ core.clk
 core.rst_n
 @200
 -M
-@28
-core.instr_valid_i
-@200
 -DECODER
 @c00200
 -CMD
@@ -78,7 +73,7 @@ core.core_decoder_u.fpu_cmd_valid
 -CMD
 @200
 -TU
-@800200
+@c00200
 -THREADS
 @28
 core.no_req_from_threads
@@ -134,7 +129,7 @@ core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @1401200
 -T1
-@800200
+@c00200
 -T2
 @22
 core.gen_threads[2].thread_unit_u.data_w[31:0]
@@ -158,6 +153,7 @@ core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @1000200
 -RF
+@1401200
 -T2
 @c00200
 -T3
@@ -168,7 +164,6 @@ core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @1401200
 -T3
-@1000200
 -THREADS
 @200
 -Arbiter
@@ -253,24 +248,38 @@ core.core_decoder_u.state[1:0]
 @1401200
 -DECODER
 @200
+-Fetcher
+@22
+core.core_fetcher_u.pc_i[31:0]
+@28
+core.core_fetcher_u.en_i
+core.core_fetcher_u.gdata_valid
+@22
+core.core_fetcher_u.getted_data[31:0]
+@800200
+-AHB_PORTS
+@22
+core.core_fetcher_u.ahb_o.haddr[31:0]
+@28
+core.core_fetcher_u.ahb_o.hburst[2:0]
+core.core_fetcher_u.ahb_o.hmastlock
+core.core_fetcher_u.ahb_o.htrans[1:0]
+core.core_fetcher_u.ahb_o.hsize[2:0]
+@22
+core.core_fetcher_u.ahb_o.hwdata[31:0]
+@28
+core.core_fetcher_u.ahb_o.hwrite
+@22
+core.core_fetcher_u.ahb_i.hrdata[31:0]
+@28
+core.core_fetcher_u.ahb_i.hready
+core.core_fetcher_u.ahb_i.hresp
+@1000200
+-AHB_PORTS
+@28
+core.core_fetcher_u.ahb_master_u.req_txn_i
+core.core_fetcher_u.ahb_master_u.state[1:0]
+@200
 -DEBUG
-@22
-core.gen_threads[0].thread_unit_u.addr_w[4:0]
-core.gen_threads[0].thread_unit_u.data_w[31:0]
-core.gen_threads[0].thread_unit_u.fpu_result.result_data[31:0]
-@28
-core.gen_threads[0].thread_unit_u.state[2:0]
-@24
-core.gen_threads[0].thread_unit_u.DW[31:0]
-@23
-core.gen_threads[0].thread_unit_u.fpu_result.result_data[31:0]
-@22
-core.gen_threads[0].thread_unit_u.operands[0][31:0]
-core.gen_threads[0].thread_unit_u.operands[1][31:0]
-core.gen_threads[0].thread_unit_u.operands[2][31:0]
-core.gen_threads[0].thread_unit_u.dec_cmd.op[3:0]
-core.core_decoder_u.instr_i.cmd.f.operand.t[3:0]
-@28
-core.core_decoder_u.instr_i.cmd.f.operand.mod
 [pattern_trace] 1
 [pattern_trace] 0

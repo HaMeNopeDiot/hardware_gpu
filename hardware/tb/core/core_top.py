@@ -210,19 +210,44 @@ async def core_test(dut):
 
     await ClockCycles(clk, 30)
 
-    ahb_slave = AHBSlaveModel(dut,
+    ahb_slave_lsu = AHBSlaveModel(dut,
                               name = "lsu",
                               memory_size=2 ** 16,
                               data_width=DW, log= cocotb.log, wait_states=2)
 
-    await core_common_test(dut, clk ,ahb_slave)
+    ahb_slave_ftc = AHBSlaveModel(dut,
+                          name = "ftc",
+                          memory_size=2 ** 16,
+                          data_width=DW, log= cocotb.log, wait_states=2)
 
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.ADD)
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.MUL)
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.DIV)
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.SQRT)
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.NEG)
-    await core_fpu_test(dut, clk, ahb_slave, fpu_op=FPUopTE.MAX)
-    ahb_slave.stop()
+
+    i1 = CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1)
+    i2 = CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1)
+
+    ahb_slave_ftc.write_memory(0x0004, AHBSize.WORD.value, i1.get_machine_code())
+    ahb_slave_ftc.write_memory(0x0008, AHBSize.WORD.value, i2.get_machine_code())
+
+    dut.pc_i.value = 0x0004
+    dut.en_i.value = 1
+
+    await Timer(1, unit="ns")
+    tt = 0
+    while(dut.pc_readed_o.value == 0):
+        await ClockCycles(clk, 1)
+        tt += 1
+        assert tt < 1000, f"fuk"
+    dut.pc_i.value = 0x0008
+
+    await Timer(1, unit="ns")
+    tt = 0
+    while(dut.pc_readed_o.value == 0):
+        await ClockCycles(clk, 1)
+        tt += 1
+        assert tt < 1000, f"fuk"
+    dut.en_i.value = 0
+
+    await ClockCycles(clk, 30)
+    ahb_slave_ftc.stop()
+    ahb_slave_lsu.stop()
 
 

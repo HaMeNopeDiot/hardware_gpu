@@ -43,36 +43,52 @@ module core
     localparam int unsigned THREAD_W         = $clog2(THREAD_CNT)
 ) (
     /*==========================### COMMON SIGNALS ###========================*/
-    input   logic                       clk,
-    input   logic                       rst_n,
+    input    logic                      clk,
+    input    logic                      rst_n,
     /*=========================### INSTRUCTION SIGNALS ###====================*/
-    input   cmd_t                       instr_i,
-    input   logic                       instr_valid_i,
+    input    logic [DW - 1: 0]          pc_i,
+    input    logic                      en_i,
+    output   logic                      pc_readed_o,
     /*============================### AHB SIGNALS ###=========================*/
     // input   ahb_sports_t                lsu_ahb_i,
-    output   logic [MEM_AW - 1: 0]       lsu_haddr,
-    output   logic                       lsu_hwrite,
-    output   hsize_e                     lsu_hsize,
-    output   hburst_e                    lsu_hburst,
-    output   hprot_t                     lsu_hprot,
-    output   htrans_e                    lsu_htrans,
-    output   logic                       lsu_hmastlock,
-    output   logic [DW - 1: 0]           lsu_hwdata,
+    output   logic [MEM_AW - 1: 0]      lsu_haddr,
+    output   logic                      lsu_hwrite,
+    output   hsize_e                    lsu_hsize,
+    output   hburst_e                   lsu_hburst,
+    output   hprot_t                    lsu_hprot,
+    output   htrans_e                   lsu_htrans,
+    output   logic                      lsu_hmastlock,
+    output   logic [DW - 1: 0]          lsu_hwdata,
     // output  ahb_mports_t                lsu_ahb_o,
     input   logic                       lsu_hready,
     input   logic                       lsu_hresp,
     input   logic [DW - 1: 0]           lsu_hrdata,
+
+    // input   ahb_sports_t                ftc_ahb_i,
+    output  logic [MEM_AW - 1: 0]      ftc_haddr,
+    output  logic                      ftc_hwrite,
+    output  hsize_e                    ftc_hsize,
+    output  hburst_e                   ftc_hburst,
+    output  hprot_t                    ftc_hprot,
+    output  htrans_e                   ftc_htrans,
+    output  logic                      ftc_hmastlock,
+    output  logic [DW - 1: 0]          ftc_hwdata,
+    // output  ahb_mports_t                ftc_ahb_o,
+    input   logic                       ftc_hready,
+    input   logic                       ftc_hresp,
+    input   logic [DW - 1: 0]           ftc_hrdata,
+
     /*=============================### TU SIGNALS ###=========================*/
-    output  thread_info_t               thread_info,
-    output  logic                       decoder_ready_o
+    output  thread_info_t               thread_info
     //========================================================================//
 );
 /*============================================================================//
 region AHB
 //============================================================================*/
-ahb_sports_t lsu_ahb_i;
-ahb_mports_t lsu_ahb_o;
+ahb_sports_t lsu_ahb_i, ftc_ahb_i;
+ahb_mports_t lsu_ahb_o, ftc_ahb_o;
 
+// Load/Store unit
 always_comb begin
     lsu_haddr     = lsu_ahb_o.haddr    ;
     lsu_hwrite    = lsu_ahb_o.hwrite   ;
@@ -90,6 +106,24 @@ always_comb begin
     lsu_ahb_i.hrdata = lsu_hrdata;
 end
 
+// Fetcher unit
+always_comb begin
+    ftc_haddr     = ftc_ahb_o.haddr    ;
+    ftc_hwrite    = ftc_ahb_o.hwrite   ;
+    ftc_hsize     = ftc_ahb_o.hsize    ;
+    ftc_hburst    = ftc_ahb_o.hburst   ;
+    ftc_hprot     = ftc_ahb_o.hprot    ;
+    ftc_htrans    = ftc_ahb_o.htrans   ;
+    ftc_hmastlock = ftc_ahb_o.hmastlock;
+    ftc_hwdata    = ftc_ahb_o.hwdata   ;
+end
+
+always_comb begin
+    ftc_ahb_i.hready = ftc_hready;
+    ftc_ahb_i.hresp  = ftc_hresp ;
+    ftc_ahb_i.hrdata = ftc_hrdata;
+end
+
 /*============================================================================//
 region LOGIC
 //============================================================================*/
@@ -103,6 +137,10 @@ lsu_cmd_e           lsu_cmd;
 logic               lsu_cmd_valid;
 
 logic               no_req_from_threads;
+
+cmd_t               ftc_instr;
+logic               ftc_instr_valid;
+logic               dec_ready;
 
 /*============================================================================//
 region THREAD INTERCONNECT
@@ -174,28 +212,54 @@ core_arbiter #(
 );
 // ///////////////////////////////////////////////////////// //
 
+// ///////////////////////////////////////////////////////// //
+//                   *** CORE FETCHER ***                    //
+// NOTE: write a purpose here
+core_fetcher #(
+    .DW         (DW),
+    .AW         (MEM_AW),
+    .THREAD_CNT (THREAD_CNT),
+    .INST_Q_SZ  (8)
+) core_fetcher_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk           (clk             ), // <-
+    .rst_n         (rst_n           ), // <-
+    //==================### AHB SIGNALS ###==================//
+    .ahb_i         (ftc_ahb_i       ), // <-
+    .ahb_o         (ftc_ahb_o       ), // ->
+    //==============### SIGNALS TO DECODER ###===============//
+    .instr_o       (ftc_instr       ), // ->
+    .instr_valid_o (ftc_instr_valid ), // ->
+    .dec_ready_i   (dec_ready       ), // <-
+    //===============### SIGNALS FROM CORE ###===============//
+    .pc_i          (pc_i            ), // <-
+    .en_i          (en_i            ), // <-
+    .pc_readed_o   (pc_readed_o     )  // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
 
 // ///////////////////////////////////////////////////////// //
 //                   *** CORE DECODER ***                    //
 core_decoder #() core_decoder_u (
     //================### COMMON SIGNALS ###=================//
-    .clk            (clk          ),    // <-
-    .rst_n          (rst_n        ),    // <-
+    .clk            (clk                ),    // <-
+    .rst_n          (rst_n              ),    // <-
     //===========### SIGNALS FROM CONTROL UNIT ###===========//
-    .instr_i        (instr_i      ),    // <-
-    .instr_valid    (instr_valid_i),    // <-
+    .instr_i        (ftc_instr          ),    // <-
+    .instr_valid    (ftc_instr_valid    ),    // <-
     //==================### CMD SIGNALS ###==================//
-    .cmd            (cmd          ),    // ->
-    .cmd_op_type    (cmd_op_type  ),    // ->
+    .cmd            (cmd                ),    // ->
+    .cmd_op_type    (cmd_op_type        ),    // ->
     //================### SIGNALS TO LSU ###=================//
-    .lsu_cmd        (lsu_cmd      ),    // ->
-    .lsu_cmd_valid  (lsu_cmd_valid),    // ->
+    .lsu_cmd        (lsu_cmd            ),    // ->
+    .lsu_cmd_valid  (lsu_cmd_valid      ),    // ->
     //================### SIGNALS TO FPU ###=================//
-    .fpu_cmd        (fpu_cmd      ),    // ->
-    .fpu_cmd_valid  (fpu_cmd_valid),     // ->
+    .fpu_cmd        (fpu_cmd            ),    // ->
+    .fpu_cmd_valid  (fpu_cmd_valid      ),    // ->
     //===============### SIGNALS FROM FPU ###================//
-    .threads_valid_i(no_req_from_threads), // <-
-    .decoder_ready_o(decoder_ready_o    )  // ->
+    .threads_valid_i(no_req_from_threads),    // <-
+    .decoder_ready_o(dec_ready          )     // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

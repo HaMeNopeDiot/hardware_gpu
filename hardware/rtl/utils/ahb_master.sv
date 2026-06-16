@@ -110,15 +110,6 @@ region LOGIC
 logic  req_active;
 assign req_active = req_txn_i;
 
-
-logic req_active_ff;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        req_active_ff <= '0;
-    else
-        req_active_ff <= req_active;
-end
-
 //============================================================================*/
 // AHB FSM
 //============================================================================*/
@@ -129,7 +120,7 @@ ahb_txn_e state, next_state;
 logic  res_ahb_txn;
 // assign req_ahb_txn = fst_state == AHB_IDLE && fst_state_next == AHB_ACTIVE;
 assign res_ahb_txn =    ((state == AHB_ACTIVE) || (state == AHB_STALL))
-                    && hready && ~req_active_ff;
+                    && hready && ~(htrans == HTRANS_NONSEQ);
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
@@ -298,7 +289,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         htrans <= HTRANS_IDLE;
     else if (req_active && htrans == HTRANS_IDLE)
         htrans <= HTRANS_NONSEQ;
-    else if (req_active && htrans == HTRANS_NONSEQ)
+    else if (req_active && (htrans == HTRANS_NONSEQ || htrans == HTRANS_SEQ))
         htrans <= HTRANS_SEQ;
     else
         htrans <= HTRANS_IDLE; // BUSY write later. mng can hold

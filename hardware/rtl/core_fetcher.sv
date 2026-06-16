@@ -44,7 +44,9 @@ module core_fetcher
     import ahb_pkg::HSIZE_WORD ;
     import ahb_pkg::HSIZE_DWORD;
 
-
+    // AHB
+    import ahb_pkg::ahb_mports_t;
+    import ahb_pkg::ahb_sports_t;
 #(
     parameter   int unsigned DW           = 32,
     parameter   int unsigned AW           = 32,
@@ -53,9 +55,7 @@ module core_fetcher
     localparam  int unsigned TW           = $clog2(THREAD_CNT),
 
     parameter   int unsigned INST_Q_SZ    = 8,
-    localparam  int unsigned INST_Q_W     = $clog2(INST_Q_SZ),
-    localparam  int unsigned BUFFERABLE   = INST_Q_SZ == 1? HTRANS_BUFE_OFF: HTRANS_BUFE_ON
-
+    localparam  int unsigned INST_Q_W     = $clog2(INST_Q_SZ)
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
@@ -84,12 +84,13 @@ module core_fetcher
 
 
     /*=====================### SIGNALS TO DECODER ###=========================*/
-    output cmd_t                instr_i,
+    output cmd_t                instr_o,
     output logic                instr_valid_o,
-    /*======================### SIGNALS FROM TU ###===========================*/
     input  logic                dec_ready_i,    // decoder is read
+    /*======================### SIGNALS FROM CORE ###=========================*/
     input  logic [DW - 1: 0]    pc_i,
-    input  logic                en_i
+    input  logic                en_i,
+    output logic                pc_readed_o
 
     //========================================================================//
 );
@@ -125,10 +126,24 @@ region ASSIGNES
 // QUEUE
 //============================================================================*/
 
-logic q_data_get;
+logic  q_data_get;
+assign q_data_get = gdata_valid;
+
 logic q_data_give;
 
 logic [DW - 1: 0] getted_data;
+logic gdata_valid, gdata_valid_prev;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        gdata_valid_prev <= '0;
+    else
+        gdata_valid_prev <= gdata_valid;
+end
+
+assign pc_readed_o = ~gdata_valid_prev && gdata_valid;
+
+
 
 assign q_data_give = instr_valid_o && dec_ready_i;
 // write q_data_get
@@ -193,7 +208,7 @@ end
 
 assign instr_valid_o = ~inst_q_empty;
 
-assign instr_i = inst_q[next_inst_ptr_q];
+assign instr_o = inst_q[next_inst_ptr_q];
 
 //============================================================================*/
 // INSTANCES
@@ -204,7 +219,7 @@ assign instr_i = inst_q[next_inst_ptr_q];
 // NOTE: Master AHB to memory for Fetcher
 ahb_master #(
     .DW (DW),
-    .AW (MEM_AW),
+    .AW (AW),
     .TW (TW)
 ) ahb_master_u (
     //================### COMMON SIGNALS ###=================//
@@ -221,8 +236,8 @@ ahb_master #(
     .addr_i       (pc_i         ),  // <-
     .data_i       ('0           ),  // <-
     //==================### OUT SIGNALS ###==================//
-    .data_o       (mem_data     ),  // ->
-    .data_valid_o (getted_data  )   // ->
+    .data_o       (getted_data  ),  // ->
+    .data_valid_o (gdata_valid  )   // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

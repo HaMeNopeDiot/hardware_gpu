@@ -12,6 +12,9 @@ region MODULE DEFINITION
 module core_decoder
     import fpnew_pkg::roundmode_e;
     import fpnew_pkg::operation_e;
+    import fpnew_pkg::MINMAX;
+    import fpnew_pkg::SGNJ;
+    import fpnew_pkg::RTZ;
 
 
     import handshake_fpu_pkg::tags_t;
@@ -159,7 +162,13 @@ always_ff @(posedge clk or negedge rst_n) begin
             fpu_cmd_ff.a3       <= instr_i.cmd.f.a3;
             fpu_cmd_ff.ar       <= instr_i.cmd.f.ar;
             fpu_cmd_ff.tag      <= (tags_t)'(instr_i.cmd.f.imm);
-            fpu_cmd_ff.rnd      <= (roundmode_e)'(instr_i.cmd.f.extra);
+            // Yeah, i know that minmax is not only max and sgnj is not only
+            // negate, but for this case I need only MAX and negate the number.
+            // So, in cvfpu this works only with RTZ round mode
+            if (instr_i.cmd.f.operand.t == MINMAX || instr_i.cmd.f.operand.t == SGNJ)
+                fpu_cmd_ff.rnd      <= (roundmode_e)'(RTZ);
+            else
+                fpu_cmd_ff.rnd      <= (roundmode_e)'(instr_i.cmd.f.extra);
             fpu_cmd_valid_ff    <= '1;
         end
         else begin
