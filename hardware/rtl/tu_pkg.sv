@@ -95,8 +95,8 @@ package tu_pkg;
     //==========================================================================*/
 
     typedef struct packed {
-        operation_e t;
         logic       mod;
+        operation_e t;
     } fpu_op_t;
 
     typedef union packed {

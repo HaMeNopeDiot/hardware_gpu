@@ -11,6 +11,9 @@ region MODULE DEFINITION
 //============================================================================*/
 module core_decoder
     import fpnew_pkg::roundmode_e;
+    import fpnew_pkg::operation_e;
+
+
     import handshake_fpu_pkg::tags_t;
     import tu_pkg::cmd_union_t;
     import tu_pkg::cmd_t;
@@ -90,7 +93,7 @@ end
 always_comb begin
     case (state)
         DEC_IDLE: begin
-            if (instr_valid_ff)
+            if (instr_valid)
                 if (threads_valid_i)
                     next_state = DEC_GIVE;
                 else
@@ -127,11 +130,8 @@ assign prepare_give = next_state == DEC_GIVE;
 assign prepare_wait = next_state == DEC_WAIT;
 assign prepare_idle = next_state == DEC_IDLE;
 
-logic  ff_are_free;
-assign ff_are_free = state != DEC_WAIT;
-
 logic  can_latch_for_wait;
-assign can_latch_for_wait = ff_are_free && prepare_wait;
+assign can_latch_for_wait = ~prepare_wait;
 
 logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
 assign l_cmd_valid      = instr_valid && (instr_i.op_type == L_CMD);
@@ -147,23 +147,29 @@ thread_command_t fpu_cmd_ff;
 logic            fpu_cmd_valid_ff;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        fpu_cmd_ff          <= '0;
-        fpu_cmd_valid_ff    <= '0;
+        fpu_cmd_ff              <= '0;
+        fpu_cmd_valid_ff        <= '0;
     end
-    else if ((prepare_give || can_latch_for_wait) && f_cmd_valid) begin
-        fpu_cmd_ff.op       <= instr_i.cmd.f.operand.t;
-        fpu_cmd_ff.op_mod   <= instr_i.cmd.f.operand.mod;
-        fpu_cmd_ff.a1       <= instr_i.cmd.f.a1;
-        fpu_cmd_ff.a2       <= instr_i.cmd.f.a2;
-        fpu_cmd_ff.a3       <= instr_i.cmd.f.a3;
-        fpu_cmd_ff.ar       <= instr_i.cmd.f.ar;
-        fpu_cmd_ff.tag      <= (tags_t)'(instr_i.cmd.f.imm);
-        fpu_cmd_ff.rnd      <= (roundmode_e)'(instr_i.cmd.f.extra);
-        fpu_cmd_valid_ff    <= '1;
+    else if (prepare_give || can_latch_for_wait) begin
+        if (f_cmd_valid) begin
+            fpu_cmd_ff.op       <= instr_i.cmd.f.operand.t;
+            fpu_cmd_ff.op_mod   <= instr_i.cmd.f.operand.mod;
+            fpu_cmd_ff.a1       <= instr_i.cmd.f.a1;
+            fpu_cmd_ff.a2       <= instr_i.cmd.f.a2;
+            fpu_cmd_ff.a3       <= instr_i.cmd.f.a3;
+            fpu_cmd_ff.ar       <= instr_i.cmd.f.ar;
+            fpu_cmd_ff.tag      <= (tags_t)'(instr_i.cmd.f.imm);
+            fpu_cmd_ff.rnd      <= (roundmode_e)'(instr_i.cmd.f.extra);
+            fpu_cmd_valid_ff    <= '1;
+        end
+        else begin
+            fpu_cmd_ff          <= '0;
+            fpu_cmd_valid_ff    <= '0;
+        end
     end
     else if (prepare_idle) begin
-        fpu_cmd_ff          <= '0;
-        fpu_cmd_valid_ff    <= '0;
+        fpu_cmd_ff              <= '0;
+        fpu_cmd_valid_ff        <= '0;
     end
 end
 
@@ -182,14 +188,18 @@ always_ff @(posedge clk or negedge rst_n) begin
         lsu_cmd_ff              <= LSU_L;
         lsu_cmd_valid_ff        <= '0;
     end
-    else if ((prepare_give || can_latch_for_wait) && (is_lsu_load || is_lsu_store)) begin
+    else if (prepare_give || can_latch_for_wait) begin
         if (is_lsu_load) begin
             lsu_cmd_ff          <= LSU_L;
             lsu_cmd_valid_ff    <= '1;
         end
-        else begin
+        else if (is_lsu_store) begin
             lsu_cmd_ff          <= LSU_S;
             lsu_cmd_valid_ff    <= '1;
+        end
+        else begin
+            lsu_cmd_ff          <= LSU_L;
+            lsu_cmd_valid_ff    <= '0;
         end
     end
     else if (prepare_idle) begin
@@ -211,16 +221,22 @@ assign no_fpu_cmd_valid = l_cmd_valid || u_cmd_valid || s_cmd_valid; // maked it
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        cmd_ff          <= '0;
-        cmd_op_type_ff  <= U_CMD; // so it's write in zero address zero, that prohibited.
+        cmd_ff              <= '0;
+        cmd_op_type_ff      <= U_CMD; // so it's write in zero address zero, that prohibited.
     end
-    else if ((prepare_give || can_latch_for_wait) && no_fpu_cmd_valid) begin
-        cmd_ff          <= instr_i.cmd;
-        cmd_op_type_ff  <= instr_i.op_type;
+    else if ((prepare_give || can_latch_for_wait)) begin
+        if (no_fpu_cmd_valid) begin
+            cmd_ff          <= instr_i.cmd;
+            cmd_op_type_ff  <= instr_i.op_type;
+        end
+        else begin
+            cmd_ff          <= '0;
+            cmd_op_type_ff  <= U_CMD;
+        end
     end
     else if (prepare_idle) begin
-        cmd_ff          <= '0;
-        cmd_op_type_ff  <= U_CMD;
+        cmd_ff              <= '0;
+        cmd_op_type_ff      <= U_CMD;
     end
 end
 

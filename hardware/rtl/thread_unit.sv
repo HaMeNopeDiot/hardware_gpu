@@ -38,6 +38,8 @@ module thread_unit
     import fpnew_pkg::fpu_features_t;
 
     // Operation
+    import fpnew_pkg::ADD;
+
     import tu_pkg::cmd_union_t;
     import tu_pkg::dec_op_type_e;
 
@@ -217,7 +219,17 @@ thread_result_t fpu_result;
 logic [DW - 1: 0]       op_1, op_2, op_3;
 logic [2: 0][DW - 1: 0] operands;
 
-assign operands = {op_1, op_2, op_3};
+// assign operands = {op_1, op_2, op_3};
+always_comb begin
+    if (dec_cmd_valid)
+        case (dec_cmd.op)
+            ADD:        operands = {op_1, op_2, op_3};
+            default:    operands = {op_3, op_2, op_1};
+        endcase
+    else
+        operands = {op_1, op_2, op_3};
+end
+
 
 fsm_fpu_state_e state;
 
@@ -263,15 +275,15 @@ always_comb begin
         data_w = alu_or;
         wr_en  = alu_rr;
     end
-    else if (u_cmd_valid && u_cmd.operand == '0) begin
-        addr_w = u_cmd.rd_addr;
-        data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
-        wr_en  = '1;
-    end
     else if (state == FPU_RESULT) begin
         addr_w = addr_result;
         data_w = fpu_result.result_data;
         wr_en = '1;
+    end
+    else if (u_cmd_valid && u_cmd.operand == '0) begin
+        addr_w = u_cmd.rd_addr;
+        data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
+        wr_en  = '1;
     end
     else begin
         addr_w = '0;
@@ -292,25 +304,7 @@ always_comb begin
         addr_rs1 = '0;
 end
 
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         addr_rs1 <= '0;
-//     else if (s_cmd_valid)
-//         addr_rs1 <= s_cmd.rs1_addr;
-//     else if (l_cmd_valid)
-//         addr_rs1 <= l_cmd.rs1_addr;
-// end
-
-
 assign addr_rs2 = s_cmd_valid? s_cmd.rs2_addr: '0;
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         addr_rs2 <= '0;
-//     else if (s_cmd_valid)
-//         addr_rs2 <= s_cmd.rs2_addr;
-// end
-
-
 
 // handshake sig
 logic out_ready_i;
@@ -502,7 +496,7 @@ if (ONLY_LINT == 0) begin: gen_real_fpu
     fpnew_top #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
         // Type of FPU configuration. Do not touch
-        .Features       (RV64D_Xsflt),
+        .Features       (RV32F_Xsflt),
         .Implementation (DEFAULT_NOREGS),
         .DivSqrtSel     (THMULTI),
         .TagType        (tags_t),
