@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Wed Jun 17 11:08:28 2026
+[*] Wed Jun 17 12:39:07 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Wed Jun 17 11:08:13 2026"
-[dumpfile_size] 4314396
+[dumpfile_mtime] "Wed Jun 17 12:37:16 2026"
+[dumpfile_size] 4562929
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
 [timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-16.500000 215000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.151604 417800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd.
@@ -273,7 +273,7 @@ core.core_fetcher_u.en_i
 core.core_fetcher_u.gdata_valid
 @22
 core.core_fetcher_u.getted_data[31:0]
-@c00200
+@800200
 -AHB_PORTS
 @22
 core.core_fetcher_u.ahb_o.haddr[31:0]
@@ -288,10 +288,11 @@ core.core_fetcher_u.ahb_o.hwdata[31:0]
 core.core_fetcher_u.ahb_o.hwrite
 @22
 core.core_fetcher_u.ahb_i.hrdata[31:0]
-@28
+@29
 core.core_fetcher_u.ahb_i.hready
+@28
 core.core_fetcher_u.ahb_i.hresp
-@1401200
+@1000200
 -AHB_PORTS
 @28
 core.core_fetcher_u.inst_q_empty

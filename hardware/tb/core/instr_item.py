@@ -36,6 +36,8 @@ class InstItem():
             await Timer(1, unit="ns")
             tt += 1
             assert tt < 1000, f"Time out in load instr"
+        cocotb.log.info(f"{self.addr}: catched")
+
         await ClockCycles(clk, 1)
 
 

@@ -134,14 +134,37 @@ logic q_data_give;
 logic [DW - 1: 0] getted_data;
 logic gdata_valid;//, gdata_valid_prev;
 
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         gdata_valid_prev <= '0;
-//     else
-//         gdata_valid_prev <= gdata_valid;
-// end
+logic [DW - 1: 0] pc_i_ff;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        pc_i_ff <= '0;
+    else if (ahb_i.hready)
+        pc_i_ff <= pc_i;
+    else
+        pc_i_ff <= pc_i_ff;
+end
 
-// assign pc_readed_o = (htrans == HTRANS_IDLE);
+logic [DW - 1: 0] ahb_addr;
+always_comb begin
+    if (ahb_i.hready)
+        ahb_addr = pc_i;
+    else
+        ahb_addr = pc_i_ff;
+end
+
+logic  make_it_done;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        make_it_done <= '0;
+    else if (~make_it_done && en_i && ~(ahb_i.hready))
+        make_it_done <= '1;
+    else if (make_it_done && ~en_i && (ahb_i.hready))
+        make_it_done <= '0;
+end
+
+logic  ahb_rq;
+assign ahb_rq = en_i || make_it_done;
+
 
 logic en_i_prev;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -180,7 +203,7 @@ logic  inst_q_empty;
 logic  inst_q_full;
 
 logic [INST_Q_W     : 0]    free_buf_space;
-assign free_buf_space = (INST_Q_W + 1)'(INST_Q_W) - inst_buf_len;
+assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
 
 assign inst_q_empty = inst_buf_len   == '0;
 assign inst_q_full  = free_buf_space == '0;
@@ -253,11 +276,11 @@ ahb_master #(
     .ahb_i        (ahb_i        ),  // <-
     .ahb_o        (ahb_o        ),  // ->
     //================### CONTROL SIGNALS ###================//
-    .req_txn_i    (en_i         ),  // <-
+    .req_txn_i    (ahb_rq       ),  // <-
     .rw_i         ('0           ),  // <-
     .txn_amount_i (2'b01        ),  // <-
     //==================### IN SIGNALS ###===================//
-    .addr_i       (pc_i         ),  // <-
+    .addr_i       (ahb_addr     ),  // <-
     .data_i       ('0           ),  // <-
     //==================### OUT SIGNALS ###==================//
     .data_o       (getted_data  ),  // ->
