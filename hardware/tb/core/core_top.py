@@ -209,6 +209,50 @@ async def fpu_core_test(dut, clk, ahb_slave, ahb_slave_ftc, fpu_op: FPUopTE):
         cocotb.log.info(f"{i}: {eps_real}")
         assert eps_real < eps, f"Uncorrect answer"
 
+async def do_all_i(dut, ahb_slave_lsu, ahb_slave_ftc): # 20.3
+    iuc1 = InstItem(CIUI(op=UPPopTE.LUI,   imm = 0x10000, rd_addr = 1), ahb_slave_ftc, 0x04)
+    ilc1 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0x020,   rd_addr = 1, rs1_addr = 0), ahb_slave_ftc, 0x04)
+    ilc2 = InstItem(CILI(op=LoadOpTE.LW,   imm = 0x04,    rd_addr = 1, rs1_addr = 0), ahb_slave_ftc, 0x04)
+    ifc1 = InstItem(CIFI(op=FPUopTE.ADD,   imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ifc2 = InstItem(CIFI(op=FPUopTE.MUL,   imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ifc3 = InstItem(CIFI(op=FPUopTE.DIV,   imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ifc4 = InstItem(CIFI(op=FPUopTE.SQRT,  imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ifc5 = InstItem(CIFI(op=FPUopTE.NEG,   imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ifc6 = InstItem(CIFI(op=FPUopTE.MAX,   imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    isc1 = InstItem(CISI(op=StoreOpTE.ADD, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), ahb_slave_ftc, 0x08)
+    isc2 = InstItem(CISI(op=StoreOpTE.MUL, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), ahb_slave_ftc, 0x08)
+    isc3 = InstItem(CISI(op=StoreOpTE.SW,  imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), ahb_slave_ftc, 0x08)
+
 async def core_test(dut):
     """Try accessing the design."""
     clk = dut.clk
