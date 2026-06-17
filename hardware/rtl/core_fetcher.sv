@@ -132,17 +132,39 @@ assign q_data_get = gdata_valid;
 logic q_data_give;
 
 logic [DW - 1: 0] getted_data;
-logic gdata_valid, gdata_valid_prev;
+logic gdata_valid;//, gdata_valid_prev;
 
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         gdata_valid_prev <= '0;
+//     else
+//         gdata_valid_prev <= gdata_valid;
+// end
+
+// assign pc_readed_o = (htrans == HTRANS_IDLE);
+
+logic en_i_prev;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        gdata_valid_prev <= '0;
+        en_i_prev <= '0;
     else
-        gdata_valid_prev <= gdata_valid;
+        en_i_prev <= en_i;
 end
 
-assign pc_readed_o = ~gdata_valid_prev && gdata_valid;
+logic  start;
+assign start = ~en_i_prev && en_i;
 
+logic  start_d1;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        start_d1 <= '0;
+    else
+        start_d1 <= start;
+end
+
+always_comb begin
+    pc_readed_o = (start || (ahb_i.hready));
+end
 
 
 assign q_data_give = instr_valid_o && dec_ready_i;
@@ -186,6 +208,8 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_buf_len <= '0;
+    else if (q_data_get && ~inst_q_full && q_data_give && ~inst_q_empty)
+        inst_buf_len <= inst_buf_len;
     else if (q_data_get && ~inst_q_full)
         inst_buf_len <= inst_buf_len + (INST_Q_W + 1)'(1);
     else if (q_data_give && ~inst_q_empty)

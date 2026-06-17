@@ -209,7 +209,7 @@ package tu_pkg;
     typedef enum logic [TU_STATE_W - 1: 0] {
         TU_STATE_IDLE    = 0,
         TU_STATE_REQUEST = 1,
-        TU_STATE_WAIT    = 2,
+        TU_STATE_BUSY    = 2,
         TU_STATE_DONE    = 3
     } tu_state_e;
 

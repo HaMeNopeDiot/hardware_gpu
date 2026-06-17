@@ -52,7 +52,7 @@ module thread_unit
     import tu_pkg::tu_state_e;
     import tu_pkg::TU_STATE_IDLE   ;
     import tu_pkg::TU_STATE_REQUEST;
-    import tu_pkg::TU_STATE_WAIT   ;
+    import tu_pkg::TU_STATE_BUSY   ;
     import tu_pkg::TU_STATE_DONE   ;
 
     import tu_pkg::U_OFS_IMM_W;
@@ -146,18 +146,25 @@ assign load_op  = l_cmd_valid? cmd.l.operand == LOP_LW: '0;
 /*============================================================================//
 region FSM
 //============================================================================*/
-tu_state_e next_thread_state;
+
+fsm_fpu_state_e state; // fpu
+logic  fpu_is_idle;
+assign fpu_is_idle = state == FPU_IDLE;
+
+tu_state_e next_thread_state, cur_thread_state;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
-        thread_state <= TU_STATE_IDLE;
+        cur_thread_state <= TU_STATE_IDLE;
     else
-        thread_state <= next_thread_state;
+        cur_thread_state <= next_thread_state;
 end
 
 always_comb begin
-    case (thread_state)
+    case (cur_thread_state)
         TU_STATE_IDLE:
-            if (load_op || store_op) // TU wants request to LSU
+            if (~fpu_is_idle)
+                next_thread_state   = TU_STATE_BUSY;
+            else if (load_op || store_op) // TU wants request to LSU
                 next_thread_state   = TU_STATE_REQUEST;
             else
                 next_thread_state   = TU_STATE_IDLE;
@@ -171,16 +178,23 @@ always_comb begin
                 next_thread_state   = TU_STATE_REQUEST;
             else
                 next_thread_state   = TU_STATE_IDLE;
+        TU_STATE_BUSY:
+            if (fpu_is_idle)
+                next_thread_state   = TU_STATE_IDLE;
+            else
+                next_thread_state   = TU_STATE_BUSY;
         default:
             next_thread_state       = TU_STATE_IDLE;
     endcase
 end
 
+assign thread_state = cur_thread_state;
+
 // logic  tu_idle;
 logic  tu_req;
 // logic  tu_done;
 // assign tu_idle = thread_state == TU_STATE_IDLE;
-assign tu_req  = thread_state == TU_STATE_REQUEST;
+assign tu_req  = cur_thread_state == TU_STATE_REQUEST;
 // assign tu_done = thread_state == TU_STATE_DONE;
 
 /*============================================================================//
@@ -231,7 +245,6 @@ always_comb begin
 end
 
 
-fsm_fpu_state_e state;
 
 logic  busy_o;
 assign busy_o          = state != FPU_IDLE;

@@ -15,6 +15,8 @@ from core.core_enums      import LoadOpTE, InstTE, StoreOpTE, FPUopTE, UPPopTE, 
 from core.ahb_slave       import AHBSlaveModel, AHBSize
 from core.core_instr_item import VID_ADDR, DW
 
+from core.instr_item      import InstItem
+
 def print_result(result):
     cocotb.log.info(result)
     res = hex(result["result"])
@@ -178,6 +180,98 @@ async def core_fpu_test(dut, clk, ahb_slave, fpu_op: FPUopTE = FPUopTE.ADD):
 
     cocotb.log.info(f"RESULT FPU: {res}")
 
+    eps     = 1e-4
+
+    for i in range(4):
+        res_exp = a[i] + b[i]
+        match fpu_op:
+            case FPUopTE.ADD:
+                res_exp = a[i] + b[i]
+            case FPUopTE.MUL:
+                res_exp = a[i] * b[i]
+            case FPUopTE.DIV:
+                res_exp = a[i] / b[i]
+            case FPUopTE.SQRT:
+                res_exp = np.sqrt(a[i])
+            case FPUopTE.NEG:
+                res_exp = - a[i]
+            case FPUopTE.MAX:
+                res_exp = max(a[i], b[i])
+        eps_real = abs(res[i] - (res_exp))
+        cocotb.log.info(f"{i}: {eps_real}")
+        assert eps_real < eps, f"Uncorrect answer"
+
+async def fpu_core_test(dut, clk, ahb_slave, ahb_slave_ftc, fpu_op: FPUopTE):
+    cocotb.log.info(f"START TESTING CORE FPU")
+
+    # Initialize the generator
+    rng = np.random.default_rng()
+
+    # Generate a single float32 between 0 and 100
+    # rng.random() yields [0.0, 1.0), which is scaled by multiplying by 100
+    a = []
+    b = []
+    for i in range (4):
+        random_float = rng.random(dtype=np.float32) * 10
+        a.append(random_float)
+
+    for i in range (4):
+        random_float = rng.random(dtype=np.float32) * 10
+        b.append(random_float)
+
+    # float
+    # a = [2.3, 2.5, 2.7, 2.9]
+    # b = [3.6, 3.5, 3.3, 3.2]
+    cocotb.log.info(f"a: {a}; b: {b}")
+
+    # load constants in memory
+    ahb_size   = AHBSize.WORD.value
+    elem_ofs    = 1 << ahb_size
+    for i in range(4):
+        a_tmp = float_to_i754(a[i], 32)
+        b_tmp = float_to_i754(b[i], 32)
+        ahb_slave.write_memory((i * elem_ofs)         , ahb_size, a_tmp)
+        ahb_slave.write_memory((i * elem_ofs) + (0x10), ahb_size, b_tmp)
+
+
+    # form instructions: get constants/ calculate / give result
+    ipc1 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0), ahb_slave_ftc, 0x04)
+    ipc2 = InstItem(CISI(op=StoreOpTE.MUL, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), ahb_slave_ftc, 0x08)
+    ipc3 = InstItem(CILI(op=LoadOpTE.LW,   imm = 0x00,   rd_addr = 3, rs1_addr = 2), ahb_slave_ftc, 0x0C)
+    ipc4 = InstItem(CILI(op=LoadOpTE.LW,   imm = 0x10,   rd_addr = 4, rs1_addr = 2), ahb_slave_ftc, 0x10)
+    ipc5 = InstItem(CIFI(op=fpu_op,        imm = 0x00,
+                                           arg1_addr = 3,
+                                           arg2_addr = 4,
+                                           arg3_addr = 1,
+                                           argr_addr = 5,
+                                           extra=RoundModeE.RTZ.value), ahb_slave_ftc, 0x14)
+    ipc6 = InstItem(CISI(op=StoreOpTE.SW,  imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5), ahb_slave_ftc, 0x18)
+
+
+    # execute instructions
+    await ipc1.load_instr(clk, dut)
+    await ipc2.load_instr(clk, dut)
+    await ipc3.load_instr(clk, dut)
+    await ipc4.load_instr(clk, dut)
+    await ipc5.load_instr(clk, dut)
+    await ipc6.load_instr(clk, dut)
+
+    await ClockCycles(clk, 1)
+    dut.pc_i.value = 0x0000
+    dut.en_i.value = 0
+
+    await ClockCycles(clk, 100)
+    # get values
+    res = []
+    cocotb.log.info(f"READ MEM")
+    for i in range(4):
+        r_tmp = ahb_slave.read_memory(0x20 + 0x4 * i, ahb_size)
+        print(r_tmp)
+        r_val = ieee754_to_float(hex(r_tmp), 32)
+        res.append(r_val)
+
+    cocotb.log.info(f"RESULT FPU: {res}")
+
     eps     = 1e-5
 
     for i in range(4):
@@ -208,7 +302,6 @@ async def core_test(dut):
     # make reset
     await make_reset(clk, rst_n)
 
-    await ClockCycles(clk, 30)
 
     ahb_slave_lsu = AHBSlaveModel(dut,
                               name = "lsu",
@@ -218,33 +311,26 @@ async def core_test(dut):
     ahb_slave_ftc = AHBSlaveModel(dut,
                           name = "ftc",
                           memory_size=2 ** 16,
-                          data_width=DW, log= cocotb.log, wait_states=2)
+                          data_width=DW, log= cocotb.log, wait_states=0)
 
 
-    i1 = CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1)
-    i2 = CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1)
+    # ipc1 = InstItem(CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1),                 ahb_slave_ftc, 0x04)
+    # ipc2 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1),   ahb_slave_ftc, 0x08)
+    # await ClockCycles(clk, 30)
 
-    ahb_slave_ftc.write_memory(0x0004, AHBSize.WORD.value, i1.get_machine_code())
-    ahb_slave_ftc.write_memory(0x0008, AHBSize.WORD.value, i2.get_machine_code())
+    # await ipc1.load_instr(clk, dut)
+    # await ipc2.load_instr(clk, dut)
 
-    dut.pc_i.value = 0x0004
-    dut.en_i.value = 1
 
-    await Timer(1, unit="ns")
-    tt = 0
-    while(dut.pc_readed_o.value == 0):
-        await ClockCycles(clk, 1)
-        tt += 1
-        assert tt < 1000, f"fuk"
-    dut.pc_i.value = 0x0008
+    # dut.pc_i.value = 0x0000
+    # dut.en_i.value = 0
 
-    await Timer(1, unit="ns")
-    tt = 0
-    while(dut.pc_readed_o.value == 0):
-        await ClockCycles(clk, 1)
-        tt += 1
-        assert tt < 1000, f"fuk"
-    dut.en_i.value = 0
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.ADD)
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.MUL)
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.DIV)
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.SQRT)
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.NEG)
+    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.MAX)
 
     await ClockCycles(clk, 30)
     ahb_slave_ftc.stop()

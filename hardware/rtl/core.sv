@@ -19,6 +19,7 @@ module core
     import tu_pkg::L_CMD;
     import tu_pkg::dw_value_t;
     import tu_pkg::TU_STATE_REQUEST;
+    import tu_pkg::TU_STATE_BUSY;
     import tu_pkg::TU_STATE_IDLE;
     import tu_pkg::tu_state_e;
 
@@ -178,6 +179,13 @@ end
 logic  thread_req, lsu_done;
 assign thread_req = thread_states[thread_sel] != TU_STATE_IDLE;
 
+// always_ff @(posedge clk or negedge rst_n) begin
+//     if (~rst_n)
+//         thread_req <= '0;
+//     else
+//         thread_req <= thread_states[thread_sel] != TU_STATE_IDLE;
+// end
+
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_if_interpretator
     assign rs1_arr[i] = rt_if[i].rs1;
     assign rs2_arr[i] = rt_if[i].rs2;
@@ -191,6 +199,14 @@ end
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_demux
     assign rt_if[i].rd = (THREAD_W)'(i) == thread_sel? rl_if.rd: '0;
 end
+
+logic [THREAD_CNT - 1: 0] is_busy_tu;
+for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_status_tu_req
+    assign is_busy_tu[i] = thread_states[i] == TU_STATE_BUSY;
+end
+
+logic  tus_ready_get_cmd;
+assign tus_ready_get_cmd = (is_busy_tu == '0) && no_req_from_threads;
 
 
 /*============================================================================//
@@ -258,7 +274,7 @@ core_decoder #() core_decoder_u (
     .fpu_cmd        (fpu_cmd            ),    // ->
     .fpu_cmd_valid  (fpu_cmd_valid      ),    // ->
     //===============### SIGNALS FROM FPU ###================//
-    .threads_valid_i(no_req_from_threads),    // <-
+    .threads_valid_i(tus_ready_get_cmd  ),    // <-
     .decoder_ready_o(dec_ready          )     // ->
     //=======================================================//
 );

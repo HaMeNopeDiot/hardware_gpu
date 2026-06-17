@@ -81,6 +81,33 @@ always_ff @(posedge clk or negedge rst_n) begin
         instr_valid_ff <= instr_valid;
 end
 
+logic  is_lsu_load, is_lsu_store;
+assign is_lsu_load  = l_cmd_valid? (instr_i.cmd.l.operand == LOP_LW? 1: 0): 0;
+assign is_lsu_store = s_cmd_valid? (instr_i.cmd.s.operand == SOP_SW? 1: 0): 0;
+
+logic  i_with_delay;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        i_with_delay <= '0;
+    else
+        i_with_delay <= is_lsu_load || is_lsu_store || f_cmd_valid;
+end
+
+logic threads_valid_prev;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        threads_valid_prev <= '0;
+    else
+        threads_valid_prev <= threads_valid_i;
+end
+
+logic  tu_valid_re;
+assign tu_valid_re = ~threads_valid_prev && threads_valid_i;
+
+
+logic  threads_free;
+assign threads_free = (~(i_with_delay && ~tu_valid_re)) && threads_valid_i;
+
 /*============================================================================//
 region FSM
 //============================================================================*/
@@ -97,7 +124,7 @@ always_comb begin
     case (state)
         DEC_IDLE: begin
             if (instr_valid)
-                if (threads_valid_i)
+                if (threads_free)
                     next_state = DEC_GIVE;
                 else
                     next_state = DEC_WAIT;
@@ -105,14 +132,14 @@ always_comb begin
                 next_state = DEC_IDLE;
         end
         DEC_WAIT: begin
-            if (threads_valid_i)
+            if (threads_free)
                 next_state = DEC_GIVE;
             else
                 next_state = DEC_WAIT;
         end
         DEC_GIVE: begin
-            if (instr_valid_ff)
-                if (threads_valid_i)
+            if (instr_valid)
+                if (threads_free)
                     next_state = DEC_GIVE;
                 else
                     next_state = DEC_WAIT;
@@ -132,6 +159,12 @@ logic prepare_idle;
 assign prepare_give = next_state == DEC_GIVE;
 assign prepare_wait = next_state == DEC_WAIT;
 assign prepare_idle = next_state == DEC_IDLE;
+
+logic  give_rn;
+assign give_rn = state == DEC_GIVE;
+
+logic  wait_rn;
+assign wait_rn = state == DEC_WAIT;
 
 logic  can_latch_for_wait;
 assign can_latch_for_wait = ~prepare_wait;
@@ -185,10 +218,6 @@ end
 /*============================================================================//
 region LSU
 //============================================================================*/
-
-logic  is_lsu_load, is_lsu_store;
-assign is_lsu_load  = l_cmd_valid? (instr_i.cmd.l.operand == LOP_LW? 1: 0): 0;
-assign is_lsu_store = s_cmd_valid? (instr_i.cmd.s.operand == SOP_SW? 1: 0): 0;
 
 lsu_cmd_e   lsu_cmd_ff;
 logic       lsu_cmd_valid_ff;
@@ -256,14 +285,14 @@ region OUT
 assign decoder_ready_o = next_state != DEC_WAIT;
 
 // cmd for threads
-assign cmd              = prepare_give? cmd_ff              : '0;
-assign cmd_op_type      = prepare_give? cmd_op_type_ff      : U_CMD;
+assign cmd              = give_rn? cmd_ff              : '0;
+assign cmd_op_type      = give_rn? cmd_op_type_ff      : U_CMD;
 // lsu
-assign lsu_cmd          = prepare_give? lsu_cmd_ff          : LSU_L;
-assign lsu_cmd_valid    = prepare_give? lsu_cmd_valid_ff    : '0;
+assign lsu_cmd          = give_rn? lsu_cmd_ff          : LSU_L;
+assign lsu_cmd_valid    = give_rn? lsu_cmd_valid_ff    : '0;
 // fpu
-assign fpu_cmd          = prepare_give? fpu_cmd_ff          : '0;
-assign fpu_cmd_valid    = prepare_give? fpu_cmd_valid_ff    : '0;
+assign fpu_cmd          = give_rn? fpu_cmd_ff          : '0;
+assign fpu_cmd_valid    = give_rn? fpu_cmd_valid_ff    : '0;
 
 //============================================================================*/
 endmodule
