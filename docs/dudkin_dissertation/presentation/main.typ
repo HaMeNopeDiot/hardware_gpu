@@ -27,8 +27,6 @@
 
 #set text(size: 14pt, font: "Times New Roman")
 
-// #show heading: it => rect(fill: rgb("444444"), [#text(fill: rgb("ffffff"), it)])
-
 // title page
 #slide[
   #set align(center + horizon)
@@ -147,7 +145,6 @@
     columns: (70%, 30%),
     align: (left, left),
     image("kcachegrind.png", height: 65%),
-    // image("mem_dump.png", height: 65%),
     sourcecode(numbering: none, ```
     // draw->pt.user.vbuffer contents
     // modelView
@@ -301,16 +298,3 @@
 
   Воронеж 2026
 ]
-
-/*
-#slide[
-  #set align(center + horizon)
-  #text(size: 28pt, font: "Times New Roman")[*Спасибо за внимание*]
-  #text(size: 14pt)[#align(right + bottom)[
-    Дудкин Илья Андреевич \
-    Воронежский государственный университет \
-    Руководитель: к.т.н., доц. О.А. Авсеева \
-    E-mail: dudkin.i\@yahoo.com
-  ]]
-]
-*/
