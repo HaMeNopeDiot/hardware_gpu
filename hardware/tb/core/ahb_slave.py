@@ -1,7 +1,7 @@
 # ahb_slave.py
 
 import cocotb
-from cocotb.triggers import RisingEdge, ReadOnly
+from cocotb.triggers import RisingEdge, ReadOnly, Timer
 from cocotb.types import LogicArray
 from enum import IntEnum
 from collections import defaultdict
@@ -313,6 +313,7 @@ class AHBSlaveModel:
 
             if self._addr_phase_write:
                 # --- WRITE Data Phase ---
+                await Timer(1, unit="ns") # FIXME FIXME
                 hwdata = int(self.hwdata.value)
                 wdata = self._extract_write_data(
                     self._addr_phase_addr,
@@ -326,7 +327,7 @@ class AHBSlaveModel:
                 )
                 self.stats["writes"] += 1
 
-                self.log.debug(
+                self.log.error(
                     f"WRITE: addr=0x{self._addr_phase_addr:08X} "
                     f"size={self._addr_phase_size} "
                     f"data=0x{wdata:08X} (hwdata=0x{hwdata:08X})"
