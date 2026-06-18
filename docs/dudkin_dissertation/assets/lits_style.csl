@@ -40,7 +40,7 @@
   </macro>
   <macro name="access">
     <group>
-      <text value=" — "/>
+      <text value=". — "/>
       <text variable="URL" prefix="URL: "/>
       <group prefix=" (" suffix=").">
         <text term="accessed" suffix=": "/>
