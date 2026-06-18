@@ -126,6 +126,18 @@ region ASSIGNES
 // QUEUE
 //============================================================================*/
 
+logic  stop_load_pc;
+assign stop_load_pc = free_buf_space <= (INST_Q_W)'(2); // need 2 cycles to determine what happenin
+
+logic  stop_load_pc_ff;
+always_ff @(posedge clk or negedge rst_n) begin
+    if (~rst_n)
+        stop_load_pc_ff <= '0;
+    else
+        stop_load_pc_ff <= stop_load_pc;
+end
+
+
 logic  q_data_get;
 assign q_data_get = gdata_valid;
 
@@ -163,7 +175,7 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 logic  ahb_rq;
-assign ahb_rq = en_i || make_it_done;
+assign ahb_rq = (en_i || make_it_done) && ~stop_load_pc_ff;
 
 
 logic en_i_prev;
@@ -185,10 +197,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         start_d1 <= start;
 end
 
-always_comb begin
-    pc_readed_o = (start || (ahb_i.hready));
-end
-
 
 assign q_data_give = instr_valid_o && dec_ready_i;
 // write q_data_get
@@ -207,6 +215,7 @@ assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
 
 assign inst_q_empty = inst_buf_len   == '0;
 assign inst_q_full  = free_buf_space == '0;
+
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -256,6 +265,8 @@ end
 assign instr_valid_o = ~inst_q_empty;
 
 assign instr_o = inst_q[next_inst_ptr_q];
+
+assign pc_readed_o = (start || (ahb_i.hready)) && ~stop_load_pc;
 
 //============================================================================*/
 // INSTANCES
