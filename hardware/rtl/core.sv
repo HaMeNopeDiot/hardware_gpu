@@ -32,6 +32,11 @@ module core
     import ahb_pkg::hprot_t;
     import ahb_pkg::htrans_e;
 
+    // APB
+    import apb_pkg::apb4_mports_t;
+    import apb_pkg::apb4_sports_t;
+    import apb_pkg::STROBE;
+
     // LSU
     import lsu_pkg::lsu_cmd_e;
 #(
@@ -46,10 +51,6 @@ module core
     /*==========================### COMMON SIGNALS ###========================*/
     input    logic                      clk,
     input    logic                      rst_n,
-    /*=========================### INSTRUCTION SIGNALS ###====================*/
-    input    logic [DW - 1: 0]          pc_i,
-    input    logic                      en_i,
-    output   logic                      pc_readed_o,
     /*============================### AHB SIGNALS ###=========================*/
     // input   ahb_sports_t                lsu_ahb_i,
     output   logic [MEM_AW - 1: 0]      lsu_haddr,
@@ -66,19 +67,31 @@ module core
     input   logic [DW - 1: 0]           lsu_hrdata,
 
     // input   ahb_sports_t                ftc_ahb_i,
-    output  logic [MEM_AW - 1: 0]      ftc_haddr,
-    output  logic                      ftc_hwrite,
-    output  hsize_e                    ftc_hsize,
-    output  hburst_e                   ftc_hburst,
-    output  hprot_t                    ftc_hprot,
-    output  htrans_e                   ftc_htrans,
-    output  logic                      ftc_hmastlock,
-    output  logic [DW - 1: 0]          ftc_hwdata,
+    output  logic [MEM_AW - 1: 0]       ftc_haddr,
+    output  logic                       ftc_hwrite,
+    output  hsize_e                     ftc_hsize,
+    output  hburst_e                    ftc_hburst,
+    output  hprot_t                     ftc_hprot,
+    output  htrans_e                    ftc_htrans,
+    output  logic                       ftc_hmastlock,
+    output  logic [DW - 1: 0]           ftc_hwdata,
     // output  ahb_mports_t                ftc_ahb_o,
     input   logic                       ftc_hready,
     input   logic                       ftc_hresp,
     input   logic [DW - 1: 0]           ftc_hrdata,
-
+    /*============================### APB SIGNALS ###=========================*/
+    // output apb4_sports_t                csr_apb_i
+    output  logic [DW - 1: 0]           csr_prdata,
+    output  logic                       csr_pready,
+    output  logic                       csr_pslverr,
+    // input  apb4_mports_t                csr_apb_o
+    input   logic [MEM_AW - 1: 0]       csr_paddr,
+    input   logic [DW - 1: 0]           csr_pwdata,
+    input   logic [STROBE - 1: 0]       csr_pstrb,
+    input   logic                       csr_psel,
+    input   logic                       csr_pwrite,
+    input   logic                       csr_penable,
+    input   logic [2:0]                 csr_pprot,
     /*=============================### TU SIGNALS ###=========================*/
     output  thread_info_t               thread_info
     //========================================================================//
@@ -126,6 +139,28 @@ always_comb begin
 end
 
 /*============================================================================//
+region AHB
+//============================================================================*/
+apb4_mports_t csr_apb_i;
+apb4_sports_t csr_apb_o;
+
+always_comb begin // ->
+    csr_prdata  = csr_apb_o.prdata;
+    csr_pready  = csr_apb_o.pready;
+    csr_pslverr = csr_apb_o.pslverr;
+end
+
+always_comb begin // <-
+    csr_apb_i.paddr     = csr_paddr;
+    csr_apb_i.pwdata    = csr_pwdata;
+    csr_apb_i.pstrb     = csr_pstrb;
+    csr_apb_i.psel      = csr_psel;
+    csr_apb_i.pwrite    = csr_pwrite;
+    csr_apb_i.penable   = csr_penable;
+    csr_apb_i.pprot     = csr_pprot;
+end
+
+/*============================================================================//
 region LOGIC
 //============================================================================*/
 cmd_union_t         cmd;
@@ -143,6 +178,13 @@ cmd_t               ftc_instr;
 logic               ftc_instr_valid;
 logic               dec_ready;
 
+
+// CSR <-> CORE
+logic               fetcher_read_pc;
+logic [DW - 1: 0]   vid_arr [THREAD_CNT];
+logic               csr_en;
+logic [DW - 1: 0]   csr_pc;
+logic               ret_inst;
 /*============================================================================//
 region THREAD INTERCONNECT
 //============================================================================*/
@@ -248,9 +290,9 @@ core_fetcher #(
     .instr_valid_o (ftc_instr_valid ), // ->
     .dec_ready_i   (dec_ready       ), // <-
     //===============### SIGNALS FROM CORE ###===============//
-    .pc_i          (pc_i            ), // <-
-    .en_i          (en_i            ), // <-
-    .pc_readed_o   (pc_readed_o     )  // ->
+    .pc_i          (csr_pc          ), // <-
+    .en_i          (csr_en          ), // <-
+    .pc_readed_o   (fetcher_read_pc )  // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -275,7 +317,8 @@ core_decoder #() core_decoder_u (
     .fpu_cmd_valid  (fpu_cmd_valid      ),    // ->
     //===============### SIGNALS FROM FPU ###================//
     .threads_valid_i(tus_ready_get_cmd  ),    // <-
-    .decoder_ready_o(dec_ready          )     // ->
+    .decoder_ready_o(dec_ready          ),    // ->
+    .ret_inst_o     (ret_inst           )     // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -307,6 +350,30 @@ core_lsu #(
 );
 // ///////////////////////////////////////////////////////// //
 
+// ///////////////////////////////////////////////////////// //
+//                  *** CORE CSRM HNDL ***                   //
+// NOTE: write a purpose here
+core_csrm_hndl #(
+    .DW         (DW),
+    .AW         (MEM_AW),
+    .THREAD_CNT (THREAD_CNT)
+) core_csrm_hndl_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk         (clk               ), // <-
+    .rst_n       (rst_n             ), // <-
+    //==================### APB SIGNALS ###==================//
+    .apb4_i      (csr_apb_i         ), // <-
+    .apb4_o      (csr_apb_o         ), // ->
+    //==================### OUT SIGNALS ###==================//
+    .ret_i       (ret_inst          ), // <-
+    .en_o        (csr_en            ), // ->
+    .vid_o       (vid_arr           ), // ->
+    .pc_readed_i (fetcher_read_pc   ), // <-
+    .cur_pc_o    (csr_pc            )  // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
+
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
     // ///////////////////////////////////////////////////////// //
     //                    *** THREAD UNIT ***                    //
@@ -329,7 +396,7 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         .dec_cmd        (fpu_cmd            ),  // <-
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
         //==================### VID SIGNALS ###==================//
-        .vid_i          ((DW)'(i)           ),  // <- fixme later
+        .vid_i          (vid_arr[i]         ),  // <- fixme later
         //==================### OUT SIGNALS ###==================//
         .thread_info    (thread_unit_info[i]),  // ->
         .thread_state   (thread_states[i]   )   // ->

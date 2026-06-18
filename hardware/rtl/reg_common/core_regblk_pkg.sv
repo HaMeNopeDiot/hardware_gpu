@@ -6,17 +6,17 @@
 // Date: 2026/06
 //------------------------------------------------------------------------------//
 
-`timescale 1ns/10ps
-
 package core_regblk_pkg;
     import base_pkg::DW;
 
+    localparam int unsigned  BYTES_IN_REG  = int'(DW / 8);
     // [REGISTERS]
     //----------------------- REGISTER ADDR OFFSET PARAMETERS ------------------//
     localparam int unsigned  R_CORE_CTRL_OFS               = 'h0 * BYTES_IN_REG;
-    localparam int unsigned  R_CORE_STATUS_OFS             = 'h1 * BYTES_IN_REG;
-    //                       [RESERVED]                    = 'h2 * BYTES_IN_REG;
-    localparam int unsigned  RS_VID_OFS                    = 'h3 * BYTES_IN_REG;
+    // localparam int unsigned  R_CORE_STATUS_OFS             = 'h1 * BYTES_IN_REG;
+    localparam int unsigned  R_PC_OFS                      = 'h2 * BYTES_IN_REG;
+    //                       [RESERVED]                    = 'h3 * BYTES_IN_REG;
+    localparam int unsigned  RS_VID_OFS                    = 'h4 * BYTES_IN_REG;
 
     // [FIELDS]
     // - [CORE CONTROL]
@@ -31,6 +31,13 @@ package core_regblk_pkg;
 
     //------------------------ REGISTER VID SIZE PARAMETERS --------------------//
     localparam int unsigned  F_VID_SZ                           = DW;
+
+    //----------------------- REGISTER PC OFFSETS PARAMETERS -------------------//
+    localparam int unsigned  F_PC_OFS                           = 'h0; // RW
+
+    //------------------------ REGISTER PC SIZE PARAMETERS ---------------------//
+    localparam int unsigned  F_PC_SZ                            = DW;
+
 
     //--------------------------------------------------------------------------//
 endpackage

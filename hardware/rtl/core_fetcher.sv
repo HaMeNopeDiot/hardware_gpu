@@ -126,8 +126,12 @@ region ASSIGNES
 // QUEUE
 //============================================================================*/
 
+logic [INST_Q_W     : 0]    free_buf_space;
+assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
+
+
 logic  stop_load_pc;
-assign stop_load_pc = free_buf_space <= (INST_Q_W)'(2); // need 2 cycles to determine what happenin
+assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2); // need 2 cycles to determine what happenin
 
 logic  stop_load_pc_ff;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -189,15 +193,6 @@ end
 logic  start;
 assign start = ~en_i_prev && en_i;
 
-logic  start_d1;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        start_d1 <= '0;
-    else
-        start_d1 <= start;
-end
-
-
 assign q_data_give = instr_valid_o && dec_ready_i;
 // write q_data_get
 
@@ -210,8 +205,6 @@ logic [INST_Q_W     : 0]    inst_buf_len;
 logic  inst_q_empty;
 logic  inst_q_full;
 
-logic [INST_Q_W     : 0]    free_buf_space;
-assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
 
 assign inst_q_empty = inst_buf_len   == '0;
 assign inst_q_full  = free_buf_space == '0;

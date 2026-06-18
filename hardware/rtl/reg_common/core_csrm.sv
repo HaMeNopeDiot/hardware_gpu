@@ -7,7 +7,8 @@
 //------------------------------------------------------------------------------//
 
 module core_csrm
-
+    import core_regblk_pkg::*;
+    import core_reg_structure_pkg::*;
 /*==============================================================================//
 region MODULE DEFINITION
 //==============================================================================*/
@@ -16,10 +17,9 @@ region MODULE DEFINITION
     parameter  int unsigned AW                      = 32,  // ADDRESS WIDTH
     parameter  int unsigned DW                      = 32,  // DATA WIDTH
     parameter  int unsigned THREAD_CNT              = 4,
-    parameter  bit          DEBUG_BUILD             = 0,
 
-    localparam int unsigned VID_STRB_W              = DW / 8,
-    localparam int unsigned RS_VID_END_OFS          = VID_F_OFS + VID_STRB_W * THREAD_CNT,
+    localparam int unsigned STRB_W                  = DW / 8,
+    localparam int unsigned RS_VID_END_OFS          = F_VID_OFS + STRB_W * THREAD_CNT,
     localparam int unsigned VID_W                   = $clog2(THREAD_CNT)
 ) (
     /*==========================### COMMON SIGNALS ###==========================*/
@@ -34,7 +34,10 @@ region MODULE DEFINITION
     /*========================### ADDITIONAL SIGNALS ###========================*/
     input  logic                            ret_i,
     output logic                            en_o,
-    output logic [DW - 1: 0]                vid_o [THREAD_CNT]
+    output logic [DW - 1: 0]                vid_o [THREAD_CNT],
+
+    output logic [DW - 1: 0]                cur_pc_o,
+    input  logic                            pc_readed_i
     //==========================================================================//
 );
 
@@ -42,22 +45,28 @@ region MODULE DEFINITION
 region LOGIC VARIABLE DEFINITION
 //==============================================================================*/
 logic [DW - 1: 0] core_ctrl_rdata;
+logic [DW - 1: 0] pc_rdata;
 logic [DW - 1: 0] vid_rdata         [THREAD_CNT];
 
 logic [DW - 1: 0] core_ctrl_wedata;
+logic [DW - 1: 0] pc_wedata;
 logic [DW - 1: 0] vid_wedata        [THREAD_CNT];
 /*==============================================================================//
 region ASSIGNES
 //==============================================================================*/
 
 logic  is_core_ctrl_addr;
-assign is_core_ctrl_addr = addr == (AW)'(R_CORE_CTRL_OFS);
+assign is_core_ctrl_addr    = addr == (AW)'(R_CORE_CTRL_OFS);
+
+logic  is_pc_addr;
+assign is_pc_addr           = addr == (AW)'(R_PC_OFS);
 
 /*==============================================================================//
 region WRITE ENABLE LOGIC
 //==============================================================================*/
 
-assign core_ctrl_wedata = ret_i? (DW)'(1): (is_core_ctrl_addr? wedata: '0);
+assign core_ctrl_wedata = ret_i         ? (DW)'(1)  : (is_core_ctrl_addr? wedata: '0);
+assign pc_wedata        = pc_readed_i   ? (DW)'(1)  : (is_pc_addr       ? wedata: '0);
 
 /*==============================================================================//
 region VID DATA LOGIC
@@ -71,7 +80,7 @@ if (THREAD_CNT > 1) begin: g_logic_many_threads
     logic [VID_W - 1: 0] local_vid_addr;
     always_comb begin
         if (addr_in_vid_range)
-            local_vid_addr = (VID_W)'((addr - (AW)'(RS_VID_OFS)) >> VID_STRB_W);
+            local_vid_addr = (VID_W)'((addr - (AW)'(RS_VID_OFS)) >> STRB_W);
         else
             local_vid_addr = '0;
     end
@@ -102,10 +111,13 @@ always_comb begin
     if (ret_i)
         core_ctrl_wdata[F_CORE_EN_OFS] = '0;
     if (is_core_ctrl_addr)
-        core_ctrl_wdata = wdata;
+        core_ctrl_wdata = wdata_masked;
     else
         core_ctrl_wdata = '0;
 end
+
+logic [DW - 1: 0] pc_wdata;
+assign pc_wdata = pc_readed_i? pc_rdata + (DW)'(STRB_W): wdata_masked;
 
 /*==============================================================================//
 region RDATA LOGIC
@@ -122,6 +134,8 @@ always_comb begin
     case (addr)
         (AW)'(R_CORE_CTRL_OFS):
             rdata = core_ctrl_rdata;
+        (AW)'(R_PC_OFS):
+            rdata = pc_rdata;
         default:
             if (addr_in_vid_range)
                 rdata = cur_vid;
@@ -135,13 +149,14 @@ end
 region INNER OUT LOGIC
 //==============================================================================*/
 
-assign en_o = core_ctrl_rdata[0];
+assign cur_pc_o = pc_readed_i? pc_wdata: pc_rdata;
+assign en_o     = core_ctrl_rdata[0];
 
 /*==============================================================================//
 region INSTANCES
 //==============================================================================*/
 
-// [CTRL_STAT_REG]
+// [CORE CTRL REG]
 prim_register #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
     .DW(DW),
@@ -150,7 +165,7 @@ prim_register #(
     .F_W    (CORE_CTRL_F_W),
     .F_OFS  (CORE_CTRL_F_OFS)
     // ----------------------------------------------------- //
-) bsld_ctrl_reg (
+) core_ctrl_reg (
     /*================### COMMON SIGNALS ###=================*/
     .clk    (clk),                       // <-
     .rst_n  (rst_n),                     // <-
@@ -161,8 +176,29 @@ prim_register #(
     //=======================================================//
 );
 
+// [PC]
+prim_register #(
+    // ----------------- GLOBAL PARAMETERS ----------------- //
+    .DW(DW),
+    // ----------------- FIELDS PARAMETERS ----------------- //
+    .F_NUM  (PC_F_NUM),
+    .F_W    (PC_F_W),
+    .F_OFS  (PC_F_OFS)
+    // ----------------------------------------------------- //
+) pc_reg (
+    /*================### COMMON SIGNALS ###=================*/
+    .clk    (clk),                       // <-
+    .rst_n  (rst_n),                     // <-
+    /*================### PACKET SIGNALS ###=================*/
+    .wdata  (pc_wdata),                  // <-
+    .wedata (pc_wedata),                 // <-
+    .rdata  (pc_rdata)                   // ->
+    //=======================================================//
+);
 
-// [CFG DATA]
+
+
+// [VID DATA]
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_vid_regs
     prim_register #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
@@ -172,7 +208,7 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_vid_regs
         .F_W    (VID_F_W),
         .F_OFS  (VID_F_OFS)
         // ----------------------------------------------------- //
-    ) cfg_data_reg (
+    ) vid_reg (
         /*================### COMMON SIGNALS ###=================*/
         .clk    (clk),                      // <-
         .rst_n  (rst_n),                    // <-

@@ -6,8 +6,6 @@
 // Date: 2026/06
 //------------------------------------------------------------------------------//
 
-`timescale 1ns/10ps
-
 package apb_pkg;
     import base_pkg::*;
 
@@ -21,18 +19,13 @@ package apb_pkg;
         logic                 pwrite;
         logic                 penable;
         logic [2: 0]          pprot;
-    } apb4_input_t;
+    } apb4_mports_t;
 
     typedef struct packed {
         logic [DW     - 1: 0] prdata;
         logic                 pready;
         logic                 pslverr;
-    } apb4_output_t;
-
-    typedef struct packed {
-        apb4_input_t  in;
-        apb4_output_t out;
-    } apb4_iop_t;
+    } apb4_sports_t;
 
     localparam int unsigned APB_SLV_FSM_W = 3;
     typedef enum logic [APB_SLV_FSM_W - 1: 0] {

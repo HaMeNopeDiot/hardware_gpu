@@ -11,27 +11,31 @@ region MODULE DEFINITION
 //==============================================================================*/
 module core_csrm_hndl
     // imports here
-    import apb_pkg::apb4_input_t;
-    import apb_pkg::apb4_output_t;
+    import apb_pkg::apb4_mports_t;
+    import apb_pkg::apb4_sports_t;
+    import core_regblk_pkg::*;
+
 #(
     parameter   int unsigned DW           = 32,
     parameter   int unsigned AW           = 32,
     parameter   int unsigned THREAD_CNT   = 4,
-    parameter   int unsigned TSTROBE      = DW / 8,
+    localparam  int unsigned STROBE       = DW / 8,
 
-    parameter   int unsigned MIN_ADDR     = '0,
-    parameter   int unsigned MAX_ADDR     = F_VID_SZ + THREAD_CNT * TSTROBE
+    localparam  int unsigned MIN_ADDR     = '0,
+    localparam  int unsigned MAX_ADDR     = F_VID_OFS + THREAD_CNT * STROBE
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                    clk,
     input  logic                    rst_n,
     /*=========================### APB SIGNALS ###============================*/
-    input  apb4_input_t             apb4_i,
-    output apb4_output_t            apb4_o,
+    input  apb4_mports_t            apb4_i,
+    output apb4_sports_t            apb4_o,
     /*=========================### OUT SIGNALS ###============================*/
     input  logic                    ret_i,
     output logic                    en_o,
-    output logic [DW - 1: 0]        vid_o [THREAD_CNT]
+    output logic [DW - 1: 0]        vid_o [THREAD_CNT],
+    input  logic                    pc_readed_i,
+    output logic [DW - 1: 0]        cur_pc_o
     //========================================================================//
 );
 
@@ -73,6 +77,7 @@ region LOGIC
 //============================================================================*/
 
 logic [DW - 1: 0] csrm_wedata;
+logic [DW - 1: 0] csrm_rdata;
 
 /*============================================================================//
 region INSTANCES
@@ -84,20 +89,21 @@ region INSTANCES
 core_csrm #(
     .AW          (AW        ),
     .DW          (DW        ),
-    .THREAD_CNT  (THREAD_CNT),
-    .DEBUG_BUILD (0         )
+    .THREAD_CNT  (THREAD_CNT)
 ) core_csrm_u (
     //================### COMMON SIGNALS ###=================//
-    .clk    (clk        ),  // <-
-    .rst_n  (rst_n      ),  // <-
-    .addr   (paddr      ),  // <-
-    .wdata  (pwdata     ),  // <-
-    .wedata (csrm_wedata),  // <-
-    .rdata  (csrm_rdata ),  // ->
+    .clk        (clk        ),  // <-
+    .rst_n      (rst_n      ),  // <-
+    .addr       (paddr      ),  // <-
+    .wdata      (pwdata     ),  // <-
+    .wedata     (csrm_wedata),  // <-
+    .rdata      (csrm_rdata ),  // ->
     //==============### ADDITIONAL SIGNALS ###===============//
-    .ret_i  (ret_i      ),  // <-
-    .en_o   (en_o       ),  // ->
-    .vid_o  (vid_o      )   // ->
+    .ret_i      (ret_i      ),  // <-
+    .en_o       (en_o       ),  // ->
+    .vid_o      (vid_o      ),  // ->
+    .cur_pc_o   (cur_pc_o   ),  // ->
+    .pc_readed_i(pc_readed_i)   // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -121,7 +127,7 @@ apb_slave #(
     .psel         (psel       ),    // <-
     .penable      (penable    ),    // <-
     .pwrite       (pwrite     ),    // <-
-    .pwdata       (pwdata     ),    // <-
+    //.pwdata       (pwdata     ),    // <-
     .pstrb        (pstrb      ),    // <-
     //                --- OUTPUT SIGNALS ---                 //
     .pready       (pready     ),    // ->

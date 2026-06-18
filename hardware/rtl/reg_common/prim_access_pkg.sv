@@ -6,11 +6,7 @@
 // Date: 2026/06
 //------------------------------------------------------------------------------//
 
-`timescale 1ns/10ps
-
 package prim_access_pkg;
-    import efpga_bl_common_pkg::*;
-    import efpga_bl_reg_structure_pkg::*;
 
     function automatic logic get_we_of_bit(
         input f_access_type_e access_type,

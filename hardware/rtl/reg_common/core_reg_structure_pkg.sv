@@ -39,9 +39,9 @@ package core_reg_structure_pkg;
         (F_PARAM_W)'(F_CORE_EN_OFS )
     };
     // ACCESS TYPES
-    localparam logic [CORE_CTRL_ARR_W - 1: 0] INFO_BRAM_LD_F_AT = {
-        (F_PARAM_W)'(F_ACCESS_RW)
-    };
+    // localparam logic [CORE_CTRL_ARR_W - 1: 0] CORE_CTRL_F_AT = {
+    //     (F_PARAM_W)'(F_ACCESS_RW)
+    // };
 
 
     /*==========================================================================//
@@ -61,9 +61,32 @@ package core_reg_structure_pkg;
         (F_PARAM_W)'(F_VID_OFS )
     };
     // ACCESS TYPES
-    localparam logic [VID_ARR_W - 1: 0] VID_F_AT = {
-        (F_PARAM_W)'(F_ACCESS_RW)
+    // localparam logic [VID_ARR_W - 1: 0] VID_F_AT = {
+    //     (F_PARAM_W)'(F_ACCESS_RW)
+    // };
+
+
+    /*==========================================================================//
+    region PC
+    //==========================================================================*/
+
+    // ================================ ### PC ### ============================ //
+    localparam int unsigned PC_F_NUM = 1;
+    localparam int unsigned PC_ARR_W = PC_F_NUM * F_PARAM_W;
+
+    // WIDTH
+    localparam logic [PC_ARR_W - 1: 0] PC_F_W = {
+        (F_PARAM_W)'(F_PC_SZ )
     };
+    // OFFSETS
+    localparam logic [PC_ARR_W - 1: 0] PC_F_OFS = {
+        (F_PARAM_W)'(F_PC_OFS )
+    };
+    // ACCESS TYPES
+    // localparam logic [PC_ARR_W - 1: 0] PC_F_AT = {
+    //     (F_PARAM_W)'(F_ACCESS_RW)
+    // };
+
 
 
     // ======================================================================== //

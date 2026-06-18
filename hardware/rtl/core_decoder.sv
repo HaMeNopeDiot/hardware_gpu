@@ -27,6 +27,7 @@ module core_decoder
 
     import tu_pkg::SOP_SW;
     import tu_pkg::LOP_LW;
+    import tu_pkg::UOP_RET;
     // type cmd
     import tu_pkg::S_CMD;
     import tu_pkg::L_CMD;
@@ -65,7 +66,8 @@ module core_decoder
 
     /*========================### SIGNALS FROM FPU ###========================*/
     input  logic                threads_valid_i,
-    output logic                decoder_ready_o
+    output logic                decoder_ready_o,
+    output logic                ret_inst_o
     //========================================================================//
 );
 
@@ -73,13 +75,11 @@ module core_decoder
 region LOGIC
 //============================================================================*/
 
-logic instr_valid_ff;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        instr_valid_ff <= '0;
-    else
-        instr_valid_ff <= instr_valid;
-end
+logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
+assign l_cmd_valid      = instr_valid && (instr_i.op_type == L_CMD);
+assign u_cmd_valid      = instr_valid && (instr_i.op_type == U_CMD);
+assign f_cmd_valid      = instr_valid && (instr_i.op_type == F_CMD);
+assign s_cmd_valid      = instr_valid && (instr_i.op_type == S_CMD);
 
 logic  is_lsu_load, is_lsu_store;
 assign is_lsu_load  = l_cmd_valid? (instr_i.cmd.l.operand == LOP_LW? 1: 0): 0;
@@ -163,17 +163,9 @@ assign prepare_idle = next_state == DEC_IDLE;
 logic  give_rn;
 assign give_rn = state == DEC_GIVE;
 
-logic  wait_rn;
-assign wait_rn = state == DEC_WAIT;
-
 logic  can_latch_for_wait;
 assign can_latch_for_wait = ~prepare_wait;
 
-logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
-assign l_cmd_valid      = instr_valid && (instr_i.op_type == L_CMD);
-assign u_cmd_valid      = instr_valid && (instr_i.op_type == U_CMD);
-assign f_cmd_valid      = instr_valid && (instr_i.op_type == F_CMD);
-assign s_cmd_valid      = instr_valid && (instr_i.op_type == S_CMD);
 
 /*============================================================================//
 region FPU
@@ -293,6 +285,11 @@ assign lsu_cmd_valid    = give_rn? lsu_cmd_valid_ff    : '0;
 // fpu
 assign fpu_cmd          = give_rn? fpu_cmd_ff          : '0;
 assign fpu_cmd_valid    = give_rn? fpu_cmd_valid_ff    : '0;
+
+// ret
+assign ret_inst_o       =   give_rn
+                        && (cmd_op_type_ff == U_CMD)
+                        && (cmd_ff.u.operand == UOP_RET)? 1: '0;
 
 //============================================================================*/
 endmodule

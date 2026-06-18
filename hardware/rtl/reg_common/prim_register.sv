@@ -58,7 +58,6 @@ another field), the module will not work correctly. The behavior of such a modul
 
 
 module prim_register
-    import register_pkg::*;
 #(
     /*==========================### COMMON SIGNALS ###==========================*/
     parameter  int unsigned                 DW = 32,                // DATA WIDTH

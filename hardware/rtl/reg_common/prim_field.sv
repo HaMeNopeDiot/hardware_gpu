@@ -8,7 +8,6 @@
 
 
 module prim_field
-    import register_pkg::*;
 #(
     /*==========================### COMMON SIGNALS ###==========================*/
     parameter  int unsigned             FIELD_W = 8

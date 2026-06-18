@@ -10,7 +10,7 @@
 region MODULE DEFINITION
 //==============================================================================*/
 module apb_slave
-    import efpga_bl_apb_pkg::*;
+    import apb_pkg::*;
 #(
     /*==========================================================================//
     region PARAMS
@@ -38,12 +38,13 @@ module apb_slave
     /*=============================### APB SLAVE SIGNALS ###====================*/
     //                            --- INPUT SIGNALS ---                         //
     input logic [AW - 1 : 0]            paddr,
+    /* verilator lint_off UNUSEDSIGNAL */
     input logic [2 : 0]                 pprot,
 
     input logic                         psel,
     input logic                         penable,
     input logic                         pwrite,
-    input logic [DW - 1 : 0]            pwdata,
+    //input logic [DW - 1 : 0]            pwdata,
     input logic [STRBSIZE - 1 : 0]      pstrb,
 
     //                           --- OUTPUT SIGNALS ---                         //
@@ -68,6 +69,11 @@ function automatic [DW - 1: 0] get_we_mask_from_strb (
         mask[8*i+:8] = strb[i]? '1: 0;
     return mask;
 endfunction
+
+/*==============================================================================//
+region LOGIC
+//==============================================================================*/
+logic we, re, wse;
 
 /*==============================================================================//
 region FINAL STATE MACHINE

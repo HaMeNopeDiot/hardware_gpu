@@ -20,4 +20,13 @@ rtl/core_lsu_fsm_pkg.sv
 rtl/core_lsu.sv
 rtl/core_arbiter.sv
 rtl/core_fetcher.sv
+rtl/utils/apb_pkg.sv
+rtl/utils/apb_slave.sv
+rtl/reg_common/core_reg_structure_pkg.sv
+rtl/reg_common/core_regblk_pkg.sv
+rtl/reg_common/prim_bit.sv
+rtl/reg_common/prim_field.sv
+rtl/reg_common/prim_register.sv
+rtl/reg_common/core_csrm.sv
+rtl/core_csrm_hndl.sv
 rtl/core.sv
