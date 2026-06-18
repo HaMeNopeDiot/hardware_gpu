@@ -301,8 +301,8 @@ plt.show()
 ########################################################################
 per_instruction_execution_time = {}
 per_instruciton_count = {}
-for key in TOTAL_EXECUTION_TIME.keys():
-    per_instruction_execution_time[key] = TOTAL_EXECUTION_TIME[
+for key in EXEC_STAGE_CONTRIBUTION.keys():
+    per_instruction_execution_time[key] = EXEC_STAGE_CONTRIBUTION[
         key
     ] * INSTRUCTIONS.count(key)
     per_instruciton_count[key] = INSTRUCTIONS.count(key)
@@ -335,9 +335,9 @@ plt.show()
 
 ########################################################################
 relative_exec_time = {}
-for key in TOTAL_EXECUTION_TIME.keys():
+for key in EXEC_STAGE_CONTRIBUTION.keys():
     relative_exec_time[key] = (
-        TOTAL_EXECUTION_TIME[key] * INSTRUCTIONS.count(key) / execution_time[-1]
+        EXEC_STAGE_CONTRIBUTION[key] * INSTRUCTIONS.count(key) / execution_time[-1]
     )
 
 
