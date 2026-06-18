@@ -22,7 +22,7 @@ module core_csrm_hndl
     localparam  int unsigned STROBE       = DW / 8,
 
     localparam  int unsigned MIN_ADDR     = '0,
-    localparam  int unsigned MAX_ADDR     = F_VID_OFS + THREAD_CNT * STROBE
+    localparam  int unsigned MAX_ADDR     = RS_VID_OFS + THREAD_CNT * STROBE
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                    clk,

@@ -1,17 +1,18 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Thu Jun 18 11:06:45 2026
+[*] Thu Jun 18 13:28:37 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Thu Jun 18 11:05:05 2026"
-[dumpfile_size] 4903896
+[dumpfile_mtime] "Thu Jun 18 13:27:12 2026"
+[dumpfile_size] 4975946
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 0
+[timestart] 339800
 [size] 1920 1116
 [pos] -1 -1
-*-17.051601 1202900 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.751602 778900 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
+[treeopen] core.core_csrm_hndl_u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
@@ -205,7 +206,7 @@ core.core_arbitrage_u.no_req_from_threads
 -Arbiter
 @200
 -LSU
-@800200
+@c00200
 -LSU
 @22
 core.core_lsu_u.rs2[31:0]
@@ -246,6 +247,7 @@ core.core_lsu_u.ahb_i.hready
 core.core_lsu_u.ahb_i.hresp
 @1000200
 -AHB
+@1401200
 -LSU
 @200
 -Decoder
@@ -317,6 +319,33 @@ core.core_fetcher_u.ahb_master_u.state[1:0]
 @1401201
 -Fetcher
 @200
+-CSRM
+@c00200
+-APB_SLAVE
+@22
+core.core_csrm_hndl_u.paddr[31:0]
+@28
+core.core_csrm_hndl_u.pprot[2:0]
+@22
+core.core_csrm_hndl_u.pwdata[31:0]
+core.core_csrm_hndl_u.pstrb[3:0]
+@28
+core.core_csrm_hndl_u.pwrite
+core.core_csrm_hndl_u.psel
+core.core_csrm_hndl_u.penable
+@22
+core.core_csrm_hndl_u.prdata[31:0]
+@28
+core.core_csrm_hndl_u.pready
+core.core_csrm_hndl_u.pslverr
+@1401200
+-APB_SLAVE
+@200
 -DEBUG
+@22
+core.csr_pc[31:0]
+@28
+core.core_csrm_hndl_u.apb_slave_u.addr_not_in_range
+core.core_csrm_hndl_u.apb_slave_u.is_unaligned_addr
 [pattern_trace] 1
 [pattern_trace] 0

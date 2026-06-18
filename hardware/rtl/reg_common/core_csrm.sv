@@ -19,7 +19,7 @@ region MODULE DEFINITION
     parameter  int unsigned THREAD_CNT              = 4,
 
     localparam int unsigned STRB_W                  = DW / 8,
-    localparam int unsigned RS_VID_END_OFS          = F_VID_OFS + STRB_W * THREAD_CNT,
+    localparam int unsigned RS_VID_END_OFS          = RS_VID_OFS + STRB_W * THREAD_CNT,
     localparam int unsigned VID_W                   = $clog2(THREAD_CNT)
 ) (
     /*==========================### COMMON SIGNALS ###==========================*/
@@ -65,8 +65,8 @@ assign is_pc_addr           = addr == (AW)'(R_PC_OFS);
 region WRITE ENABLE LOGIC
 //==============================================================================*/
 
-assign core_ctrl_wedata = ret_i         ? (DW)'(1)  : (is_core_ctrl_addr? wedata: '0);
-assign pc_wedata        = pc_readed_i   ? (DW)'(1)  : (is_pc_addr       ? wedata: '0);
+assign core_ctrl_wedata = ret_i                 ? (DW)'(1)  : (is_core_ctrl_addr? wedata: '0);
+assign pc_wedata        = pc_readed_i && en_o   ? (DW)'('1) : (is_pc_addr       ? wedata: '0);
 
 /*==============================================================================//
 region VID DATA LOGIC
@@ -117,7 +117,7 @@ always_comb begin
 end
 
 logic [DW - 1: 0] pc_wdata;
-assign pc_wdata = pc_readed_i? pc_rdata + (DW)'(STRB_W): wdata_masked;
+assign pc_wdata = pc_readed_i && en_o? pc_rdata + (DW)'(STRB_W): wdata_masked;
 
 /*==============================================================================//
 region RDATA LOGIC

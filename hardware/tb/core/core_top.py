@@ -13,6 +13,7 @@ from decimal import Decimal
 from core.core_instr_item import CILI, CIFI, CISI, CIUI, CoreInstItem
 from core.core_enums      import LoadOpTE, InstTE, StoreOpTE, FPUopTE, UPPopTE, RoundModeE
 from core.ahb_slave       import AHBSlaveModel, AHBSize
+from core.apb_master      import APB4Master
 from core.core_instr_item import VID_ADDR, DW
 
 from core.instr_item      import InstItem
@@ -319,21 +320,29 @@ async def core_test(dut):
                           memory_size=2 ** 16,
                           data_width=DW, log= cocotb.log, wait_states=0)
 
+    apb_master_csr = APB4Master(dut,
+                                prefix = "csr",
+                                clock = dut.clk,
+                                reset = dut.rst_n)
 
-    # ipc1 = InstItem(CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1),                 ahb_slave_ftc, 0x04)
-    # ipc2 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1),   ahb_slave_ftc, 0x08)
-    # await ClockCycles(clk, 30)
+    ipc1 = InstItem(CIUI(op=UPPopTE.LUI,   imm = 0xABCDE, rd_addr = 1),                 ahb_slave_ftc, 0x04)
+    ipc2 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0xF12,   rd_addr = 1, rs1_addr = 1),   ahb_slave_ftc, 0x08)
+    ipc3 = InstItem(CIUI(op=UPPopTE.RET,   imm = 0x00,    rd_addr = 0),                 ahb_slave_ftc, 0x12)
+    await ClockCycles(clk, 30)
 
-    # await ipc1.load_instr(clk, dut)
-    # await ipc2.load_instr(clk, dut)
-
+    await apb_master_csr.write(0x2 * 4, 0x4, 0b1111)
+    await apb_master_csr.write(0x4 * 4, 0x0, 0b1111)
+    await apb_master_csr.write(0x5 * 4, 0x1, 0b1111)
+    await apb_master_csr.write(0x6 * 4, 0x2, 0b1111)
+    await apb_master_csr.write(0x7 * 4, 0x3, 0b1111)
+    await apb_master_csr.write(0x0 * 4, 0x1, 0b1111)
 
     # dut.pc_i.value = 0x0000
     # dut.en_i.value = 0
 
     # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.ADD)
     # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.MUL)
-    await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.DIV)
+    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.DIV)
     # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.SQRT)
     # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.NEG)
     # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, FPUopTE.MAX)
@@ -342,5 +351,4 @@ async def core_test(dut):
     await ClockCycles(clk, 100)
     ahb_slave_ftc.stop()
     ahb_slave_lsu.stop()
-
 
