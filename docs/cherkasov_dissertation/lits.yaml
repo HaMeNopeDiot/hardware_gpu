@@ -12,7 +12,9 @@ amd:
   type: Original
   title: Southern Islands Series Instruction Set Architecture
   author: Advanced Micro Devices, Inc.
-  url: https://www.amd.com/content/dam/amd/en/documents/radeon-tech-docs/instruction-set-architectures/southern-islands-instruction-set-architecture.pdf
+  url:
+    date: 2026-06-18
+    value: https://www.amd.com/content/dam/amd/en/documents/radeon-tech-docs/instruction-set-architectures/southern-islands-instruction-set-architecture.pdf
 
 c_programming_language:
   type: Book
@@ -24,12 +26,16 @@ language_classes:
   title: Introduction to Compilers and Language Design Second Edition
   author:
     - Prof. Douglas Thain
-  url: http://compilerbook.org
+  url:
+    date: 2026-06-18
+    value: http://compilerbook.org
 
 gcc:
   type: Web
   title: GCC, the GNU Compiler Collection
-  url: https://gcc.gnu.org/
+  url:
+    date: 2026-06-18
+    value: https://gcc.gnu.org/
 
 flynn:
   type: Article
@@ -41,7 +47,9 @@ flynn:
 lsu_w:
   type: Web
   title: Load-storage unit
-  url: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit#:~:text=In%20computer%20engineering%2C%20a%20load,back%20to%20memory%20from%20registers.
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit#:~:text=In%20computer%20engineering%2C%20a%20load,back%20to%20memory%20from%20registers.
 
 haris:
   type: Book
@@ -55,117 +63,163 @@ haris:
 mesa:
   type: Repository
   title: Mesa 3D
-  url: https://gitlab.freedesktop.org/mesa/mesa
+  url:
+    date: 2026-06-18
+    value: https://gitlab.freedesktop.org/mesa/mesa
 
 rtl_wiki:
   type: Web
   title: Уровень регистровых передач
-  url: https://ru.wikipedia.org/wiki/Уровень_регистровых_передач
+  url:
+    date: 2026-06-18
+    value: https://ru.wikipedia.org/wiki/Уровень_регистровых_передач
 
 llvmpipe_doc:
   type: Web
   title: LLVMpipe
-  url: https://docs.mesa3d.org/drivers/llvmpipe.html
+  url:
+    date: 2026-06-18
+    value: https://docs.mesa3d.org/drivers/llvmpipe.html
 
 nir_doc:
   type: Web
   title: NIR Intermediate Representation (NIR)
-  url: https://docs.mesa3d.org/nir/index.html
+  url:
+    date: 2026-06-18
+    value: https://docs.mesa3d.org/nir/index.html
 
 tgsi_doc:
   type: Web
   title: TGSI
-  url: https://docs.mesa3d.org/gallium/tgsi.html
+  url:
+    date: 2026-06-18
+    value: https://docs.mesa3d.org/gallium/tgsi.html
 
 vulkan_doc:
-  type: Repository
+  type: Web
   title: Vulkan Docs
-  url: https://github.com/KhronosGroup/Vulkan-Docs
+  url:
+    date: 2026-06-18
+    value: https://github.com/KhronosGroup/Vulkan-Docs
 
 three_address_code:
   type: Web
   title: Three-address code
-  url: https://en.wikipedia.org/wiki/Three-address_code
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Three-address_code
 
 mesa3d_doc:
   type: Web
   title: Mesa 3D Documentation
-  url: https://docs.mesa3d.org/index.html
+  url:
+    date: 2026-06-18
+    value: https://docs.mesa3d.org/index.html
 
 spirv_wiki:
   type: Web
   title: Standard Portable Intermediate Representation
-  url: https://en.wikipedia.org/wiki/Standard_Portable_Intermediate_Representation
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Standard_Portable_Intermediate_Representation
 
 isa_wiki:
   type: Web
   title: Instruction set architecture
-  url: https://en.wikipedia.org/wiki/Instruction_set_architecture
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Instruction_set_architecture
 
 ir_wiki:
   type: Web
   title: Intermediate representation
-  url: https://en.wikipedia.org/wiki/Intermediate_representation
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Intermediate_representation
 
 simd_wiki:
   type: Web
   title: Single instruction, multiple data
-  url: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
 
 nvidia_turing_gpu:
   type: Book
   title: NVIDIA TURING GPU ARCHITECTURE
-  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
+  url:
+    date: 2026-06-18
+    value: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
 
 gpp:
   type: Chapter
   title: Graphics Pipeline Performance
-  url: https://developer-nvidia-com.translate.goog/gpugems/gpugems/part-v-performance-and-practicalities/chapter-28-graphics-pipeline-performance?_x_tr_sl=en&_x_tr_tl=ru&_x_tr_hl=ru&_x_tr_pto=sge
+  url:
+    date: 2026-06-18
+    value: https://developer-nvidia-com.translate.goog/gpugems/gpugems/part-v-performance-and-practicalities/chapter-28-graphics-pipeline-performance?_x_tr_sl=en&_x_tr_tl=ru&_x_tr_hl=ru&_x_tr_pto=sge
 
 register_file_wiki:
   type: Web
   title: Регистровый файл
-  url: https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%BE%D0%B2%D1%8B%D0%B9_%D1%84%D0%B0%D0%B9%D0%BB
+  url:
+    date: 2026-06-18
+    value: https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%BE%D0%B2%D1%8B%D0%B9_%D1%84%D0%B0%D0%B9%D0%BB
 
 load_store_unit_wiki:
   type: Web
   title: Load-store unit
-  url: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit
 
 simt_wiki:
   type: Web
   title: Single Instruction, multiple threads
-  url: https://en.wikipedia.org/wiki/Single_instruction,_multiple_threads
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Single_instruction,_multiple_threads
 
 riscv_article:
   type: Article
   title: Исследование технологии RISC-V
-  url: https://www.mathnet.ru/links/74f6f2e62d9510259e3a97a45b3ff6f1/tisp500.pdf
+  url:
+    date: 2026-06-18
+    value: https://www.mathnet.ru/links/74f6f2e62d9510259e3a97a45b3ff6f1/tisp500.pdf
 
 riscv_standard:
   type: Web
   title: Библиотека стандарта RISC-V
-  url: https://docs.riscv.org/reference/home/index.html
+  url:
+    date: 2026-06-18
+    value: https://docs.riscv.org/reference/home/index.html
 
 intel_atnt_syntax:
   type: Web
   title: Язык ассемблера x86
-  url: https://en.wikipedia.org/wiki/X86_assembly_language
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/X86_assembly_language
 
 jit_wiki:
   type: Web
   title: Just-in-time compilation
-  url: https://en.wikipedia.org/wiki/Just-in-time_compilation
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Just-in-time_compilation
 
 llvm_doc:
   type: Web
   title: The LLVM Compiler Infrastructure
-  url: https://llvm.org/
+  url:
+    date: 2026-06-18
+    value: https://llvm.org/
 
 verification_habr:
   type: Web
   title: Верификация цифровых схем. Обзор
-  url: https://habr.com/ru/articles/481542/
+  url:
+    date: 2026-06-18
+    value: https://habr.com/ru/articles/481542/
 
 ipblocks_gost:
   type: Book
@@ -199,9 +253,13 @@ computer_organization:
 phillips_machine:
   type: Web
   title: Phillips Machine
-  url: https://en.wikipedia.org/wiki/Phillips_Machine
+  url:
+    date: 2026-06-18
+    value: https://en.wikipedia.org/wiki/Phillips_Machine
 
 vulkan_tutorial:
   type: Web
   title: Vulkan Tutorial
-  url: https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Introduction
+  url:
+    date: 2026-06-18
+    value: https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Introduction
