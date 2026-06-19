@@ -93,7 +93,8 @@ module core
     input   logic                       csr_penable,
     input   logic [2:0]                 csr_pprot,
     /*=============================### TU SIGNALS ###=========================*/
-    output  thread_info_t               thread_info
+    output  thread_info_t               thread_info,
+    output  logic                       busy_o
     //========================================================================//
 );
 /*============================================================================//
@@ -139,7 +140,7 @@ always_comb begin
 end
 
 /*============================================================================//
-region AHB
+region APB
 //============================================================================*/
 apb4_mports_t csr_apb_i;
 apb4_sports_t csr_apb_o;
@@ -221,13 +222,6 @@ end
 logic  thread_req, lsu_done;
 assign thread_req = thread_states[thread_sel] != TU_STATE_IDLE;
 
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         thread_req <= '0;
-//     else
-//         thread_req <= thread_states[thread_sel] != TU_STATE_IDLE;
-// end
-
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_if_interpretator
     assign rs1_arr[i] = rt_if[i].rs1;
     assign rs2_arr[i] = rt_if[i].rs2;
@@ -250,6 +244,11 @@ end
 logic  tus_ready_get_cmd;
 assign tus_ready_get_cmd = (is_busy_tu == '0) && no_req_from_threads;
 
+/*============================================================================//
+region OUT
+//============================================================================*/
+
+assign busy_o = csr_en;
 
 /*============================================================================//
 region INSTANCES

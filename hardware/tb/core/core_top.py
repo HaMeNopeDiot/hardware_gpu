@@ -1,7 +1,7 @@
 # test_my_design.py (simple)
 
 import cocotb
-from cocotb.triggers import Timer, ClockCycles
+from cocotb.triggers import Timer, ClockCycles, FallingEdge
 
 from fpu.fppconverter import ieee754_to_float, float_to_i754
 
@@ -19,16 +19,6 @@ from core.core_instr_item import VID_ADDR, DW
 from core.instr_item      import InstItem
 from utility.addresess    import CSRAddr
 
-def print_result(result):
-    cocotb.log.info(result)
-    res = hex(result["result"])
-    if result["result"] != 0:
-        if len(res) - 2 < 16:
-            res = "0x" + (16 + 2 - len(res)) * "0" + res[2:]
-        cocotb.log.info(f"TRY TO SEND HEX: {res}")
-        cocotb.log.info(f"RESULT: {(ieee754_to_float(res[2:], 64))}")
-
-
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
     while True:
         clk.value = 0
@@ -42,37 +32,6 @@ async def make_reset(clk, rst_n):
     rst_n.value = 0
     await ClockCycles(clk, 1)
     rst_n.value = 1
-
-async def clear_instr_i(dut, clk):
-    instr_valid_i = dut.instr_valid_i
-    instr_i = dut.instr_i
-    await ClockCycles(clk, 1)
-    instr_valid_i.value = 0
-    instr_i.value       = 0
-
-async def launch_inst(dut, clk, instr: CoreInstItem, clear=False, id_inst: int = -1, timeout: int = 1000):
-    instr_valid_i = dut.instr_valid_i
-    instr_i = dut.instr_i
-    # set
-    await ClockCycles(clk, 1)
-    if id_inst == -1:
-        cocotb.log.info(f"Start txn...")
-    else:
-        cocotb.log.info(f"{id_inst}: Start txn...")
-
-    instr_i.value = instr.get_machine_code()
-    instr_valid_i.value = 1
-
-    tt = 0
-    await Timer(time=1, unit="ns")
-    while(dut.decoder_ready_o.value == 0):
-        await ClockCycles(clk, 1)
-        tt += 1
-        if tt >= timeout:
-            cocotb.log.error(f"TIME OUT!")
-            assert False, f"TIME OUT"
-    if clear:
-        await clear_instr_i(dut, clk)
 
 async def fpu_core_test(dut,
                         clk,
@@ -100,7 +59,7 @@ async def fpu_core_test(dut,
     # float
     # a = [2.3, 2.5, 2.7, 2.9]
     # b = [3.6, 3.5, 3.3, 3.2]
-    cocotb.log.info(f"a: {a}; b: {b}")
+    cocotb.log.debug(f"Arguments: arg1: {a}; arg2: {b}")
 
     # load constants in memory
     ahb_size   = AHBSize.WORD.value
@@ -131,14 +90,16 @@ async def fpu_core_test(dut,
     await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
     await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
 
-    await ClockCycles(clk, 100)
+
+    while (dut.busy_o.value == 1):
+        await ClockCycles(clk, 1)
     # get values
     res = []
     cocotb.log.info(f"READ MEM")
     for i in range(4):
         r_addr = 0x20 + 0x4 * i
         r_tmp = ahb_slave.read_memory(r_addr, ahb_size)
-        cocotb.log.info(f"A: {hex(r_addr)}; D: {r_tmp}")
+        cocotb.log.info(f"- A: {hex(r_addr)}; D: {r_tmp}")
         # print(r_tmp)
         r_val = ieee754_to_float(hex(r_tmp), 32)
         res.append(r_val)
@@ -163,7 +124,7 @@ async def fpu_core_test(dut,
             case FPUopTE.MAX:
                 res_exp = max(a[i], b[i])
         eps_real = abs(res[i] - (res_exp))
-        cocotb.log.info(f"{i}: {eps_real}")
+        cocotb.log.debug(f"ESP for {i} THREAD: {eps_real}")
         assert eps_real < eps, f"Uncorrect answer: {a[i]} op {b[i]} = {res[i]} <> {res_exp}"
 
 async def do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr): # 20.3
@@ -239,13 +200,16 @@ async def do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr): # 20
     await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
     await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
 
-    await ClockCycles(clk, 100)
+    while (dut.busy_o.value == 1):
+        await ClockCycles(clk, 1)
 
     for iitem in ifpu:
         await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x40, 0b1111)
         await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,  0b1111)
 
-    await ClockCycles(clk, 200)
+
+    while (dut.busy_o.value == 1):
+        await ClockCycles(clk, 1)
 
     r_fpu_res = []
     for i in range(6):
@@ -253,7 +217,7 @@ async def do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr): # 20
         for j in range(4):
             r_addr = 0x1080 + ((i * 4) + j) * (1 << 2)
             r_tmp = ahb_slave_lsu.read_memory(r_addr, AHBSize.WORD.value)
-            cocotb.log.info(f"A: {hex(r_addr)}; D: {r_tmp}")
+            cocotb.log.info(f"- A: {hex(r_addr)}; D: {r_tmp}")
             r_val = ieee754_to_float(hex(r_tmp), 32)
             r_fpu.append(r_val)
         r_fpu_res.append(r_fpu)
@@ -275,46 +239,81 @@ async def do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr): # 20
         assert abs(-np.sqrt(a[i])               - r_fpu_neg[i] ) < eps, "NEG FPU RES not match"
         assert abs(max(a[i], np.sqrt(a[i]))     - r_fpu_max[i] ) < eps, "MAX FPU RES not match"
 
+class BaseCoreTest:
+    def __init__(self, dut, name: str = "test"):
+        self.name = name
+        self.dut = dut
+        self.clk = dut.clk
+        self.rst_n = dut.rst_n
+        self.ahb_slave_lsu = None
+        self.ahb_slave_ftc = None
+        self.apb_master_csr = None
 
-async def core_test(dut):
-    """Try accessing the design."""
-    clk = dut.clk
-    rst_n = dut.rst_n
-    # clk launch
-    cocotb.start_soon(clock_generator(clk, 10, unit="ns"))
-    # make reset
-    await make_reset(clk, rst_n)
 
+    async def prebody(self):
+        clk = self.clk
+        rst_n = self.rst_n
+        dut = self.dut
+        cocotb.start_soon(clock_generator(clk, 10, unit="ns"))
+        # make reset
+        await make_reset(clk, rst_n)
 
-    ahb_slave_lsu = AHBSlaveModel(dut,
-                              name = "lsu",
-                              memory_size=2 ** 16,
-                              data_width=DW, log= cocotb.log, wait_states=0)
+        self.ahb_slave_lsu = AHBSlaveModel(dut,
+                                name = "lsu",
+                                memory_size=2 ** 16,
+                                data_width=DW, log= cocotb.log, wait_states=0)
 
-    ahb_slave_ftc = AHBSlaveModel(dut,
-                          name = "ftc",
-                          memory_size=2 ** 16,
-                          data_width=DW, log= cocotb.log, wait_states=0)
+        self.ahb_slave_ftc = AHBSlaveModel(dut,
+                            name = "ftc",
+                            memory_size=2 ** 16,
+                            data_width=DW, log= cocotb.log, wait_states=0)
 
-    apb_master_csr = APB4Master(dut,
-                                prefix = "csr",
-                                clock = dut.clk,
-                                reset = dut.rst_n)
+        self.apb_master_csr = APB4Master(dut,
+                                    prefix = "csr",
+                                    clock = dut.clk,
+                                    reset = dut.rst_n)
 
-    await apb_master_csr.write(CSRAddr.CORE_VID.value       , 0x0, 0b1111)
-    await apb_master_csr.write(CSRAddr.CORE_VID.value + 0x4 , 0x1, 0b1111)
-    await apb_master_csr.write(CSRAddr.CORE_VID.value + 0x8 , 0x2, 0b1111)
-    await apb_master_csr.write(CSRAddr.CORE_VID.value + 0xC , 0x3, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value       , 0x0, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x4 , 0x1, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x8 , 0x2, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0xC , 0x3, 0b1111)
 
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.ADD)
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.MUL)
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.DIV)
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.SQRT)
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.NEG)
-    # await fpu_core_test(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr, FPUopTE.MAX)
-    await do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr)
+    async def body(self):
+        pass # virtual
 
-    await ClockCycles(clk, 100)
-    ahb_slave_ftc.stop()
-    ahb_slave_lsu.stop()
+    async def postbody(self):
+            self.ahb_slave_lsu.stop()
+            self.ahb_slave_ftc.stop()
 
+    async def run(self):
+        await self.prebody()
+        await self.body()
+        await self.postbody()
+
+class ISACheckTest(BaseCoreTest):
+    async def body(self):
+        await do_all_i(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr)
+
+class FPUCheckADDTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.ADD)
+
+class FPUCheckMULTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.MUL)
+
+class FPUCheckDIVTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.DIV)
+
+class FPUCheckSQRTTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.SQRT)
+
+class FPUCheckNEGTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.NEG)
+
+class FPUCheckMAXTest(BaseCoreTest):
+    async def body(self):
+        await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.MAX)

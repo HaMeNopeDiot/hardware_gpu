@@ -44,7 +44,7 @@ VERILOG_INCLUDE_DIRS += $(FPU_PWD) \
 COCOTB_TOPLEVEL = core#thread_unit#fpnew_top
 
 # COCOTB_TEST_MODULES is the basename of the Python test file(s)
-COCOTB_TEST_MODULES = core_top
+COCOTB_TEST_MODULES = test_top
 
 COCOTB_HDL_TIMEUNIT = 1ns
 COCOTB_HDL_TIMEPRECISION = 100ps

@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Fri Jun 19 07:02:52 2026
+[*] Fri Jun 19 07:50:16 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Fri Jun 19 07:02:49 2026"
-[dumpfile_size] 9314657
+[dumpfile_mtime] "Fri Jun 19 07:50:05 2026"
+[dumpfile_size] 14158466
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
 [timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-20.351603 16190000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-21.251602 14510000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
@@ -25,6 +25,7 @@
 @28
 core.clk
 core.rst_n
+core.busy_o
 @200
 -M
 -DECODER
@@ -357,10 +358,5 @@ core.csr_pc[31:0]
 core.core_csrm_hndl_u.apb_slave_u.addr_not_in_range
 core.core_csrm_hndl_u.apb_slave_u.is_unaligned_addr
 core.core_csrm_hndl_u.core_csrm_u.en_o
-@22
-core.vid_arr[0][31:0]
-core.vid_arr[1][31:0]
-core.vid_arr[2][31:0]
-core.vid_arr[3][31:0]
 [pattern_trace] 1
 [pattern_trace] 0
