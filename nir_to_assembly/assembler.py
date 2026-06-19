@@ -71,19 +71,19 @@ class Assembler:
     }
 
     INSTRUCTION_OPCODES = {
-        "lw":       0b0_000001,
-        "sw":       0b0_000101,
-        "lui":      0b0_000011,
-        "addi":     0b0_001001,
-        "fadd":     0b0_001010,
-        "fmul":     0b0_001110,
-        "fdiv":     0b0_010010,
-        "fsqrt":    0b0_010110,
-        "fneg":     0b0_011010,
-        "fmax":     0b0_011110,
-        "add":      0b0_001101,
-        "mul":      0b0_010001,
-        "ret":      0b0_000100,
+        "lw":       0b010_0000,
+        "sw":       0b010_0001,
+        "lui":      0b110_0000,
+        "addi":     0b010_0010,
+        "fadd":     0b100_0010,
+        "fmul":     0b100_0011,
+        "fdiv":     0b100_0100,
+        "fsqrt":    0b100_0101,
+        "fneg":     0b100_0110,
+        "fmax":     0b100_0111,
+        "add":      0b010_0011,
+        "mul":      0b010_0100,
+        "ret":      0b000_0001,
     }
 
     def __init__(self) -> None:
@@ -269,7 +269,7 @@ class Assembler:
             and rs1.bit_length() <= 5
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
-        code = (opcode << 0) | (rd << 7) | (rs1 << 12) | (imm << 17)
+        code = (opcode << 25) | (rd << 20) | (rs1 << 15) | (imm << 0)
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
 
     def __F_type_instruction(
@@ -292,13 +292,13 @@ class Assembler:
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (
-            (opcode << 0)
-            | (rs1 << 7)
-            | (rs2 << 12)
-            | (rs3 << 17)
-            | (rd << 22)
-            | (extra << 27)
-            | (imm << 30)
+            (opcode << 25)
+            | (rs1 << 20)
+            | (rs2 << 15)
+            | (rs3 << 10)
+            | (rd << 5)
+            | (extra << 2)
+            | (imm << 0)
         )
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
 
@@ -312,12 +312,12 @@ class Assembler:
             and rs1.bit_length() <= 5
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
-        code = (opcode << 0) | (rs1 << 7) | (rs2 << 12) | (rd << 17) | (imm << 22)
+        code = (opcode << 25) | (rs1 << 20) | (rs2 << 15) | (rd << 10) | (imm << 0)
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
 
     def __U_type_instruction(self, imm: int = 0, rd: int = 0, opcode: int = 0):
         assert (
             imm.bit_length() <= 20 and rd.bit_length() <= 5 and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
-        code = (opcode << 0) | (rd << 7) | (imm << 12)
+        code = (opcode << 25) | (rd << 20) | (imm << 0)
         self.binary += code.to_bytes(4, byteorder="big", signed=False)
