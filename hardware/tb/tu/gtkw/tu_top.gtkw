@@ -1,0 +1,85 @@
+[*]
+[*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
+[*] Thu May  7 11:39:44 2026
+[*]
+[dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
+[dumpfile_mtime] "Thu May  7 11:39:00 2026"
+[dumpfile_size] 1922930
+[savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/tu/gtkw/tu_top.gtkw"
+[timestart] 0
+[size] 1920 1116
+[pos] -1 -1
+*-17.400002 550000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] thread_unit.
+[treeopen] thread_unit.gen_real_fpu.
+[sst_width] 209
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 336
+@28
+thread_unit.clk
+thread_unit.rst_n
+@200
+-LSU
+@23
+thread_unit.data_o[63:0]
+@800200
+-LSU
+@28
+thread_unit.lsu_cmd.addr[2:0]
+@22
+thread_unit.lsu_cmd.data_w[63:0]
+@28
+thread_unit.lsu_cmd.rw
+thread_unit.lsu_cmd_active
+@1000200
+-LSU
+@200
+-DEC
+@800200
+-DEC
+@28
+thread_unit.dec_cmd.a1[2:0]
+thread_unit.dec_cmd.a2[2:0]
+thread_unit.dec_cmd.a3[2:0]
+thread_unit.dec_cmd.ar[2:0]
+@22
+thread_unit.dec_cmd.op[3:0]
+@28
+thread_unit.dec_cmd.op_mod
+thread_unit.dec_cmd.rnd[2:0]
+thread_unit.dec_cmd.tag[2:0]
+thread_unit.dec_cmd_active
+@1000200
+-DEC
+@200
+-FPU
+@800200
+-FPU
+@22
+thread_unit.gen_real_fpu.fpnew_top_u.operands_i[0][63:0]
+thread_unit.gen_real_fpu.fpnew_top_u.operands_i[1][63:0]
+thread_unit.gen_real_fpu.fpnew_top_u.operands_i[2][63:0]
+thread_unit.gen_real_fpu.fpnew_top_u.op_i[3:0]
+thread_unit.gen_real_fpu.fpnew_top_u.result_o[63:0]
+@28
+thread_unit.gen_real_fpu.fpnew_top_u.out_ready_i
+thread_unit.gen_real_fpu.fpnew_top_u.in_valid_i
+thread_unit.gen_real_fpu.fpnew_top_u.in_ready_o
+thread_unit.gen_real_fpu.fpnew_top_u.out_valid_o
+@1000200
+-FPU
+@200
+-REGFILE
+@28
+thread_unit.tu_fsm_u.state[2:0]
+@22
+thread_unit.data_w[63:0]
+@28
+thread_unit.addr_w[2:0]
+thread_unit.wr_en
+thread_unit.valid_o
+thread_unit.lsu_cmd_active
+thread_unit.lsu_cmd.rw
+[pattern_trace] 1
+[pattern_trace] 0

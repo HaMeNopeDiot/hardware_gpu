@@ -1,0 +1,59 @@
+[*]
+[*] GTKWave Analyzer v3.3.126 (w)1999-2026 BSI
+[*] Tue Apr  7 19:13:35 2026
+[*]
+[dumpfile] "/mnt/e/CodePrograms/3.Global/mdiploma/hardware_gpu/hardware/tb/dump.vcd"
+[dumpfile_mtime] "Tue Apr  7 19:09:40 2026"
+[dumpfile_size] 2567638
+[savefile] "/mnt/e/CodePrograms/3.Global/mdiploma/hardware_gpu/hardware/tb/gtkw/fpu_top.gtkw"
+[timestart] 0
+[size] 1920 1116
+[pos] -1 -1
+*-17.999998 680000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 290
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 336
+@28
+$rootio.clk_i
+$rootio.rst_ni
+@200
+-OUT
+@22
+$rootio.result_o[63:0]
+@28
+$rootio.in_ready_o
+$rootio.out_valid_o
+$rootio.busy_o
+$rootio.early_valid_o
+@200
+-IN
+@22
+$rootio.op_i[3:0]
+$rootio.operands_i[0][63:0]
+$rootio.operands_i[1][63:0]
+$rootio.operands_i[2][63:0]
+@28
+$rootio.in_valid_i
+$rootio.out_ready_i
+$rootio.op_mod_i
+$rootio.flush_i
+$rootio.vectorial_op_i
+$rootio.rnd_mode_i[2:0]
+@22
+$rootio.simd_mask_i[7:0]
+@c00200
+-FORMAT
+@28
+$rootio.src_fmt_i[2:0]
+$rootio.dst_fmt_i[2:0]
+$rootio.int_fmt_i[1:0]
+@1401200
+-FORMAT
+@200
+-TAGS
+@22
+$rootio.tag_i[3:0]
+$rootio.tag_o[3:0]
+[pattern_trace] 1
+[pattern_trace] 0

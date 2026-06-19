@@ -1,0 +1,263 @@
+haris:
+  type: Book
+  title: Цифровая схемотехника и архитектура компьютера
+  author:
+    - Дэвид М. Хэррис
+    - Сара Л. Хэррис
+  publisher:
+    name: Morgan Kaufman
+
+nvidia_nv30_chip:
+  type: Web
+  title: NVIDIA NV30
+  url: https://www.techpowerup.com/gpu-specs/nvidia-nv30.g20
+
+rop_wiki:
+  type: Web
+  title: Render output unit
+  url: https://en.wikipedia.org/wiki/Render_output_unit
+
+turing_microarchitecture_wiki:
+  type: Web
+  title: Turing (микроархитектура)
+  url: https://en.wikipedia.org/wiki/Turing_(microarchitecture)
+
+turing_archi:
+  type: Web
+  title: NVIDIA TURING GPU ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
+
+nvidia_wiki:
+  type: Web
+  title: Nvidia
+  url: https://ru.wikipedia.org/wiki/Nvidia
+
+graph_review:
+  type: Article
+  title: Обзор и анализ 2D графических ускорителей
+  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+
+graph_arch:
+  type: Article
+  title: Разработка архитектуры аппаратной реализации 2D графического ускорителя
+  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+
+graph_arch_8:
+  type: Article
+  title: Архитектура графических процессоров Nvidia восьмого поколения с точки
+    зрения вычислений общего назначения
+  author: [Э. С. Ершов, Е. А. Сухотерин]
+
+tesla_microarchi:
+  type: Web
+  title: NVIDIA Tesla A Unified Graphics and Computing Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-tesla-architecture.pdf
+
+fermi_archi:
+  type: Web
+  title: NVIDIA's Next Generation CUDA Compute Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-fermi-compute-architecture.pdf
+
+blackwell_archi:
+  type: Web
+  title: NVIDIA RTX BLACKWELL GPU ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/nvidia-blackwell-architecture.pdf
+
+gpu_wiki:
+  type: Web
+  title: Видеокарта
+  url: https://ru.wikipedia.org/wiki/Видеокарта
+
+sisd_wiki:
+  type: Web
+  title: SISD
+  url: https://ru.wikipedia.org/wiki/SISD
+
+simd_wiki:
+  type: Web
+  title: SIMD
+  url: https://ru.wikipedia.org/wiki/SIMD
+
+misd_wiki:
+  type: Web
+  title: MISD
+  url: https://ru.wikipedia.org/wiki/MISD
+
+mimd_wiki:
+  type: Web
+  title: MIMD
+  url: https://ru.wikipedia.org/wiki/MIMD
+
+flin_taxonomy_wiki:
+  type: Web
+  title: Таксономия Флинна
+  url: https://en.wikipedia.org/wiki/Flynn%27s_taxonomy
+
+amd_wiki:
+  type: Web
+  title: amd
+  url: https://en.wikipedia.org/wiki/AMD
+
+epoch_1:
+  type: Web
+  title: Part I The first fully programmable GPUs-a rewiew
+  url: https://www.jonpeddie.com/news/part-i-the-first-fully-programmable-gpus-a-review/
+
+amd_r600_isa:
+  type: Web
+  title: R600-Family Instruction Set Architecture
+  url: https://www.techpowerup.com/gpu-specs/docs/ati-r600-isa.pdf
+
+amd_r600_terascale_dns:
+  type: Web
+  title: История развития графики AMD/ATI. Часть 2 путь универсальности
+  url: https://club.dns-shop.ru/blog/t-99-videokartyi/101511-istoriya-razvitiya-grafiki-amd-ati-chast-2-put-universalnosti/#sub_Radeon__HD2000__DirectX__10__i__superskalyarnaya__TeraScale
+
+amd_evergreen_isa:
+  type: Web
+  title: Evergreen Family Instruction Set Architecture Instructions and Microcode
+  url: https://www.techpowerup.com/gpu-specs/docs/ati-evergreen-isa.pdf
+
+amd_gcn1_archi:
+  type: Web
+  title: AMD GrAPHICS CORES NEXT (GCN) ARCHITECTURE
+  url: https://www.techpowerup.com/gpu-specs/docs/amd-gcn1-architecture.pdf
+
+workitem_info:
+  type: Web
+  title: Введение в OpenCL
+  url: https://habr.com/ru/articles/124925/
+
+workgroup_info:
+  type: Web
+  title: Учимся разрабатывать для GPU на примере операции GEMM
+  url: https://habr.com/ru/companies/yadro/articles/934878/
+
+rdna_microarchi:
+  type: Web
+  title: RDNA (microarchitecture)
+  url: https://en.wikipedia.org/wiki/RDNA_(microarchitecture)
+
+compute_unit_amd:
+  type: Web
+  title: Compute unit
+  url: https://rocm.docs.amd.com/projects/omniperf/en/amd-staging/conceptual/compute-unit.html
+
+interface_wiki:
+  type: Web
+  title: Интерфейс
+  url: https://ru.wikipedia.org/wiki/Интерфейс
+
+amba_wiki:
+  type: Web
+  title: AMBA
+  url: https://ru.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture
+
+alu_haris:
+  type: chapter
+  title: "Арифметико-логическое устройство"
+  chapter: 5.2.4
+  author:
+  - Дэвид М. Хэррис
+  - Сара Л. Хэррис
+  page-range: 304-309
+  parent:
+    type: Book
+    title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
+    publisher:
+      name: ДМК Пресс
+
+fpn_haris:
+  type: chapter
+  title: "Числа с плавающей точкой"
+  chapter: 5.3.2
+  author:
+    - Дэвид М. Хэррис
+    - Сара Л. Хэррис
+  page-range: 315-316
+  parent:
+    type: Book
+    title: "Цифровая схемотехника и архитектура компьютера: RISC-V"
+    publisher:
+      name: ДМК Пресс
+
+alu_wiki:
+  type: Web
+  title: ALU
+  url: https://en.wikipedia.org/wiki/Arithmetic_logic_unit
+
+fpu_wiki:
+  type: Web
+  title: FPU
+  url: https://en.wikipedia.org/wiki/Floating-point_unit
+
+ieee_754_wiki:
+  type: Web
+  title: IEEE_754
+  url: https://ru.wikipedia.org/wiki/IEEE_754
+
+ieee_754_standart:
+  type: Article
+  title: IEEE Standard for Floating-Point Arithmetic
+  author: Microprocessor Standards Committee
+
+cvfpu:
+  type: Repository
+  title: FPnew - New Floating-Point Unit with Transprecision Capabilities
+  url: https://github.com/openhwgroup/cvfpu
+
+archi_proc_sys_regfile:
+  type: chapter
+  title: "Лабораторная работа №3 \"Регистровый файл и память инструкций\""
+  author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
+  page-range: 87-90
+  parent:
+    type: Book
+    title: Архитектуры процессорных систем
+    publisher:
+      name: "АО \"РИЦ \"Техносфера\"\""
+
+isa_wiki:
+  type: Web
+  title: Instruction Set Architecture
+  url: https://en.wikipedia.org/wiki/Instruction_set_architecture
+
+guide_to_risc_processors:
+    type: chapter
+    title: "RISC Principles"
+    author:
+        - "Сиварама П. Дандамуди"
+    chapter: "3"
+    page-range: 39-44
+    parent:
+        type: Book
+        title: "Guide to RISC Processors for Programmers and Engineers"
+        publisher:
+            name: Springer
+        date: "2005"
+
+archi_proc_sys_lsu:
+  type: chapter
+  title: "Лабораторная работа №8 \"Блок загрузки и сохранения\""
+  author: ["А.Л. Переверзев", "М.Г. Попов", "А.П. Солодовников"]
+  page-range: 155-156
+  parent:
+    type: Book
+    title: Архитектуры процессорных систем
+    publisher:
+      name: "АО \"РИЦ \"Техносфера\"\""
+
+interconnect_reg_cloud:
+  type: Web
+  title: "Что такое Interconnect: аппаратные и сетевые технологии"
+  url: https://reg.cloud/blog/chto-takoe-interconnect/?utm_source=google.com&utm_medium=organic&utm_campaign=reg.cloud&utm_referrer=google.com&utm_content=%2Fblog%2Fchto-takoe-interconnect%2F
+
+round_robin_wiki:
+  type: Web
+  title: "Round-Robin"
+  url: https://ru.wikipedia.org/wiki/Round-robin_(%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC)
+
+instruction_pipelining_wiki:
+  type: Web
+  title: "Instruction pipelining"
+  url: https://en.wikipedia.org/wiki/Instruction_pipelining

@@ -1,0 +1,14 @@
+*.yml
+LICENSE.*
+*.cff
+docs/*
+*__pycache__*
+vendor/*
+util/*
+*/sim_build/*
+src/*
+README*.md
+cvfpu/
+*.xml
+*.vcd
+*/*/sim_build/*

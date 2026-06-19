@@ -1,0 +1,145 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.10 Safari/537.36" version="29.6.1">
+  <diagram name="Страница-1" id="NCBinj6hSSvIZLYwvK5y">
+    <mxGraphModel dx="815" dy="553" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="T15spiPRRnXAPuue5HSH-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=15;" value="Схема блока загрузки инструкций (Fetcher) и декодера инструкций (Decoder)" vertex="1">
+          <mxGeometry height="500" width="670" x="120" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#BEC9D0;dashed=1;verticalAlign=top;" value="Исполняющие блоки" vertex="1">
+          <mxGeometry height="110" width="170" x="310" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="PbM2AOCR9R4myeqma9dM-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#A1A9BB;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="327" y="656" as="geometry" />
+        </mxCell>
+        <mxCell id="PbM2AOCR9R4myeqma9dM-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#A1A9BB;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="323" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="PbM2AOCR9R4myeqma9dM-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#A1A9BB;" value="" vertex="1">
+          <mxGeometry height="60" width="90" x="319" y="664" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#A6C0FF;" value="Память инструкций" vertex="1">
+          <mxGeometry height="60" width="170" x="310" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;gradientColor=none;gradientDirection=east;fillColor=#A1A9BB;" value="TU" vertex="1">
+          <mxGeometry height="60" width="90" x="315" y="668" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#D6ECFF;" value="Блок захвата инструкций (Fetcher)" vertex="1">
+          <mxGeometry height="60" width="170" x="310" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#D6ECFF;" value="Блок декодирования инструкций (Decoder)" vertex="1">
+          <mxGeometry height="60" width="170" x="310" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#C1BAEB;" value="FPU" vertex="1">
+          <mxGeometry height="30" width="30" x="323" y="694" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#C1BAEB;" value="ALU" vertex="1">
+          <mxGeometry height="30" width="30" x="368" y="694" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#C1BAEB;" value="LSU" vertex="1">
+          <mxGeometry height="60" width="40" x="430" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-14" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-2" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="260" y="510" as="sourcePoint" />
+            <mxPoint x="310" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-15" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="390" y="370" as="sourcePoint" />
+            <mxPoint x="390" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-16" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-4" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-10" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="390" y="600" as="sourcePoint" />
+            <mxPoint x="390" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;gradientColor=none;gradientDirection=east;fillColor=#A6C0FF;" value="Регистры управления и статусов (CSR)" vertex="1">
+          <mxGeometry height="170" width="110" x="140" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-17" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-10" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-19" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="260" y="650" as="sourcePoint" />
+            <mxPoint x="230" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;gradientDirection=east;fillColor=#A6C0FF;" value="PC" vertex="1">
+          <mxGeometry height="30" width="30" x="180" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="IQErcy7-kcQAirzN5IRM-21" edge="1" parent="1" source="IQErcy7-kcQAirzN5IRM-19" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.995;exitY=0.181;exitDx=0;exitDy=0;exitPerimeter=0;fillColor=default;" target="IQErcy7-kcQAirzN5IRM-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="300" y="550" as="sourcePoint" />
+            <mxPoint x="350" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;" value="" vertex="1">
+          <mxGeometry height="250" width="230" x="550" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;" value="" vertex="1">
+          <mxGeometry height="90" width="222" x="553" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=top;rounded=0;fontSize=11;" value="- Instruction memory - память инструкций;&lt;div&gt;- Fetcher - блок загрузки инструкций;&lt;/div&gt;&lt;div&gt;- Decoder - блок декодирования инструкций;&lt;/div&gt;&lt;div&gt;- TU (Thread Unit) - вычислительный блок;&lt;/div&gt;&lt;div&gt;- FPU - математический сопроцессор;&lt;/div&gt;&lt;div&gt;- ALU - арифметико-логическое устройство;&lt;/div&gt;&lt;div&gt;- LSU - блок загрузки и сохранения;&lt;/div&gt;&lt;div&gt;- PC - счётчик инструкций&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="230" x="550" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontStyle=1" value="Легенда" vertex="1">
+          <mxGeometry height="30" width="130" x="601" y="293" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=9;" value="С помощью PC смещается адрес для взятия новой инструкции" vertex="1">
+          <mxGeometry height="60" width="90" x="214" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=9;" value="После завершения работы исполняющих блоков, PC инкрементируется" vertex="1">
+          <mxGeometry height="60" width="102" x="208" y="608" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=9;" value="Захватив инструкцию Fetcher передает инструкцию для её преобразования в структуры Decoder-у" vertex="1">
+          <mxGeometry height="50" width="130" x="417" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=9;" value="Преобразуя инструкции в структуры, передаёт их исполнящим блокам для их выполнения" vertex="1">
+          <mxGeometry height="50" width="130" x="417" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="T15spiPRRnXAPuue5HSH-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=9;" value="Взаимодействуя по интерфейсу AHB, Fetcher захватывает инструкцию из внешней памяти инструкций" vertex="1">
+          <mxGeometry height="50" width="130" x="417" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-1" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="15" width="25" x="560" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-2" parent="QObUC6DREzyDmLBp-8Fh-1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A6C0FF,#FFFFFF);labelBorderColor=none;labelBackgroundColor=none;shadow=0;glass=0;" value="" vertex="1">
+          <mxGeometry height="14.999999999999998" width="25" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-4" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="15" width="25" x="560" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-5" parent="QObUC6DREzyDmLBp-8Fh-4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D6ECFF;" value="" vertex="1">
+          <mxGeometry height="15" width="25" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-7" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="15" width="25" x="560" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-8" parent="QObUC6DREzyDmLBp-8Fh-7" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#A1A9BB,#FFFFFF);" value="" vertex="1">
+          <mxGeometry height="15" width="25" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-10" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="15" width="25" x="560" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-11" parent="QObUC6DREzyDmLBp-8Fh-10" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#C1BAEB,#FFFFFF);" value="" vertex="1">
+          <mxGeometry height="15" width="25" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Память" vertex="1">
+          <mxGeometry height="25" width="112" x="588" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Блок формирования инструкций" vertex="1">
+          <mxGeometry height="25" width="192" x="588" y="461" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Вычислительный блок" vertex="1">
+          <mxGeometry height="25" width="158" x="588" y="479" as="geometry" />
+        </mxCell>
+        <mxCell id="QObUC6DREzyDmLBp-8Fh-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Исполняемый блок" vertex="1">
+          <mxGeometry height="25" width="112" x="588" y="499" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
