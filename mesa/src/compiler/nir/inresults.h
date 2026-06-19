@@ -10,7 +10,7 @@ typedef struct {
     uint32_t data_empty_offset;
 
     // the data itself
-    float* data;
+    float data[1200];
 } inresults_t;
 
 void inresults_init(inresults_t *results, uint32_t magical_data_size);

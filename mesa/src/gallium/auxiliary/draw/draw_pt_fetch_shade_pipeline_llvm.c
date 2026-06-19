@@ -25,6 +25,7 @@
  *
  **************************************************************************/
 
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "util/u_math.h"
@@ -43,6 +44,8 @@
 #include "gallivm/lp_bld_debug.h"
 // #include "extract.h"
 #include "inresults.h"
+#include "nir.h"
+#include "nir_intrinsics.h"
 
 
 struct llvm_middle_end {
@@ -84,51 +87,250 @@ bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *ve
 
 
 static void nir_deref_instr_handler(nir_deref_instr * deref_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
-    if (deref_instr->deref_type != nir_deref_type_var) {
-        fprintf(stderr, "Ne znayu takoi deref_type: %d\n", deref_instr->deref_type);
+    if (deref_instr->deref_type != nir_deref_type_var && deref_instr->deref_type != nir_deref_type_struct) {
+        fprintf(stderr, "Unknown deref_type: %d\n", deref_instr->deref_type);
         exit(0);
     }
     int location = deref_instr->var->data.driver_location;
     int offset = buffer_offset;
     uint32_t *map = (uint32_t *) vbuffer->map;
     uint32_t *data_offset = map + offset / 4;
-    printf("driver location: %d\n", deref_instr->var->data.driver_location);
 
     uint32_t * temp = data_offset + vertex_id;
     inresults_save_new(inresults, (float*)&temp, 1);
 }
 
+
+static void nir_load_const_instr_handler(nir_load_const_instr *load_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
+    unsigned int components = load_instr->def.num_components;
+    float *values = (float *)load_instr->value;
+    inresults_save_new(inresults, values, components);
+}
+
+
+static void nir_alu_instr_handler(nir_alu_instr *alu_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
+    unsigned int components = alu_instr->def.num_components;
+    float res[4]; // NIR max components is usually 4 (vec4)
+    unsigned int src_counts = components;
+
+    float *src0, *src1, *src2, *src3;
+
+    src0 = inresults_get(inresults, alu_instr->src[0].src.ssa->index-1);
+    if (src_counts > 1) {
+         src1 = inresults_get(inresults, alu_instr->src[1].src.ssa->index-1);
+    }
+
+    if (src_counts > 2) {
+         src2 = inresults_get(inresults, alu_instr->src[2].src.ssa->index-1);
+    }
+
+    if (src_counts > 3) {
+         src3 = inresults_get(inresults, alu_instr->src[3].src.ssa->index-1);
+    }
+
+    // Выполнение операции
+    switch (alu_instr->op) {
+        case nir_op_fadd:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = src0[i] + src1[i];
+            break;
+        case nir_op_fmul:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = src0[i] * src1[i];
+            break;
+        case nir_op_fdiv:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = src0[i] / src1[i];
+            break;
+        case nir_op_fneg:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = - src0[i];
+            break;
+        case nir_op_fmax:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = fmaxf(src0[i], src1[i]);
+            break;
+        case nir_op_fsqrt:
+            components = 1;
+            for (unsigned int i = 0; i < components; i++) res[i] = fsqrt(src0[i]);
+            break;
+        case nir_op_vec4:
+            components = 4;
+            res[0] = src0[0];
+            res[1] = src1[0];
+            res[2] = src2[0];
+            res[3] = src3[0];
+            fprintf(stderr, "vec4(%f, %f, %f, %f)\n", res[0], res[1], res[2], res[3]);
+            break;
+        default:
+            fprintf(stderr, "NIR ALU op not implemented: %d\n", alu_instr->op);
+            return;
+    }
+    inresults_save_new(inresults, res, components);
+}
+
+
+static char* nir_op_name(int op) {
+   switch (op) {
+      case nir_op_fadd:
+            return "fadd";
+        case nir_op_fmul:
+            return "fmul";
+        case nir_op_fdiv:
+            return "fdiv";
+        case nir_op_fneg:
+            return "fneg";
+        case nir_op_fmax:
+            return "fmax";
+        case nir_op_fsqrt:
+            return "fsqrt";
+        case nir_op_vec4:
+            return "vec4";
+        default:
+            fprintf(stderr, "NIR ALU op not implemented: %d\n", op);
+            return "";
+   }
+}
+
+
+static void nir_intrinsic_instr_handler(nir_intrinsic_instr *intrinsic_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
+    switch (intrinsic_instr->intrinsic) {
+        case nir_intrinsic_load_input:
+        case nir_intrinsic_load_deref:
+            {
+               int index = intrinsic_instr->src[0].ssa->index;
+               int offset = buffer_offset + (index * 16); // Предположим размер 16 байт (vec4)
+               uint32_t *map = (uint32_t *) vbuffer->map;
+               uint32_t *data_offset = map + offset / 4;
+               uint32_t * temp = data_offset + vertex_id;
+               unsigned int components = intrinsic_instr->num_components;
+
+               inresults_save_new(inresults, (float*)temp, components);
+            }
+            break;
+         case nir_intrinsic_store_deref:
+            break;
+         case nir_intrinsic_load_const_buf_base_addr_lvp:
+            break;
+         case nir_intrinsic_load_ubo:
+            inresults_save_new(inresults, (float*)draw->pt.user.vbuffer->map, draw->pt.user.vbuffer->size);
+            break;
+        default:
+            fprintf(stderr, "NIR Intrinsic not implemented: %d\n", intrinsic_instr->intrinsic);
+    }
+}
+
+static void nir_call_instr_handler(nir_call_instr *call_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
+    nir_function *func = call_instr->callee;
+    if (!func || !func->impl) {
+        fprintf(stderr, "Call to non-existent function\n");
+        exit(1);
+    }
+    fprintf(stderr, "NIR Function Call not fully supported in this interpreter context\n");
+    float dummy = 0.0f;
+    inresults_save_new(inresults, &dummy, 1);
+}
+
+// 5. Обработчик переходов (Jump)
+static void nir_jump_instr_handler(nir_jump_instr *jump_instr, inresults_t* inresults, unsigned int buffer_offset, unsigned int vertex_id, struct draw_vertex_buffer *vbuffer, struct draw_context* draw) {
+    switch (jump_instr->type) {
+        case nir_jump_return:
+            break;
+        case nir_jump_break:
+        case nir_jump_continue:
+            fprintf(stderr, "Jump (break/continue) not supported in this interpreter\n");
+            exit(1);
+        default:
+            fprintf(stderr, "Unknown NIR jump type: %d\n", jump_instr->type);
+            exit(1);
+    }
+}
+
+static char* deref_type_to_str(int deref_type) {
+   switch (deref_type) {
+      case nir_deref_type_var:
+         return "deref_type_var";
+      case nir_deref_type_array:
+         return "deref_type_array";
+      default:
+         return "Unknown deref_type";
+   }
+}
+
+
 static void render_shader(nir_shader *nir, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer, unsigned int buffer_offset, unsigned int vertex_id, inresults_t* inresults, struct draw_context *draw) {
     inresults->data_empty_offset = 0;
     foreach_instr_in_shader(nir, {
         switch (instr->type) {
-            // case  nir_instr_type_alu:
-            //     break;
             case nir_instr_type_deref:
                 nir_deref_instr *deref_instr = nir_instr_as_deref(instr);
                 nir_deref_instr_handler(deref_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
+                // printf("type: %s, dst: %d, src: %d\n",
+                //         deref_type_to_str(deref_instr->deref_type),
+                //         deref_instr->def.index,
+                //         deref_instr->var->index);
+                break;
+            case nir_instr_type_load_const:
+                nir_load_const_instr *load_instr = nir_instr_as_load_const(instr);
+                nir_load_const_instr_handler(load_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
+                // printf("type: %s, dst: %d, src: %f\n",
+                //         "load_const",
+                //         load_instr->def.index,
+                //         load_instr->value[0].f32);
+                break;
+            case nir_instr_type_alu:
+                nir_alu_instr *alu_instr = nir_instr_as_alu(instr);
+                nir_alu_instr_handler(alu_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
+                //  char *op_name = nir_op_name(alu_instr->op);
+                //  printf("type: %s, dst: %d, src0: %d",
+                //         op_name,
+                //         alu_instr->def.index,
+                //         alu_instr->src[0].src.ssa->index);
+                // if(op_name == "fadd" || op_name == "fmul" || op_name == "fdiv")
+                //       printf(", src1: %d", alu_instr->src[1].src.ssa->index);
+                // else if(op_name == "vec4")
+                //       printf(", src1: %d, src2: %d, src3: %d"
+                //       , alu_instr->src[1].src.ssa->index
+                //       , alu_instr->src[2].src.ssa->index
+                //       , alu_instr->src[3].src.ssa->index);
+                //  printf("\n");
                 break;
             case nir_instr_type_intrinsic:
                 nir_intrinsic_instr *intrinsic_instr = nir_instr_as_intrinsic(instr);
-                printf("Intrinsic: %s\n", intrinsic_instr->name);
+                nir_intrinsic_instr_handler(intrinsic_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
+                // printf("Type: %s, dst: %d, src0: %d",
+                //        "intrinsic",
+                //        intrinsic_instr->def.index,
+                //        intrinsic_instr->src[0].ssa->index);
+                // if(intrinsic_instr->src[1].ssa->index > 0)
+                //    printf(", src1: %d", intrinsic_instr->src[1].ssa->index);
+                // printf("\n");
+                break;
+            case nir_instr_type_call:
+                nir_call_instr *call_instr = nir_instr_as_call(instr);
+                // nir_call_instr_handler(call_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
+                break;
+            case nir_instr_type_jump:
+                nir_jump_instr *jump_instr = nir_instr_as_jump(instr);
+                // nir_jump_instr_handler(jump_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
                 break;
             default:
-                fprintf(stderr, "Net takoi funkcii: %d\n", instr->type);
-                exit(0);
+                fprintf(stderr, "Unknown instruction type: %d\n", instr->type);
+                exit(1);
 
         }
     });
 }
 
+static inresults_t inresults;
 bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer, unsigned int buffer_offset, unsigned int vertex_id_offset, struct draw_context *draw) {
-    inresults_t inresults;
-    inresults_init(&inresults, 160);
+    inresults_init(&inresults, 300);
     for (size_t vertex_id = 0; vertex_id < count; vertex_id++) {
         // printf("%d\n", (int)(vertex_id + vertex_id_offset));
         render_shader(nir, verts, vbuffer, buffer_offset, vertex_id + vertex_id_offset, &inresults, draw);
     }
     inresults_destroy(&inresults);
-    exit(0);
+    // exit(0);
     return false;
 }
 
@@ -732,22 +934,26 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       // printf("Count: %d\n", vert_info->count);
 
 
-      // printf("AFTER: \n");
+      // fprintf(stderr, "AFTER: \n");
       // for (size_t i = 0; i < vert_info->count; i++) {
-      //    printf("\tVertex: %d\n", (int)i);
+      //    fprintf(stderr, "\tVertex: %d\n", (int)i);
       //    float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
-
       //    for (size_t j = 0; j < 2; j++) {
-      //       printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
-
+      //       fprintf(stderr, "\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
       //       for (size_t k = 0; k < 4; k++) {
-      //          printf("%f ", ptr[j*4 + k]);
+      //          fprintf(stderr, "%f ", ptr[j*4 + k]);
       //       }
-      //       printf("\n");
+      //       fprintf(stderr, "\t\tInterpreter: ");
+      //       for (size_t k = 0; k < 4; k++) {
+      //          fprintf(stderr, "%f ", inresults_get(&inresults, 130 + k)[0]);
+      //       }
+      //       fprintf(stderr, "\n");
       //    }
-
       // }
 
+
+
+      // printf("Block simulation\n");
       // exit(0);
    }
 

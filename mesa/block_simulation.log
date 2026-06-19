@@ -1,0 +1,411 @@
+meson setup -Dvulkan-drivers=swrast -Dgallium-drivers=llvmpipe -Dplatforms=x11 -Dvideo-codecs="" build --reconfigure --buildtype release --libdir lib --prefix /home/dudkin.i/mesa
+The Meson build system
+Version: 1.11.1
+Source dir: /home/dudkin.i/projects/mesa/mesa
+Build dir: /home/dudkin.i/projects/mesa/mesa/build
+Build type: native build
+Project name: mesa
+Project version: 26.0.0-devel
+C compiler for the host machine: /usr/bin/ccache cc (gcc 16.1.1 "cc (GCC) 16.1.1 20260430")
+C linker for the host machine: cc ld.bfd 2.46.0
+C++ compiler for the host machine: /usr/bin/ccache c++ (gcc 16.1.1 "c++ (GCC) 16.1.1 20260430")
+C++ linker for the host machine: c++ ld.bfd 2.46.0
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Checking for size of "void*" : 8 (cached)
+Checking if "-mtls-dialect=gnu2" runs: YES
+Checking if "split TLSDESC" links: YES (cached)
+Dependency libglvnd for host machine found: YES 1.7.0 (cached)
+Program glslangValidator found: YES (/usr/bin/glslangValidator)
+Dependency libva for host machine skipped: feature gallium-va disabled
+Program python3 found: YES 3.14.5 3.14.5 (/usr/bin/python3)
+Fetching value of define "ETIME" : 62 (cached)
+Compiler for C supports arguments -gsplit-dwarf: YES (cached)
+Compiler for C supports link arguments -Wl,--gdb-index: NO (cached)
+Checking for function "bswap32" : YES (cached)
+Checking for function "bswap64" : YES (cached)
+Checking for function "clz" : YES (cached)
+Checking for function "clzll" : YES (cached)
+Checking for function "ctz" : YES (cached)
+Checking for function "expect" : YES (cached)
+Checking for function "ffs" : YES (cached)
+Checking for function "ffsll" : YES (cached)
+Checking for function "popcount" : YES (cached)
+Checking for function "popcountll" : YES (cached)
+Checking for function "unreachable" : YES (cached)
+Checking for function "types_compatible_p" : YES (cached)
+Checking for function "__builtin_add_overflow" : YES (cached)
+Checking for function "__builtin_add_overflow_p" : YES (cached)
+Checking for function "__builtin_sub_overflow_p" : YES (cached)
+Compiler for C supports function attribute const: YES (cached)
+Compiler for C supports function attribute flatten: YES (cached)
+Compiler for C supports function attribute malloc: YES (cached)
+Compiler for C supports function attribute pure: YES (cached)
+Compiler for C supports function attribute unused: YES (cached)
+Compiler for C supports function attribute warn_unused_result: YES (cached)
+Compiler for C supports function attribute weak: YES (cached)
+Compiler for C supports function attribute format: YES (cached)
+Compiler for C supports function attribute packed: YES (cached)
+Compiler for C supports function attribute returns_nonnull: YES (cached)
+Compiler for C supports function attribute alias: YES (cached)
+Compiler for C supports function attribute noreturn: YES (cached)
+Compiler for C supports function attribute optimize: YES (cached)
+Compiler for C supports function attribute cold: YES (cached)
+Compiler for C supports function attribute visibility:hidden: YES (cached)
+Checking if "__uint128_t" compiles: YES (cached)
+Checking for function "reallocarray" : YES (cached)
+Checking for function "fmemopen" : YES (cached)
+Checking if "gc-sections" links: YES (cached)
+Compiler for C supports arguments -Werror=implicit-function-declaration: YES (cached)
+Compiler for C supports arguments -Werror=missing-prototypes: YES (cached)
+Compiler for C supports arguments -Werror=return-type: YES (cached)
+Compiler for C supports arguments -Werror=empty-body: YES (cached)
+Compiler for C supports arguments -Werror=incompatible-pointer-types: YES (cached)
+Compiler for C supports arguments -Werror=int-conversion: YES (cached)
+Compiler for C supports arguments -Wimplicit-fallthrough: YES (cached)
+Compiler for C supports arguments -Wmisleading-indentation: YES (cached)
+Compiler for C supports arguments -Wno-error=maybe-uninitialized: YES (cached)
+Compiler for C supports arguments -Wno-missing-field-initializers: YES (cached)
+Compiler for C supports arguments -Wno-format-truncation: YES (cached)
+Compiler for C supports arguments -Wno-nonnull-compare: YES (cached)
+Compiler for C supports arguments -fno-math-errno: YES (cached)
+Compiler for C supports arguments -fno-trapping-math: YES (cached)
+Compiler for C supports arguments -Qunused-arguments: NO (cached)
+Compiler for C supports arguments -fno-common: YES (cached)
+Compiler for C supports arguments -Wno-unknown-pragmas: YES (cached)
+Compiler for C supports arguments -Wno-microsoft-enum-value: NO (cached)
+Compiler for C supports arguments -Wno-unused-function: YES (cached)
+Compiler for C supports arguments -Werror=format: YES (cached)
+Compiler for C supports arguments -Wformat-security: YES (cached)
+Compiler for C supports arguments -Werror=thread-safety: NO (cached)
+Compiler for C supports arguments -ffunction-sections: YES (cached)
+Compiler for C supports arguments -fdata-sections: YES (cached)
+Compiler for C supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C supports arguments -Wno-unused-but-set-variable: YES (cached)
+Compiler for C supports arguments /wd4189: NO (cached)
+Compiler for C++ supports arguments -Werror=return-type: YES (cached)
+Compiler for C++ supports arguments -Werror=empty-body: YES (cached)
+Compiler for C++ supports arguments -Wmisleading-indentation: YES (cached)
+Compiler for C++ supports arguments -Wno-error=maybe-uninitialized: YES (cached)
+Compiler for C++ supports arguments -Wno-non-virtual-dtor: YES (cached)
+Compiler for C++ supports arguments -Wno-missing-field-initializers: YES (cached)
+Compiler for C++ supports arguments -Wno-format-truncation: YES (cached)
+Compiler for C++ supports arguments -fno-math-errno: YES (cached)
+Compiler for C++ supports arguments -fno-trapping-math: YES (cached)
+Compiler for C++ supports arguments -Qunused-arguments: NO (cached)
+Compiler for C++ supports arguments -flifetime-dse=1: YES (cached)
+Compiler for C++ supports arguments -Wno-unknown-pragmas: YES (cached)
+Compiler for C++ supports arguments -Wno-microsoft-enum-value: NO (cached)
+Compiler for C++ supports arguments -Werror=format: YES (cached)
+Compiler for C++ supports arguments -Wformat-security: YES (cached)
+Compiler for C++ supports arguments -ffunction-sections: YES (cached)
+Compiler for C++ supports arguments -fdata-sections: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-variable: YES (cached)
+Compiler for C++ supports arguments -Wno-unused-but-set-variable: YES (cached)
+Compiler for C++ supports arguments /wd4189: NO (cached)
+Compiler for C supports arguments -Wno-override-init: YES (cached)
+Compiler for C supports arguments -Wno-initializer-overrides: NO (cached)
+Compiler for C supports arguments -Werror=pointer-arith: YES (cached)
+Compiler for C supports arguments -Werror=vla: YES (cached)
+Compiler for C supports arguments -Werror=gnu-empty-initializer: NO (cached)
+Compiler for C supports arguments -Wgnu-pointer-arith: NO (cached)
+Compiler for C++ supports arguments -Werror=pointer-arith: YES (cached)
+Compiler for C++ supports arguments -Werror=vla: YES (cached)
+Compiler for C++ supports arguments -Werror=gnu-empty-initializer: NO (cached)
+Compiler for C++ supports arguments -Wgnu-pointer-arith: NO (cached)
+Checking for function "__builtin_ia32_clflushopt" : YES (cached)
+Checking if "GCC atomic builtins" compiles: YES (cached)
+Checking if "GCC atomic builtins required -latomic" links: YES (cached)
+Checking if "GCC 64bit atomics" with dependency  links: YES (cached)
+Library ws2_32 found: NO
+Header "sys/sysmacros.h" has symbol "major" : YES (cached)
+Header "sys/sysmacros.h" has symbol "minor" : YES (cached)
+Header "sys/sysmacros.h" has symbol "makedev" : YES (cached)
+Header "sys/mkdev.h" has symbol "major" : NO (cached)
+Check usable header "sched.h" : YES (cached)
+Checking for function "sched_getaffinity" : YES (cached)
+Check usable header "xlocale.h" : NO (cached)
+Check usable header "linux/futex.h" : YES (cached)
+Check usable header "endian.h" : YES (cached)
+Check usable header "dlfcn.h" : YES (cached)
+Check usable header "sys/shm.h" : YES (cached)
+Check usable header "cet.h" : YES (cached)
+Check usable header "pthread_np.h" : NO (cached)
+Check usable header "sys/inotify.h" : YES (cached)
+Check usable header "linux/udmabuf.h" : YES (cached)
+Checking for function "strtof" : YES (cached)
+Checking for function "mkostemp" : YES (cached)
+Checking for function "memfd_create" : YES (cached)
+Checking for function "random_r" : YES (cached)
+Checking for function "flock" : YES (cached)
+Checking for function "strtok_r" : YES (cached)
+Checking for function "getrandom" : YES (cached)
+Checking for function "qsort_s" : NO (cached)
+Checking for function "posix_fallocate" : YES (cached)
+Checking for function "secure_getenv" : YES (cached)
+Checking for function "sysconf" : YES (cached)
+Checking if "GNU qsort_r" links: YES (cached)
+Header "time.h" has symbol "struct timespec" : YES (cached)
+Checking for function "thrd_create" : YES (cached)
+Header "errno.h" has symbol "program_invocation_name" : YES (cached)
+Header "math.h" has symbol "issignaling" : YES (cached)
+Checking for function "posix_memalign" : YES (cached)
+Checking whether type "struct dirent" has member "d_type" : YES (cached)
+Checking if "strtod has locale support" links: YES (cached)
+Checking if "Bsymbolic" links: YES (cached)
+Checking if "version-script" links: YES (cached)
+Checking if "dynamic-list" links: YES (cached)
+Compiler for C supports link arguments -Wl,--build-id=sha1: YES (cached)
+Checking for function "dlopen" : YES (cached)
+Checking for function "dladdr" with dependency : YES (cached)
+Checking for function "dl_iterate_phdr" : YES (cached)
+Checking for function "clock_gettime" : YES (cached)
+Dependency zlib for host machine found: YES 1.3.2 (cached)
+Dependency libdisplay-info for host machine found: YES 0.3.0 (cached)
+Dependency libzstd for host machine found: YES 1.5.7 (cached)
+Dependency threads for host machine found: YES unknown (cached)
+Checking for function "pthread_setaffinity_np" with dependency threads: YES (cached)
+Dependency expat for host machine found: YES 2.8.1 (cached)
+Library m found: YES
+Dependency libdrm for host machine found: YES 2.4.133 (cached)
+Dependency libudev for host machine found: YES 260 (cached)
+llvm-config found: YES (/usr/bin/llvm-config) 22.1.5
+Run-time dependency LLVM (modules: bitwriter, core, engine, executionengine, instcombine, mcdisassembler, mcjit, native, scalaropts, transformutils, coroutines, lto) found: YES 22.1.5
+Dependency SPIRV-Tools for host machine found: YES 2026.2.1 (cached)
+Dependency lua54 for host machine found: YES 5.4.8 (cached)
+Dependency libelf for host machine found: YES 0.195 (cached)
+Found pkg-config: YES (/usr/bin/pkg-config) 2.5.1
+Run-time dependency valgrind found: NO  (tried pkg-config)
+Program bison found: YES (/usr/bin/bison)
+Program bison found: YES 3.8.2 3.8.2 (/usr/bin/bison)
+Program flex found: YES (/usr/bin/flex)
+Dependency libunwind for host machine found: YES 1.8.2 (cached)
+Dependency openmp for host machine found: YES 5.2 (cached)
+Dependency xcb for host machine found: YES 1.17.0 (cached)
+Dependency xcb-randr for host machine found: YES 1.17.0 (cached)
+Dependency x11 for host machine found: YES 1.8.13 (cached)
+Dependency xext for host machine found: YES 1.3.7 (cached)
+Dependency xcb-glx for host machine found: YES 1.17.0 (cached)
+Dependency xcb-shm for host machine found: YES 1.17.0 (cached)
+Dependency xcb for host machine found: YES 1.17.0 (cached)
+Dependency xcb-keysyms for host machine found: YES 0.4.1 (cached)
+Dependency x11-xcb for host machine found: YES 1.8.13 (cached)
+Dependency xcb-dri3 for host machine found: YES 1.17.0 (cached)
+Dependency xcb-present for host machine found: YES 1.17.0 (cached)
+Dependency xcb-shm for host machine found: YES 1.17.0 (cached)
+Dependency xcb-sync for host machine found: YES 1.17.0 (cached)
+Dependency xshmfence for host machine found: YES 1.3.3 (cached)
+Dependency glproto for host machine found: YES 1.4.17 (cached)
+Dependency xxf86vm for host machine found: YES 1.1.7 (cached)
+Dependency xcb-xfixes for host machine found: YES 1.17.0 (cached)
+Dependency xcb-dri3 for host machine found: YES 1.17.0 (cached)
+Dependency xcb-present for host machine found: YES 1.17.0 (cached)
+Dependency xcb-shm for host machine found: YES 1.17.0 (cached)
+Dependency xshmfence for host machine found: YES 1.3.3 (cached)
+Dependency xcb-randr for host machine found: YES 1.17.0 (cached)
+Dependency xrandr for host machine found: YES 1.5.5 (cached)
+Library sensors found: YES
+Program nm found: YES (/usr/bin/nm)
+Program symbols-check.py found: YES (/usr/bin/python /home/dudkin.i/projects/mesa/mesa/bin/symbols-check.py)
+Program install_megadrivers.py found: YES (/usr/bin/python /home/dudkin.i/projects/mesa/mesa/bin/install_megadrivers.py)
+Checking for size of "void *" : 8 (cached)
+Compiler for C supports arguments -Wno-error: YES (cached)
+src/compiler/nir/meson.build:420: WARNING: Keyword argument "cpp_args" defined multiple times.
+WARNING: This will be an error in Meson 2.0.
+Compiler for C supports arguments -Wno-misleading-indentation: YES (cached)
+Program decode.py found: YES (/home/dudkin.i/projects/mesa/mesa/src/compiler/isaspec/decode.py)
+Program encode.py found: YES (/home/dudkin.i/projects/mesa/mesa/src/compiler/isaspec/encode.py)
+Found pkg-config: YES (/usr/bin/pkg-config) 2.5.1
+Compiler for C supports link arguments -Wl,--default-symver: YES (cached)
+Configuring dri.sym using configuration
+Checking for function "mincore" : YES (cached)
+Configuring 50_mesa.json using configuration
+Configuring devenv_glvnd_egl.json using configuration
+Configuring dri.sym using configuration
+Program ln found: YES (/usr/bin/ln)
+Program sphinx-build skipped: feature html-docs disabled
+Build targets in project: 161
+
+mesa 26.0.0-devel
+
+  Directories
+    prefix           : /home/dudkin.i/mesa
+    libdir           : lib
+    includedir       : include
+
+  Common C and C++ arguments
+    c_cpp_args       : -mtls-dialect=gnu2
+
+  OpenGL
+    OpenGL           : YES
+    ES1              : YES
+    ES2              : YES
+    GLVND            : YES
+
+  DRI
+    Platform         : drm
+    Driver dir       : /home/dudkin.i/mesa/lib/dri
+
+  GLX
+    Enabled          : YES
+    Provider         : dri
+
+  EGL
+    Enabled          : YES
+    Drivers          : builtin:egl_dri2 builtin:egl_dri3
+    Platforms        : x11 surfaceless drm xcb
+
+  GBM
+    Enabled          : YES
+    External libgbm  : NO
+    Backends path    : /home/dudkin.i/mesa/lib/gbm
+
+  Vulkan
+    Drivers          : swrast
+    Platforms        : x11 surfaceless drm xcb
+    ICD dir          : share/vulkan/icd.d
+    Intel Ray tracing: NO
+
+  Video
+    Codecs           : NO
+    APIs             : vulkan
+
+  LLVM
+    Required         : enabled
+    Version          : 22.1.5
+
+  Gallium
+    Enabled          : YES
+    Drivers          : llvmpipe
+    Platforms        : x11 surfaceless drm xcb
+    Frontends        : mesa
+    HUD lm-sensors   : YES
+
+  Perfetto
+    Enabled          : NO
+
+  Teflon (TensorFlow Lite delegate)
+    Enabled          : NO
+
+  User defined options
+    buildtype        : release
+    gallium-drivers  : llvmpipe
+    libdir           : lib
+    platforms        : x11
+    prefix           : /home/dudkin.i/mesa
+    video-codecs     :
+    vulkan-drivers   : swrast
+
+Found ninja-1.13.2 at /usr/bin/ninja
+Cleaning... 0 files.
+ninja -C build install
+ninja: Entering directory `build'
+[1/949] Generating src/git_sha1.h with a custom command
+[2/948] Generating src/util/shader_stats.h with a custom command (wrapped by meson to capture output)
+[3/948] Generating src/compiler/ir_expression_operation.h with a custom command (wrapped by meson to capture output)
+[4/948] Generating src/compiler/nir/nir_builder_opcodes.h with a custom command (wrapped by meson to capture output)
+[5/948] Generating src/util/format/u_format_gen.h with a custom command (wrapped by meson to capture output)
+[6/599] Generating src/util/format/u_format_table.c with a custom command (wrapped by meson to capture output)
+[7/599] Generating src/util/format/u_format_pack.h with a custom command (wrapped by meson to capture output)
+[8/596] Generating src/compiler/nir/nir_opcodes.c with a custom command (wrapped by meson to capture output)
+[9/596] Generating src/compiler/nir/nir_opcodes.h with a custom command (wrapped by meson to capture output)
+[10/193] Generating src/compiler/nir/nir_constant_expressions.c with a custom command (wrapped by meson to capture output)
+[11/191] Generating src/compiler/glsl/ir_expression_operation_constant.h with a custom command (wrapped by meson to capture output)
+[12/190] Generating src/compiler/glsl/ir_expression_operation_strings.h with a custom command (wrapped by meson to capture output)
+[13/188] Generating src/mesa/glapi/glapi/gen/api_exec_decl.h with a custom command (wrapped by meson to capture output)
+[14/114] Generating src/mesa/glapi/glapi/gen/enums.c with a custom command (wrapped by meson to capture output)
+[15/113] Generating src/mesa/glapi/glapi/gen/api_exec_init.c with a custom command (wrapped by meson to capture output)
+[16/113] Generating src/mesa/glapi/glapi/gen/api_save.h with a custom command (wrapped by meson to capture output)
+[17/113] Generating src/mesa/glapi/glapi/gen/api_save_init.h with a custom command (wrapped by meson to capture output)
+[18/113] Generating src/mesa/glapi/glapi/gen/api_hw_select_init.h with a custom command (wrapped by meson to capture output)
+[19/113] Generating src/mesa/glapi/glapi/gen/dispatch.h with a custom command (wrapped by meson to capture output)
+[20/102] Generating src/mesa/glapi/glapi/gen/api_beginend_init.h with a custom command (wrapped by meson to capture output)
+[21/99] Generating src/mesa/glapi/glapi/gen/unmarshal_table.c with a custom command (wrapped by meson to capture output)
+[22/99] Generating src/mesa/glapi/glapi/gen/marshal_generated.h with a custom command (wrapped by meson to capture output)
+[23/87] Generating src/util/format_srgb with a custom command (wrapped by meson to capture output)
+[24/84] Generating src/mesa/glapi/glapi/gen/marshal_generated0.c with a custom command (wrapped by meson to capture output)
+[25/83] Generating src/mesa/glapi/glapi/gen/marshal_generated1.c with a custom command (wrapped by meson to capture output)
+[26/82] Generating src/mesa/glapi/glapi/gen/marshal_generated3.c with a custom command (wrapped by meson to capture output)
+[27/81] Generating src/mesa/glapi/glapi/gen/marshal_generated2.c with a custom command (wrapped by meson to capture output)
+[28/80] Generating src/mesa/glapi/glapi/gen/marshal_generated7.c with a custom command (wrapped by meson to capture output)
+[29/79] Generating src/mesa/glapi/glapi/gen/marshal_generated5.c with a custom command (wrapped by meson to capture output)
+[30/78] Generating src/mesa/glapi/glapi/gen/marshal_generated4.c with a custom command (wrapped by meson to capture output)
+[31/77] Generating src/mesa/format_info.h with a custom command (wrapped by meson to capture output)
+[32/76] Generating src/mesa/glapi/shared-glapi/shared_glapi_mapi_tmp.h with a custom command (wrapped by meson to capture output)
+[33/74] Generating src/mesa/glapi/glapi/gen/marshal_generated6.c with a custom command (wrapped by meson to capture output)
+[34/73] Generating src/mesa/get_hash.h with a custom command (wrapped by meson to capture output)
+[35/71] Generating src/mesa/glapi/glapi/gen/indirect.c with a custom command (wrapped by meson to capture output)
+[36/71] Compiling C object src/gallium/auxiliary/libgallium.a.p/draw_draw_pt_fetch_shade_pipeline_llvm.c.o
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c: В функции «render_shader»:
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:300:27: warning: сравнение со строковым литералом приводит к неопределенному поведению [-Waddress]
+  300 |                if(op_name == "fadd" || op_name == "fmul" || op_name == "fdiv")
+      |                           ^~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:81:25: note: in definition of macro «foreach_instr_in_shader»
+   81 |                         function_body                                           \
+      |                         ^~~~~~~~~~~~~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:300:48: warning: сравнение со строковым литералом приводит к неопределенному поведению [-Waddress]
+  300 |                if(op_name == "fadd" || op_name == "fmul" || op_name == "fdiv")
+      |                                                ^~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:81:25: note: in definition of macro «foreach_instr_in_shader»
+   81 |                         function_body                                           \
+      |                         ^~~~~~~~~~~~~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:300:69: warning: сравнение со строковым литералом приводит к неопределенному поведению [-Waddress]
+  300 |                if(op_name == "fadd" || op_name == "fmul" || op_name == "fdiv")
+      |                                                                     ^~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:81:25: note: in definition of macro «foreach_instr_in_shader»
+   81 |                         function_body                                           \
+      |                         ^~~~~~~~~~~~~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:302:32: warning: сравнение со строковым литералом приводит к неопределенному поведению [-Waddress]
+  302 |                else if(op_name == "vec4")
+      |                                ^~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:81:25: note: in definition of macro «foreach_instr_in_shader»
+   81 |                         function_body                                           \
+      |                         ^~~~~~~~~~~~~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:275:12: warning: Оператор никогда не будет выполнен [-Wswitch-unreachable]
+  275 |            printf("%d\n", instr->index);
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/gallium/auxiliary/draw/draw_pt_fetch_shade_pipeline_llvm.c:81:25: note: in definition of macro «foreach_instr_in_shader»
+   81 |                         function_body                                           \
+      |                         ^~~~~~~~~~~~~
+[37/71] Generating src/mesa/glapi/glapi/gen/indirect.h with a custom command (wrapped by meson to capture output)
+[38/59] Linking static target src/gallium/auxiliary/libgallium.a
+[39/59] Generating src/mesa/glapi/glapi/gen/indirect_size.c with a custom command (wrapped by meson to capture output)
+[40/59] Generating src/egl/g_egldispatchstubs.c with a custom command (wrapped by meson to capture output)
+[41/59] Generating src/mesa/glapi/glapi/gen/indirect_size.h with a custom command (wrapped by meson to capture output)
+[42/56] Generating src/egl/g_egldispatchstubs.h with a custom command (wrapped by meson to capture output)
+[43/54] Generating src/mesa/glapi/glapi/gen/indirect_init.c with a custom command (wrapped by meson to capture output)
+[44/52] Generating symbol file src/gbm/libgbm.so.1.0.0.p/libgbm.so.1.0.0.symbols
+[45/52] Linking target src/gallium/targets/dril/libdril_dri.so
+[46/52] Linking target src/gallium/targets/lavapipe/libvulkan_lvp.so
+[47/52] Linking target src/gallium/targets/dri/libgallium-26.0.0-devel.so
+[48/52] Generating symbol file src/gallium/targets/dri/libgallium-26.0.0-devel.so.p/libgallium-26.0.0-devel.so.symbols
+[48/49] Installing files
+Installing symlink pointing to libdril_dri.so to /home/dudkin.i/mesa/lib/dri/swrast_dri.so
+Installing symlink pointing to libdril_dri.so to /home/dudkin.i/mesa/lib/dri/kms_swrast_dri.so
+Installing src/gallium/targets/dri/libgallium-26.0.0-devel.so to /home/dudkin.i/mesa/lib
+Installing src/gallium/targets/lavapipe/libvulkan_lvp.so to /home/dudkin.i/mesa/lib
+Installing src/gallium/targets/lavapipe/lvp_icd.x86_64.json to /home/dudkin.i/mesa/share/vulkan/icd.d
+Installing src/glx/libGLX_mesa.so.0.0.0 to /home/dudkin.i/mesa/lib
+Installing src/gbm/libgbm.so.1.0.0 to /home/dudkin.i/mesa/lib
+Installing src/egl/libEGL_mesa.so.0.0.0 to /home/dudkin.i/mesa/lib
+Installing src/gallium/targets/dril/libdril_dri.so to /home/dudkin.i/mesa/lib/dri
+Installing src/gbm/backends/dri/dri_gbm.so to /home/dudkin.i/mesa/lib/gbm
+Installing /home/dudkin.i/projects/mesa/mesa/include/EGL/eglext_angle.h to /home/dudkin.i/mesa/include/EGL
+Installing /home/dudkin.i/projects/mesa/mesa/include/EGL/eglmesaext.h to /home/dudkin.i/mesa/include/EGL
+Installing /home/dudkin.i/projects/mesa/mesa/include/GL/internal/dri_interface.h to /home/dudkin.i/mesa/include/GL/internal
+Installing /home/dudkin.i/projects/mesa/mesa/src/gbm/main/gbm.h to /home/dudkin.i/mesa/include
+Installing /home/dudkin.i/projects/mesa/mesa/src/gbm/main/gbm_backend_abi.h to /home/dudkin.i/mesa/include
+Installing /home/dudkin.i/projects/mesa/mesa/src/util/00-mesa-defaults.conf to /home/dudkin.i/mesa/share/drirc.d
+Installing /home/dudkin.i/projects/mesa/mesa/build/meson-private/dri.pc to /home/dudkin.i/mesa/lib/pkgconfig
+Installing /home/dudkin.i/projects/mesa/mesa/build/meson-private/gbm.pc to /home/dudkin.i/mesa/lib/pkgconfig
+Installing /home/dudkin.i/projects/mesa/mesa/build/src/egl/50_mesa.json to /home/dudkin.i/mesa/share/glvnd/egl_vendor.d
+Installing symlink pointing to libGLX_mesa.so.0.0.0 to /home/dudkin.i/mesa/lib/libGLX_mesa.so.0
+Installing symlink pointing to libGLX_mesa.so.0 to /home/dudkin.i/mesa/lib/libGLX_mesa.so
+Installing symlink pointing to libgbm.so.1.0.0 to /home/dudkin.i/mesa/lib/libgbm.so.1
+Installing symlink pointing to libgbm.so.1 to /home/dudkin.i/mesa/lib/libgbm.so
+Installing symlink pointing to libEGL_mesa.so.0.0.0 to /home/dudkin.i/mesa/lib/libEGL_mesa.so.0
+Installing symlink pointing to libEGL_mesa.so.0 to /home/dudkin.i/mesa/lib/libEGL_mesa.so
+Running custom install script '/usr/bin/python /home/dudkin.i/projects/mesa/mesa/bin/install_megadrivers.py --libname-suffix so /home/dudkin.i/projects/mesa/mesa/build/src/gallium/targets/dril/libdril_dri.so /home/dudkin.i/mesa/lib/dri swrast_dri.so kms_swrast_dri.so'
+./../vkcube/build/vkcube
+1 physical devices
+vendor id 10005, device name block_simulation

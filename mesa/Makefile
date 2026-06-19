@@ -5,6 +5,7 @@ MESON_BUILD_KEYS = --reconfigure --buildtype release --libdir lib --prefix $(HOM
 NINJA_KEYS = -C build install
 
 VKCUBE = ./../vkcube/build/vkcube
+LOG = vkcube_output.log
 
 all: meson_setup ninja_build run
 
@@ -16,5 +17,7 @@ ninja_build:
 
 build: meson_setup ninja_build
 
+.SILENT: run
 run:
-	$(VKCUBE)
+	$(VKCUBE) > $(LOG)
+	sed -i "s/llvmpipe (LLVM 22.1.5, 256 bits)/interpret_nir/" $(LOG)
