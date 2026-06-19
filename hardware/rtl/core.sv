@@ -315,10 +315,11 @@ core_decoder #() core_decoder_u (
     //================### SIGNALS TO FPU ###=================//
     .fpu_cmd        (fpu_cmd            ),    // ->
     .fpu_cmd_valid  (fpu_cmd_valid      ),    // ->
-    //===============### SIGNALS FROM FPU ###================//
+    //==============### SIGNALS FROM CORE ###================//
     .threads_valid_i(tus_ready_get_cmd  ),    // <-
     .decoder_ready_o(dec_ready          ),    // ->
-    .ret_inst_o     (ret_inst           )     // ->
+    .ret_inst_o     (ret_inst           ),    // ->
+    .en_i           (csr_en             )     // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -396,7 +397,7 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         .dec_cmd        (fpu_cmd            ),  // <-
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
         //==================### VID SIGNALS ###==================//
-        .vid_i          (vid_arr[i]         ),  // <- fixme later
+        .vid_i          (vid_arr[i]         ),  // <-
         //==================### OUT SIGNALS ###==================//
         .thread_info    (thread_unit_info[i]),  // ->
         .thread_state   (thread_states[i]   )   // ->

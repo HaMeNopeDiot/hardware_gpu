@@ -67,7 +67,8 @@ module core_decoder
     /*========================### SIGNALS FROM FPU ###========================*/
     input  logic                threads_valid_i,
     output logic                decoder_ready_o,
-    output logic                ret_inst_o
+    output logic                ret_inst_o,
+    input  logic                en_i
     //========================================================================//
 );
 
@@ -108,6 +109,9 @@ assign tu_valid_re = ~threads_valid_prev && threads_valid_i;
 logic  threads_free;
 assign threads_free = (~(i_with_delay && ~tu_valid_re)) && threads_valid_i;
 
+logic  decoder_activate;
+assign decoder_activate = en_i && (~ret_inst_o);
+
 /*============================================================================//
 region FSM
 //============================================================================*/
@@ -123,7 +127,7 @@ end
 always_comb begin
     case (state)
         DEC_IDLE: begin
-            if (instr_valid)
+            if (instr_valid && decoder_activate)
                 if (threads_free)
                     next_state = DEC_GIVE;
                 else
@@ -132,13 +136,15 @@ always_comb begin
                 next_state = DEC_IDLE;
         end
         DEC_WAIT: begin
+            if (~decoder_activate)
+                next_state = DEC_IDLE;
             if (threads_free)
                 next_state = DEC_GIVE;
             else
                 next_state = DEC_WAIT;
         end
         DEC_GIVE: begin
-            if (instr_valid)
+            if (instr_valid && decoder_activate)
                 if (threads_free)
                     next_state = DEC_GIVE;
                 else

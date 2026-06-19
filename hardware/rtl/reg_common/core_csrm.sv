@@ -20,7 +20,8 @@ region MODULE DEFINITION
 
     localparam int unsigned STRB_W                  = DW / 8,
     localparam int unsigned RS_VID_END_OFS          = RS_VID_OFS + STRB_W * THREAD_CNT,
-    localparam int unsigned VID_W                   = $clog2(THREAD_CNT)
+    localparam int unsigned VID_W                   = $clog2(THREAD_CNT),
+    localparam int unsigned SAW_W                   = $clog2(STRB_W)
 ) (
     /*==========================### COMMON SIGNALS ###==========================*/
     input  logic                            clk,
@@ -80,7 +81,7 @@ if (THREAD_CNT > 1) begin: g_logic_many_threads
     logic [VID_W - 1: 0] local_vid_addr;
     always_comb begin
         if (addr_in_vid_range)
-            local_vid_addr = (VID_W)'((addr - (AW)'(RS_VID_OFS)) >> STRB_W);
+            local_vid_addr = (VID_W)'((addr - (AW)'(RS_VID_OFS)) >> SAW_W);
         else
             local_vid_addr = '0;
     end
@@ -149,7 +150,7 @@ end
 region INNER OUT LOGIC
 //==============================================================================*/
 
-assign cur_pc_o = pc_readed_i? pc_wdata: pc_rdata;
+assign cur_pc_o = pc_rdata;
 assign en_o     = core_ctrl_rdata[0];
 
 /*==============================================================================//

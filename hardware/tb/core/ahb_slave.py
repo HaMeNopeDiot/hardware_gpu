@@ -327,7 +327,7 @@ class AHBSlaveModel:
                 )
                 self.stats["writes"] += 1
 
-                self.log.error(
+                self.log.debug(
                     f"WRITE: addr=0x{self._addr_phase_addr:08X} "
                     f"size={self._addr_phase_size} "
                     f"data=0x{wdata:08X} (hwdata=0x{hwdata:08X})"

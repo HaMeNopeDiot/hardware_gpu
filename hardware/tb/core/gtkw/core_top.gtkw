@@ -1,24 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Thu Jun 18 13:28:37 2026
+[*] Fri Jun 19 07:02:52 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Thu Jun 18 13:27:12 2026"
-[dumpfile_size] 4975946
+[dumpfile_mtime] "Fri Jun 19 07:02:49 2026"
+[dumpfile_size] 9314657
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 339800
+[timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-16.751602 778900 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-20.351603 16190000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
-[treeopen] core.core_csrm_hndl_u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
 [treeopen] core.gen_threads[0].thread_unit_u.
 [treeopen] core.gen_threads[1].thread_unit_u.
-[treeopen] core.gen_threads[2].
 [treeopen] core.gen_threads[3].thread_unit_u.
 [sst_width] 290
 [signals_width] 206
@@ -78,11 +76,15 @@ core.core_decoder_u.fpu_cmd_valid
 -THREADS
 @28
 core.no_req_from_threads
-@c00200
+@800200
 -T0
+@22
+core.gen_threads[0].thread_unit_u.vid_i[31:0]
 @2028
 ^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
 core.gen_threads[0].thread_unit_u.thread_state[1:0]
+@c00200
+-RF
 @22
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[3][31:0]
@@ -90,10 +92,11 @@ core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[5][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[6][31:0]
 @1401200
+-RF
+@1000200
 -T0
-@800200
--T1
 @c00200
+-T1
 -2LSU
 @22
 core.gen_threads[1].thread_unit_u.rs1[31:0]
@@ -113,19 +116,6 @@ core.gen_threads[0].thread_unit_u.wr_en
 @c00200
 -RF
 @22
-core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[1][31:0]
-core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[2][31:0]
-core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[3][31:0]
-core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[4][31:0]
-@1401200
--RF
-@28
-core.core_lsu_u.lsu_valid_i
-core.gen_threads[1].thread_unit_u.next_thread_state[1:0]
-@2028
-^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
-core.gen_threads[1].thread_unit_u.thread_state[1:0]
-@22
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[3][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[4][31:0]
@@ -133,14 +123,21 @@ core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[5][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[6][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[7][31:0]
 core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[8][31:0]
-core.gen_threads[1].thread_unit_u.dec_cmd.op[3:0]
+@1401200
+-RF
 @28
-core.gen_threads[1].thread_unit_u.state[2:0]
-@1000200
+core.gen_threads[1].thread_unit_u.next_thread_state[1:0]
+@2028
+^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
+core.gen_threads[1].thread_unit_u.thread_state[1:0]
+@22
+core.gen_threads[1].thread_unit_u.vid_i[31:0]
+@1401200
 -T1
 @c00200
 -T2
 @22
+core.gen_threads[2].thread_unit_u.vid_i[31:0]
 core.gen_threads[2].thread_unit_u.data_w[31:0]
 core.gen_threads[2].thread_unit_u.addr_w[4:0]
 @28
@@ -178,11 +175,16 @@ core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @c00200
 -T3
 @22
+core.gen_threads[3].thread_unit_u.vid_i[31:0]
+@c00200
+-RF
+@22
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[3][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @1401200
+-RF
 -T3
 -THREADS
 @200
@@ -272,11 +274,18 @@ core.core_decoder_u.fpu_cmd_valid_ff
 core.core_decoder_u.fpu_cmd_valid
 core.core_decoder_u.lsu_cmd_valid
 core.core_decoder_u.cmd_op_type[1:0]
+core.core_decoder_u.ret_inst_o
+core.core_decoder_u.cmd_op_type[1:0]
+core.core_decoder_u.cmd_op_type_ff[1:0]
+@22
+core.core_decoder_u.cmd_ff.u.operand[4:0]
+@28
+core.core_decoder_u.give_rn
 @1401200
 -DECODER
 @200
 -Fetcher
-@c00201
+@c00200
 -Fetcher
 @22
 core.core_fetcher_u.pc_i[31:0]
@@ -292,7 +301,7 @@ core.core_fetcher_u.inst_buf_len[3:0]
 @28
 core.core_fetcher_u.inst_q_full
 core.core_fetcher_u.pc_readed_o
-@800200
+@c00200
 -AHB_PORTS
 @22
 core.core_fetcher_u.ahb_o.haddr[31:0]
@@ -310,13 +319,13 @@ core.core_fetcher_u.ahb_i.hrdata[31:0]
 @28
 core.core_fetcher_u.ahb_i.hready
 core.core_fetcher_u.ahb_i.hresp
-@1000200
+@1401200
 -AHB_PORTS
 @28
 core.core_fetcher_u.inst_q_empty
 core.core_fetcher_u.ahb_master_u.req_txn_i
 core.core_fetcher_u.ahb_master_u.state[1:0]
-@1401201
+@1401200
 -Fetcher
 @200
 -CSRM
@@ -347,5 +356,11 @@ core.csr_pc[31:0]
 @28
 core.core_csrm_hndl_u.apb_slave_u.addr_not_in_range
 core.core_csrm_hndl_u.apb_slave_u.is_unaligned_addr
+core.core_csrm_hndl_u.core_csrm_u.en_o
+@22
+core.vid_arr[0][31:0]
+core.vid_arr[1][31:0]
+core.vid_arr[2][31:0]
+core.vid_arr[3][31:0]
 [pattern_trace] 1
 [pattern_trace] 0
