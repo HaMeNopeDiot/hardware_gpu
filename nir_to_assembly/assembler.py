@@ -35,8 +35,8 @@ class Assembler:
     REGISTER_NAMES = {
         "x0": 0,
         "zero": 0,
-        "x1": 1,
-        "v_id": 1,
+        "x1": 31,
+        "v_id": 31,
         "x2": 2,
         "sp": 2,
         "x3": 3,
@@ -67,23 +67,23 @@ class Assembler:
         "x28": 28,
         "x29": 29,
         "x30": 30,
-        "x31": 31,
+        "x31": 1,
     }
 
     INSTRUCTION_OPCODES = {
-        "lw":       0b010_0000,
-        "sw":       0b010_0001,
-        "lui":      0b110_0000,
-        "addi":     0b010_0010,
-        "fadd":     0b100_0010,
-        "fmul":     0b100_0011,
-        "fdiv":     0b100_0100,
-        "fsqrt":    0b100_0101,
-        "fneg":     0b100_0110,
-        "fmax":     0b100_0111,
-        "add":      0b010_0011,
-        "mul":      0b010_0100,
-        "ret":      0b000_0001,
+        "lw":       0b010_0000, # L
+        "sw":       0b110_0000, # S
+        "lui":      0b000_0000, # U
+        "addi":     0b010_0001, # L
+        "fadd":     0b100_0010, # F
+        "fmul":     0b100_0011, # F
+        "fdiv":     0b100_0100, # F
+        "fsqrt":    0b100_0101, # F
+        "fneg":     0b100_0110, # F
+        "fmax":     0b100_0111, # F
+        "add":      0b110_0001, # S
+        "mul":      0b110_0010, # S
+        "ret":      0b000_0001, # U
     }
 
     def __init__(self) -> None:
@@ -122,13 +122,13 @@ class Assembler:
             )
             rs1 = rd
 
-        if (imm & 0x7FF) != 0:
+        if (imm & 0xFFF) != 0:
             # addi
-            self.__S_type_instruction(
+            self.__L_type_instruction(
                 opcode=self.INSTRUCTION_OPCODES["addi"],
                 rd=rd,
                 rs1=rs1,
-                imm=imm & 0x7FF,
+                imm=imm & 0xFFF,
             )
 
     # instruction
@@ -136,7 +136,7 @@ class Assembler:
         opcode = self.INSTRUCTION_OPCODES[instr.opcode]
         rd = self.REGISTER_NAMES[instr.result]
         rs1 = self.REGISTER_NAMES[instr.args[0]]
-        imm = int(instr.args[1], base=16)
+        imm = int(instr.args[1], base=10)
 
         self.__L_type_instruction(
             opcode=opcode,
@@ -149,7 +149,7 @@ class Assembler:
         opcode = self.INSTRUCTION_OPCODES[instr.opcode]
         rs1 = self.REGISTER_NAMES[instr.args[0]]
         rs2 = self.REGISTER_NAMES[instr.args[1]]
-        imm = int(instr.args[2], base=16)
+        imm = int(instr.args[2], base=10)
 
         self.__S_type_instruction(
             opcode=opcode,
@@ -254,7 +254,7 @@ class Assembler:
 
     def ret(self, instr: Instruction):
         opcode = self.INSTRUCTION_OPCODES[instr.opcode]
-        self.__L_type_instruction(
+        self.__U_type_instruction(
             opcode=opcode,
         )
 
@@ -270,7 +270,7 @@ class Assembler:
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rd << 20) | (rs1 << 15) | (imm << 0)
-        self.binary += code.to_bytes(4, byteorder="big", signed=False)
+        self.binary += code.to_bytes(4, byteorder="little", signed=False)
 
     def __F_type_instruction(
         self,
@@ -300,7 +300,7 @@ class Assembler:
             | (extra << 2)
             | (imm << 0)
         )
-        self.binary += code.to_bytes(4, byteorder="big", signed=False)
+        self.binary += code.to_bytes(4, byteorder="little", signed=False)
 
     def __S_type_instruction(
         self, imm: int = 0, rd: int = 0, rs2: int = 0, rs1: int = 0, opcode: int = 0
@@ -313,11 +313,11 @@ class Assembler:
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rs1 << 20) | (rs2 << 15) | (rd << 10) | (imm << 0)
-        self.binary += code.to_bytes(4, byteorder="big", signed=False)
+        self.binary += code.to_bytes(4, byteorder="little", signed=False)
 
     def __U_type_instruction(self, imm: int = 0, rd: int = 0, opcode: int = 0):
         assert (
             imm.bit_length() <= 20 and rd.bit_length() <= 5 and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rd << 20) | (imm << 0)
-        self.binary += code.to_bytes(4, byteorder="big", signed=False)
+        self.binary += code.to_bytes(4, byteorder="little", signed=False)

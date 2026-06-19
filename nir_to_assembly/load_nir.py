@@ -29,8 +29,8 @@ target_code = Optimizer().optimize(target_code)
 generator = BasicBlockGenerator()
 target_code = generator.generate(target_code)
 
-# for i in range(len(target_code)):
-#     print(f"{target_code[i]}")
+for i in range(len(target_code)):
+    print(f"{target_code[i]}")
 
 # print("\n\n")
 # print(f"Storage Registers: \n{generator.storage_registers}")

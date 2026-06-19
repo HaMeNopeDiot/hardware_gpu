@@ -19,6 +19,64 @@ from core.core_instr_item import VID_ADDR, DW
 from core.instr_item      import InstItem
 from utility.addresess    import CSRAddr
 
+from utility.intsr_bin_reader   import hex2word
+
+time_cycle = 20 * 1e-9 #ns
+hz = (1 / time_cycle) # 50Mhz while time_cycle = 20ns
+
+CORES_CNT   = 1
+THREADS_CNT = 4
+
+def read_vbuffer(filename):
+    values = []
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+
+                # Пропускаем пустые строки и комментарии
+                if not line or line.startswith('//'):
+                    continue
+
+                # Разбиваем строку на части по пробелам
+                parts = line.split()
+
+                for part in parts:
+                    # На всякий случай проверяем, не является ли часть комментарием
+                    if part.startswith('//'):
+                        break
+
+                    if part is not None:
+                        values.append(part)
+    except FileNotFoundError:
+        print(f"Файл {filename} не найден.")
+        return []
+
+    return values
+
+async def cnt_busy_cycles(dut, clk, cnt_instr: int):
+    wait_busy = 0
+    while (dut.busy_o.value == 0):
+        await ClockCycles(clk, 1)
+        wait_busy += 1
+        assert wait_busy < 10000, "TIME OUT"
+
+    wait_untill_busy = 0
+    while (dut.busy_o.value == 1):
+        await ClockCycles(clk, 1)
+        wait_untill_busy += 1
+        assert wait_untill_busy < 10000, "TIME OUT"
+
+    assert wait_untill_busy > 2, "no"
+    wait_untill_busy -= 2
+    # res
+    cpi = float(wait_untill_busy / cnt_instr)
+    tflops = (hz * CORES_CNT * (THREADS_CNT * (1 / cpi))) * 1e-12
+    cocotb.log.warning(f"WAIT BUSY CYCLES: {wait_untill_busy}")
+    cocotb.log.warning(f"Hz / CI: {cpi}")
+    cocotb.log.warning(f"MIPS: {hz / (cpi * 1e+6)}")
+    cocotb.log.warning(f"TFLOPS: {tflops}")
+
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
     while True:
         clk.value = 0
@@ -87,6 +145,7 @@ async def fpu_core_test(dut,
 
 
     # execute instructions
+    cocotb.start_soon(cnt_busy_cycles(dut, clk, 7))
     await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
     await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
 
@@ -197,15 +256,17 @@ async def do_all_i(dut, clk, ahb_slave_lsu, ahb_slave_ftc, apb_master_csr): # 20
     ret0 = InstItem(CIUI(op=UPPopTE.RET,   imm = 0x00,    rd_addr = 0), ahb_slave_ftc, 0x58)
 
     # do
+    cocotb.start_soon(cnt_busy_cycles(dut, clk, 14))
     await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
     await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
 
     while (dut.busy_o.value == 1):
         await ClockCycles(clk, 1)
 
-    for iitem in ifpu:
-        await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x40, 0b1111)
-        await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,  0b1111)
+
+    cocotb.start_soon(cnt_busy_cycles(dut, clk, 7))
+    await apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x40, 0b1111)
+    await apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,  0b1111)
 
 
     while (dut.busy_o.value == 1):
@@ -260,12 +321,12 @@ class BaseCoreTest:
 
         self.ahb_slave_lsu = AHBSlaveModel(dut,
                                 name = "lsu",
-                                memory_size=2 ** 16,
+                                memory_size=2 ** 32,
                                 data_width=DW, log= cocotb.log, wait_states=0)
 
         self.ahb_slave_ftc = AHBSlaveModel(dut,
                             name = "ftc",
-                            memory_size=2 ** 16,
+                            memory_size=2 ** 32,
                             data_width=DW, log= cocotb.log, wait_states=0)
 
         self.apb_master_csr = APB4Master(dut,
@@ -282,8 +343,9 @@ class BaseCoreTest:
         pass # virtual
 
     async def postbody(self):
-            self.ahb_slave_lsu.stop()
-            self.ahb_slave_ftc.stop()
+        await ClockCycles(self.clk, 10)
+        self.ahb_slave_lsu.stop()
+        self.ahb_slave_ftc.stop()
 
     async def run(self):
         await self.prebody()
@@ -317,3 +379,62 @@ class FPUCheckNEGTest(BaseCoreTest):
 class FPUCheckMAXTest(BaseCoreTest):
     async def body(self):
         await fpu_core_test(self.dut, self.clk, self.ahb_slave_lsu, self.ahb_slave_ftc, self.apb_master_csr, FPUopTE.MAX)
+
+
+import struct
+class VKCubeTest(BaseCoreTest):
+    async def body(self):
+        cocotb.log.info(f"It's comming")
+        with open("../../nir_to_assembly/vertex_shader.bin", "rb") as f:
+            raw_data = f.read()
+
+        # Отрезаем лишние байты, если длина не кратна 4
+        count = len(raw_data) // 4
+        raw_data = raw_data[:count * 4]
+
+        # '<I' = little-endian, unsigned int
+        words = struct.unpack('<' + 'I' * count, raw_data)
+        idx = 0
+
+        i_arr = []
+        for word in words:
+            print(f"idx: {idx} : 0x{word:08x}")
+            i = CoreInstItem()
+            i.set_machine_code(word)
+            idx += 1
+            i_arr.append(i)
+
+        # set instr to mem
+        idx = 0
+        for instr in i_arr:
+            InstItem(instr, self.ahb_slave_ftc, 4 + idx * 4)
+            idx += 1
+
+        for i in range(len(i_arr)):
+            print(f"{i:3} : ", end = "")
+            i_arr[i].print()
+
+        # write mem
+        data = read_vbuffer("../../vkcube/vertex_buffer.mem")
+        idx = 0
+        # print(f"Всего элементов: {len(data)}")
+        # print("Первые 10 значений:", data[:10])
+        # print("Последние 5 значений:", data[-5:])
+        for data_elem in data:
+            self.ahb_slave_lsu.write_memory(0x1000_0000 + idx * 4, AHBSize.WORD.value, int(data_elem, 32))
+            idx += 1
+        # nucelar launch ready
+        cocotb.start_soon(cnt_busy_cycles(self.dut, self.clk, 7))
+        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
+
+
+        # wait
+        while (self.dut.busy_o.value == 1):
+           await ClockCycles(self.clk, 1)
+
+        data_res = []
+
+        for i in range(0x2000_0000, 0x2000_0320, 0x4):
+            data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
+            print(f"0x{data:08x}")
