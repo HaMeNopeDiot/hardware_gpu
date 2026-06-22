@@ -17,6 +17,13 @@ module core_decoder
     import fpnew_pkg::RTZ;
 
 
+    import fpnew_pkg::ADD;
+    import fpnew_pkg::MUL;
+    import fpnew_pkg::SQRT;
+    import fpnew_pkg::DIV;
+
+
+
     import handshake_fpu_pkg::tags_t;
     import tu_pkg::cmd_union_t;
     import tu_pkg::cmd_t;
@@ -26,8 +33,16 @@ module core_decoder
 
 
     import tu_pkg::SOP_SW;
+    import tu_pkg::SOP_ADD;
+    import tu_pkg::SOP_MUL;
+
     import tu_pkg::LOP_LW;
+    import tu_pkg::LOP_ADDI;
+
+    import tu_pkg::UOP_IMM;
     import tu_pkg::UOP_RET;
+
+    import tu_pkg::U_IMM_W;
     // type cmd
     import tu_pkg::S_CMD;
     import tu_pkg::L_CMD;
@@ -43,7 +58,27 @@ module core_decoder
     import decoder_pkg::DEC_WAIT;
     import decoder_pkg::DEC_GIVE;
 
-#() (
+    // dbg
+    import tu_pkg::dbg_cmd_t;
+    import tu_pkg::cmd_op_t;
+    import tu_pkg::CMD_UNKN ;
+    import tu_pkg::CMD_RET  ;
+    import tu_pkg::CMD_LW   ;
+    import tu_pkg::CMD_SW   ;
+    import tu_pkg::CMD_LUI  ;
+    import tu_pkg::CMD_ADDI ;
+    import tu_pkg::CMD_ADD  ;
+    import tu_pkg::CMD_MUL  ;
+    import tu_pkg::CMD_FADD ;
+    import tu_pkg::CMD_FMUL ;
+    import tu_pkg::CMD_FDIV ;
+    import tu_pkg::CMD_FSQRT;
+    import tu_pkg::CMD_FNEG ;
+    import tu_pkg::CMD_FMAX ;
+
+#(
+    parameter logic DEBUG_MODE = 1
+) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
     input  logic                rst_n,
@@ -273,6 +308,104 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (prepare_idle) begin
         cmd_ff              <= '0;
         cmd_op_type_ff      <= U_CMD;
+    end
+end
+
+/*============================================================================//
+region DEBUG MODE
+//============================================================================*/
+
+if (DEBUG_MODE) begin: gen_debug_info
+    int unsigned cmd_idx;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (~rst_n)
+            cmd_idx <= '0;
+        else if (give_rn)
+            cmd_idx <= cmd_idx + 1;
+        else
+            cmd_idx <= cmd_idx;
+    end
+
+    /* verilator lint_off UNUSEDSIGNAL */
+    dbg_cmd_t command;
+    always_comb begin
+        if (give_rn) begin
+            if (fpu_cmd_valid) begin
+                case (fpu_cmd.op)
+                    ADD:
+                        command.op = CMD_FADD;
+                    MUL:
+                        command.op = CMD_FMUL;
+                    DIV:
+                        command.op = CMD_FDIV;
+                    SQRT:
+                        command.op = CMD_FSQRT;
+                    SGNJ:
+                        command.op = CMD_FNEG; // bad idea
+                    MINMAX:
+                        command.op = CMD_FMAX; // bad idea
+                    default:
+                        command.op = CMD_UNKN;
+                endcase
+                command.rs1_a   = fpu_cmd.a1;
+                command.rs2_a   = fpu_cmd.a2;
+                command.rs3_a   = fpu_cmd.a3;
+                command.rd_a    = fpu_cmd.ar;
+                command.imm     = (U_IMM_W)'(fpu_cmd.tag);
+                command.extra   = fpu_cmd.rnd;
+            end
+            else begin
+                case (cmd_op_type)
+                    U_CMD: begin
+                        case (cmd.u.operand)
+                            UOP_IMM: command.op = CMD_LUI;
+                            UOP_RET: command.op = CMD_RET;
+                            default: command.op = CMD_UNKN;
+                        endcase
+                        command.rs1_a   = '0;
+                        command.rs2_a   = '0;
+                        command.rs3_a   = '0;
+                        command.rd_a    = cmd.u.rd_addr;
+                        command.extra   = '0;
+                        command.imm     = cmd.u.imm;
+                    end
+                    L_CMD: begin
+                        case (cmd.l.operand)
+                            LOP_LW:     command.op = CMD_LW;
+                            LOP_ADDI:   command.op = CMD_ADDI;
+                            default:    command.op = CMD_UNKN;
+                        endcase
+                        command.rs1_a   = cmd.l.rs1_addr;
+                        command.rs2_a   = '0;
+                        command.rs3_a   = '0;
+                        command.rd_a    = cmd.l.rd_addr;
+                        command.extra   = '0;
+                        command.imm     = (U_IMM_W)'(cmd.l.imm);
+                    end
+                    S_CMD: begin
+                        case (cmd.s.operand)
+                            SOP_SW:     command.op = CMD_SW;
+                            SOP_ADD:    command.op = CMD_ADD;
+                            SOP_MUL:    command.op = CMD_MUL;
+                            default:    command.op = CMD_UNKN;
+                        endcase
+                        command.rs1_a   = cmd.s.rs1_addr;
+                        command.rs2_a   = cmd.s.rs2_addr;
+                        command.rs3_a   = '0;
+                        command.rd_a    = cmd.s.rd_addr;
+                        command.extra   = '0;
+                        command.imm     = (U_IMM_W)'(cmd.s.imm);
+                    end
+                    F_CMD:
+                        command.op = CMD_UNKN;
+                    default:
+                        command.op = CMD_UNKN;
+                endcase
+            end
+        end
+        else begin
+            command = '0;
+        end
     end
 end
 

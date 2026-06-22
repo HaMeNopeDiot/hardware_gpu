@@ -31,11 +31,12 @@ module ahb_master
     import ahb_pkg::HTRANS_BUFE_ON;
     import ahb_pkg::HTRANS_CACH_OFF;
 
-    import ahb_pkg::ahb_txn_e;
-    import ahb_pkg::AHB_IDLE  ;
-    import ahb_pkg::AHB_STALL ;
-    import ahb_pkg::AHB_ACTIVE;
-    import ahb_pkg::AHB_ERROR ;
+    import ahb_pkg::ahb_fsm_e;
+    import ahb_pkg::AHB_FSM_IDLE ;
+    import ahb_pkg::AHB_FSM_SADDR;
+    import ahb_pkg::AHB_FSM_SDATA;
+    import ahb_pkg::AHB_FSM_BOTH ;
+    import ahb_pkg::AHB_FSM_ERROR;
 
     import ahb_pkg::hsize_e;
     import ahb_pkg::HSIZE_BYTE ;
@@ -114,17 +115,11 @@ assign req_active = req_txn_i;
 // AHB FSM
 //============================================================================*/
 
-ahb_txn_e state, next_state;
-
-// logic  req_ahb_txn;
-logic  res_ahb_txn;
-// assign req_ahb_txn = fst_state == AHB_IDLE && fst_state_next == AHB_ACTIVE;
-assign res_ahb_txn =    ((state == AHB_ACTIVE) || (state == AHB_STALL))
-                    && hready && ~(htrans == HTRANS_NONSEQ);
+ahb_fsm_e state, next_state;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
-        state <= AHB_IDLE;
+        state <= AHB_FSM_IDLE;
     end
     else begin
         state <= next_state;
@@ -133,41 +128,59 @@ end
 
 always_comb begin
     case (state)
-        AHB_IDLE: begin
+        AHB_FSM_IDLE:
             if (req_active)
-                next_state = AHB_ACTIVE;
+                next_state = AHB_FSM_SADDR;
             else
-                next_state = AHB_IDLE;
-        end
-        AHB_ACTIVE, AHB_STALL: begin
-            if (hresp)
-                next_state = AHB_ERROR;
+                next_state = AHB_FSM_IDLE;
+        AHB_FSM_SADDR:
+            if (req_active)
+                next_state = AHB_FSM_BOTH;
             else
-                if (~(res_ahb_txn && ~req_active))
-                    if (hready)
-                        next_state = AHB_STALL;
-                    else
-                        next_state = AHB_ACTIVE;
+                next_state = AHB_FSM_SDATA;
+        AHB_FSM_SDATA:
+            if (hready)
+                if (req_active)
+                    next_state = AHB_FSM_SADDR;
+                else if (~hresp)
+                    next_state = AHB_FSM_IDLE;
                 else
-                    next_state = AHB_IDLE;
-        end
-        AHB_ERROR: begin
-            if (hresp)
-                next_state = AHB_ERROR;
+                    next_state = AHB_FSM_ERROR;
             else
-                next_state = AHB_IDLE; // maybe need fix this
-        end
+                next_state = AHB_FSM_SDATA;
+        AHB_FSM_BOTH:
+            if (hready)
+                if (req_active)
+                    next_state = AHB_FSM_BOTH;
+                else if (~hresp)
+                    next_state = AHB_FSM_SDATA;
+                else
+                    next_state = AHB_FSM_ERROR;
+            else
+                next_state = AHB_FSM_BOTH;
+        AHB_FSM_ERROR:
+            if (req_active)
+                next_state = AHB_FSM_SADDR;
+            else
+                next_state = AHB_FSM_ERROR;
         default:
-            next_state = AHB_IDLE;
+            next_state = AHB_FSM_IDLE;
     endcase
 end
+
+// old version
+
+// logic  req_ahb_txn;
+logic  res_ahb_txn;
+assign res_ahb_txn =    ((state == AHB_FSM_SDATA) || (state == AHB_FSM_BOTH)) && hready;
+
 
 // logic  mng_is_wait, mng_is_active,
 logic  mng_is_idle; // mng_is_err,
 // assign mng_is_wait      = next_state == AHB_STALL;
 // assign mng_is_active    = next_state == AHB_ACTIVE;
 // assign mng_is_err       = fst_state_next == AHB_ERROR;
-assign mng_is_idle      = next_state == AHB_IDLE;
+assign mng_is_idle      = next_state == AHB_FSM_IDLE;
 
 
 //============================================================================*/

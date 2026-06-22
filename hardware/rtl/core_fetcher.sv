@@ -131,7 +131,8 @@ assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
 
 
 logic  stop_load_pc;
-assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2); // need 2 cycles to determine what happenin
+assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2);
+// need 2 cycles to determine what happenin`
 
 logic  stop_load_pc_ff;
 always_ff @(posedge clk or negedge rst_n) begin

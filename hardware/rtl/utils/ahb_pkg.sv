@@ -74,6 +74,14 @@ package ahb_pkg;
         AHB_ERROR   = 2'b11
     } ahb_txn_e;
 
+    typedef enum logic [2:0] {
+        AHB_FSM_IDLE    = 3'b000,
+        AHB_FSM_SADDR   = 3'b001,
+        AHB_FSM_SDATA   = 3'b010,
+        AHB_FSM_BOTH    = 3'b011,
+        AHB_FSM_ERROR   = 3'b100
+    } ahb_fsm_e;
+
     // - structs
     // ======================================================================== //
 

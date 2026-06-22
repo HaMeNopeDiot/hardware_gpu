@@ -1,19 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Fri Jun 19 14:52:51 2026
+[*] Mon Jun 22 06:48:16 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Fri Jun 19 14:40:04 2026"
-[dumpfile_size] 18620453
+[dumpfile_mtime] "Mon Jun 22 06:42:30 2026"
+[dumpfile_size] 18640801
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 21151000
+[timestart] 1933200
 [size] 1920 1116
 [pos] -46 -46
-*-16.751602 21419700 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-15.551602 2101300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
-[treeopen] core.cmd.
 [treeopen] core.cmd.u.
+[treeopen] core.core_decoder_u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
+[treeopen] core.core_decoder_u.gen_debug_info.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
 [treeopen] core.gen_threads[0].
@@ -274,7 +275,7 @@ core.core_decoder_u.instr_i.op_type[1:0]
 @2028
 ^1 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_type.txt
 core.core_decoder_u.cmd_op_type[1:0]
-@29
+@28
 core.core_decoder_u.decoder_ready_o
 @2028
 ^7 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/decoder_fsm_t.txt
@@ -353,22 +354,24 @@ core.core_csrm_hndl_u.pslverr
 -APB_SLAVE
 @200
 -DEBUG
+@800200
+-COMMAND
+@2022
+^8 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
+core.core_decoder_u.gen_debug_info.command.op[3:0]
+@24
+core.core_decoder_u.gen_debug_info.cmd_idx[31:0]
 @22
-core.gen_threads[0].thread_unit_u.cmd.s.rd_addr[4:0]
-core.gen_threads[0].thread_unit_u.cmd.l.rd_addr[4:0]
-@28
-core.gen_threads[0].thread_unit_u.rd_valid
-core.gen_threads[0].thread_unit_u.l_cmd_valid
-core.gen_threads[0].thread_unit_u.s_cmd_valid
+core.core_decoder_u.gen_debug_info.command.rs1_a[4:0]
+core.core_decoder_u.gen_debug_info.command.rs2_a[4:0]
+core.core_decoder_u.gen_debug_info.command.rs3_a[4:0]
+@23
+core.core_decoder_u.gen_debug_info.command.rd_a[4:0]
 @22
-core.gen_threads[0].thread_unit_u.rs1[31:0]
-core.gen_threads[0].thread_unit_u.rs2[31:0]
-core.gen_threads[0].thread_unit_u.addr_rs1[4:0]
-core.gen_threads[0].thread_unit_u.addr_rs2[4:0]
-core.gen_threads[0].thread_unit_u.addr_result[4:0]
-core.gen_threads[0].thread_unit_u.addr_w[4:0]
-core.gen_threads[0].thread_unit_u.alu_or[31:0]
+core.core_decoder_u.gen_debug_info.command.imm[19:0]
 @28
-core.gen_threads[0].thread_unit_u.alu_rr
+core.core_decoder_u.gen_debug_info.command.extra[2:0]
+@1000200
+-COMMAND
 [pattern_trace] 1
 [pattern_trace] 0
