@@ -49,7 +49,8 @@
 
 #set heading(numbering: "1.")
 
-#include "title.typ"
+#set page(margin: (top: 0cm, right: 1cm))
+#move(dx: -1cm, image("assets/title.pdf", height: 110%))
 
 #set page(
   header: context [
