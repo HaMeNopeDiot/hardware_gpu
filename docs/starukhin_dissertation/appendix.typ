@@ -1,139 +1,144 @@
 #import "@preview/codelst:2.0.2": sourcecode
 
-= Приложение
-
 #show raw: set text(size: 9pt)
 
+= Приложение 1
+
+#align(center, [*Листинг файла base_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/utils/base_pkg.sv"))]
-  , caption: [Листинг файла base_pkg.sv]
 )
 
-
+#align(center, [*Листинг файла ahb_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/utils/ahb_pkg.sv"))]
-  , caption: [Листинг файла ahb_pkg.sv]
 )
 
+#align(center, [*Листинг файла ahb_master.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/utils/ahb_master.sv"))]
-  , caption: [Листинг файла ahb_master.sv]
 )
 
+#align(center, [*Листинг файла apb_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/utils/apb_pkg.sv"))]
-  , caption: [Листинг файла apb_pkg.sv]
 )
 
+#align(center, [*Листинг файла apb_slave.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/utils/apb_slave.sv"))]
-  , caption: [Листинг файла apb_slave.sv]
 )
 
+#align(center, [*Листинг файла reg_if.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/interfaces/reg_if.sv"))]
-  , caption: [Листинг файла reg_if.sv]
 )
 
+#align(center, [*Листинг файла tu_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/tu_pkg.sv"))]
-  , caption: [Листинг файла tu_pkg.sv]
 )
 
+#align(center, [*Листинг файла handshake_fpu_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/handshake_fpu_pkg.sv"))]
-  , caption: [Листинг файла handshake_fpu_pkg.sv]
 )
 
+#align(center, [*Листинг файла tu_fpu_fsm.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/tu_fpu_fsm.sv"))]
-  , caption: [Листинг файла tu_fpu_fsm.sv]
 )
 
+#align(center, [*Листинг файла tu_alu.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/tu_alu.sv"))]
-  , caption: [Листинг файла tu_alu.sv]
 )
 
+#align(center, [*Листинг файла tu_regfile.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/tu_regfile.sv"))]
-  , caption: [Листинг файла tu_regfile.sv]
 )
 
+#align(center, [*Листинг файла thread_unit.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/thread_unit.sv"))]
-  , caption: [Листинг файла thread_unit.sv]
 )
 
+#align(center, [*Листинг файла decoder_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/decoder_pkg.sv"))]
-  , caption: [Листинг файла decoder_pkg.sv]
 )
 
+#align(center, [*Листинг файла core_decoder.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_decoder.sv"))]
-  , caption: [Листинг файла core_decoder.sv]
 )
+
+#align(center, [*Листинг файла core_fetcher.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_fetcher.sv"))]
-  , caption: [Листинг файла core_fetcher.sv]
 )
+
+#align(center, [*Листинг файла core_arbiter.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_arbiter.sv"))]
-  , caption: [Листинг файла core_arbiter.sv]
 )
+
+#align(center, [*Листинг файла core_lsu_fsm_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_lsu_fsm_pkg.sv"))]
-  , caption: [Листинг файла core_lsu_fsm_pkg.sv]
 )
+
+#align(center, [*Листинг файла core_lsu.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_lsu.sv"))]
-  , caption: [Листинг файла core_lsu.sv]
 )
 
+#align(center, [*Листинг файла prim_access_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/prim_access_pkg.sv"))]
-  , caption: [Листинг файла prim_access_pkg.sv]
 )
 
+#align(center, [*Листинг файла prim_bit.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/prim_bit.sv"))]
-  , caption: [Листинг файла prim_bit.sv]
 )
 
+#align(center, [*Листинг файла prim_field.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/prim_field.sv"))]
-  , caption: [Листинг файла prim_field.sv]
 )
 
+#align(center, [*Листинг файла prim_register.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/prim_register.sv"))]
-  , caption: [Листинг файла prim_register.sv]
 )
 
+#align(center, [*Листинг файла core_regblk_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/core_regblk_pkg.sv"))]
-  , caption: [Листинг файла core_regblk_pkg.sv]
 )
+
+#align(center, [*Листинг файла core_reg_structure_pkg.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/core_reg_structure_pkg.sv"))]
-  , caption: [Листинг файла core_reg_structure_pkg.sv]
 )
 
+#align(center, [*Листинг файла core_csrm.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/reg_common/core_csrm.sv"))]
-  , caption: [Листинг файла core_csrm.sv]
 )
 
+#align(center, [*Листинг файла core_csrm_hndl.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core_csrm_hndl.sv"))]
-  , caption: [Листинг файла core_csrm_hndl.sv]
 )
 
+#align(center, [*Листинг файла core.sv*])
 #figure(
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core.sv"))]
-  , caption: [Листинг файла core.sv]
 )
+
 
 // #figure(
 //   sourcecode(lang: "python")[#raw(read("code/inresults.h"))]
