@@ -141,9 +141,9 @@ always_comb begin
         AHB_FSM_SDATA:
             if (hready)
                 if (req_active)
-                    next_state = AHB_FSM_SADDR;
+                    next_state = AHB_FSM_BOTH;
                 else if (~hresp)
-                    next_state = AHB_FSM_IDLE;
+                    next_state = AHB_FSM_SDATA;
                 else
                     next_state = AHB_FSM_ERROR;
             else

@@ -407,6 +407,7 @@ class VKCubeTest(BaseCoreTest):
         # set instr to mem
         idx = 0
         for instr in i_arr:
+            assert instr.get_machine_code() == words[idx], f"instruction decode don't match"
             InstItem(instr, self.ahb_slave_ftc, 4 + idx * 4)
             idx += 1
 
@@ -418,11 +419,22 @@ class VKCubeTest(BaseCoreTest):
         data = read_vbuffer("../../vkcube/vertex_buffer.mem")
         idx = 0
         # print(f"Всего элементов: {len(data)}")
-        # print("Первые 10 значений:", data[:10])
+        for data_e in data:
+            if idx % 4 == 0:
+                print(f"{(idx * 4):04x}: {data_e}", end = " ")
+            elif idx % 4 == 3:
+                print(f"{data_e}")
+            else:
+                print(f"{data_e}", end=" ")
+            idx += 1
+        print(f"\n", end="")
+
+        idx = 0
         # print("Последние 5 значений:", data[-5:])
         for data_elem in data:
-            self.ahb_slave_lsu.write_memory(0x1000_0000 + idx * 4, AHBSize.WORD.value, int(data_elem, 32))
+            self.ahb_slave_lsu.write_memory(0x0000_0000 + idx * 4, AHBSize.WORD.value, int(data_elem, 16))
             idx += 1
+        print(f"meme {hex(self.ahb_slave_lsu.read_memory(0x0000_00CC, AHBSize.WORD.value))}")
         # nucelar launch ready
         cocotb.start_soon(cnt_busy_cycles(self.dut, self.clk, 7))
         await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
@@ -434,7 +446,24 @@ class VKCubeTest(BaseCoreTest):
            await ClockCycles(self.clk, 1)
 
         data_res = []
+        print(f"HEX DUMP MEMORY")
 
         for i in range(0x2000_0000, 0x2000_0320, 0x4):
             data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
-            print(f"0x{data:08x}")
+            if ((i+0x4) % 0x20) == 0:
+                print(f"0x{data:08x}")
+            else:
+                print(f"0x{data:08x}", end=" ")
+
+        print(f"FLOAT DUMP MEMORY")
+
+        for i in range(0x2000_0000, 0x2000_0320, 0x4):
+            data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
+            if data == 0:
+                fdata = 0
+            else:
+                fdata = ieee754_to_float(hex(data), 32)
+            if ((i+0x4) % 0x20) == 0:
+                print(f"{fdata}")
+            else:
+                print(f"{fdata}", end=" ")

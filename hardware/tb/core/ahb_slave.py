@@ -330,7 +330,7 @@ class AHBSlaveModel:
                 self.log.debug(
                     f"WRITE: addr=0x{self._addr_phase_addr:08X} "
                     f"size={self._addr_phase_size} "
-                    f"data=0x{wdata:08X} (hwdata=0x{hwdata:08X})"
+                    f"data=0x{wdata:08X} (hwdata=0x{hwdata:08X}) ({self.name})"
                 )
 
                 if self.write_callback:
@@ -348,11 +348,12 @@ class AHBSlaveModel:
                 self.hrdata.value = hrdata
                 self.stats["reads"] += 1
 
-                self.log.debug(
-                    f"READ:  addr=0x{self._addr_phase_addr:08X} "
-                    f"size={self._addr_phase_size} "
-                    f"data=0x{hrdata:08X}"
-                )
+                if (self.name == "lsu"):
+                    self.log.debug(
+                        f"READ:  addr=0x{self._addr_phase_addr:08X} "
+                        f"size={self._addr_phase_size} "
+                        f"data=0x{hrdata:08X} ({self.name})"
+                    )
 
                 if self.read_callback:
                     self.read_callback(
@@ -406,19 +407,19 @@ class AHBSlaveModel:
         if addr + num_bytes > self.memory_size:
             self.log.warning(
                 f"ERROR: Address 0x{addr:08X} out of range "
-                f"(memory_size=0x{self.memory_size:X})"
+                f"(memory_size=0x{self.memory_size:X}) ({self.name})"
             )
             return True
 
         # Explicit error address
         if addr in self.error_addresses:
-            self.log.warning(f"ERROR: Address 0x{addr:08X} in error set")
+            self.log.warning(f"ERROR: Address 0x{addr:08X} in error set ({self.name})")
             return True
 
         # Alignment check
         if addr & (num_bytes - 1):
             self.log.warning(
-                f"ERROR: Unaligned access addr=0x{addr:08X} size={size}"
+                f"ERROR: Unaligned access addr=0x{addr:08X} size={size} ({self.name})"
             )
             return True
 

@@ -144,7 +144,8 @@ package tu_pkg;
     // lsu
     typedef struct packed {
         l_op_e                  operand;            // 5
-        regfile_addr_t          rs1_addr, rd_addr;  // 5 * 2 = 10
+        regfile_addr_t          rd_addr;            // 5
+        regfile_addr_t          rs1_addr;           // 5
         logic [L_IMM_W - 1: 0]  imm;                // x
     } l_cmd_t;
 
@@ -163,7 +164,9 @@ package tu_pkg;
     // upper imid
     typedef struct packed {
         s_op_e                  operand;
-        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;
+        regfile_addr_t          rd_addr;
+        regfile_addr_t          rs2_addr;
+        regfile_addr_t          rs1_addr;
         logic [S_IMM_W - 1: 0]  imm;
     } s_cmd_t;
 

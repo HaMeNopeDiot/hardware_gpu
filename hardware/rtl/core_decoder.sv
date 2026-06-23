@@ -316,15 +316,18 @@ region DEBUG MODE
 //============================================================================*/
 
 if (DEBUG_MODE) begin: gen_debug_info
-    int unsigned cmd_idx;
+    /* verilator lint_off UNUSEDSIGNAL */
+    int unsigned cmd_idx, cmd_idx_ff;
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
-            cmd_idx <= '0;
+            cmd_idx_ff <= '0;
         else if (give_rn)
-            cmd_idx <= cmd_idx + 1;
+            cmd_idx_ff <= cmd_idx_ff + 1;
         else
-            cmd_idx <= cmd_idx;
+            cmd_idx_ff <= cmd_idx_ff;
     end
+
+    assign cmd_idx = give_rn? cmd_idx_ff: '0;
 
     /* verilator lint_off UNUSEDSIGNAL */
     dbg_cmd_t command;
