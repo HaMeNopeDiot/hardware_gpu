@@ -16,7 +16,7 @@ amd:
 
 c_programming_language:
   type: Book
-  title: "Kernighan B.W. C Programming Language : учебник / B.W. Kernighan, D.M. Ritchie. — New Jersey : Prentice Hall, 1988."
+  title: "Kernighan B.W. C Programming Language : учебник / B.W. Kernighan, D.M. Ritchie. — New Jersey : Prentice Hall, 1988. — C.288"
 
 flynn:
   type: Article
