@@ -11,16 +11,6 @@ AMD -- архитектуру RDNA с выделенными блоками дл
 
 Вместе с этим комплекс программных графических API, языков описания шейдеров и моделей исполнения также остается разнородным:
 
-// #figure(table(
-//     columns: 2,
-//     [API], [Vulkan, OpenGL, DirectX, Metal],
-//     [Языки описания шейдеров], [GLSL, HLSL, MSL],
-//     [Модели исполнения], [Graphics Compute, Ray Tracing],
-//     [Версии API], [Vulkan 1.0-1.3, OpenGL 2.0-4.6, DX11-12, Metal 1.0-3.0],
-//     [Аппаратные платформы], [PC, консоли, мобильные устройства, встраиваемые системы]),
-//     caption: [Разнородность стека программного обеспечения]
-// )
-
 #figure(image("presentation/geterogenus_problem.svg"), caption: [Разнородность стека программного обеспечения])
 
 Каждый графический API имеет свои уникальные особенности и требования:
@@ -305,8 +295,6 @@ uniform-переменных (блок, смещение, размер), дес�
 языков программирования, суть и архитектура остаются теми же, потому как описаны достаточно универсально и подойдут
 для многих задач.
 
-== Общий принцип работы интерпретатора
-
 Общий принцип работы интерпретатора проиллюстрирован на @interpreter_work_cycle.
 На первом этапе происходит лексический анализ кода. В этот же момент каждая строка кода преобразуется
 в последовательность токенов@token_wiki. На втором этапе парсер, из полученных токенов, строит абстрактное синтаксическое дерево (далее АСТ),
@@ -366,30 +354,18 @@ LLVMpipe -- программный рендерер, использующий LL
 аппаратной реализации. Готовый интерпретатор также будет удобно встроить в пайплайн автоматизированного тестирования,
 что позволит расширить процент покрытия кода аппаратной реализации.
 
-== Структуры и функции интерпретатора
+== Логика верхнего уровня интерпретатора
 
 Для обхода всего графа инструкций в шейдере будет использоваться вспомогательная макро-функция `foreach_instr_in_shader`.
 На вход она будет принимать сам шейдер и тело функции, которое будет применяться к каждой инструкции внутри этого шейдера.
 Эта макро-функция абстрагирует сложную иерархию структур NIR и предоставляет единый интерфейс для обхода.
 
 Тело макро-функции представлено ниже:
+#pagebreak()
 #figure(
-  sourcecode[```c
-    #define foreach_instr_in_shader(shader, function_body)\
-    foreach_list_typed(nir_function, func, node, &shader->functions) {\
-        if (func->impl != NULL) {\
-            foreach_list_typed(nir_cf_node, node, node, &(func->impl)->body) {\
-                if (node->type == nir_cf_node_block) {\
-                    nir_block *block = nir_cf_node_as_block(node);\
-                    nir_foreach_instr(instr, block) {\
-                        function_body\
-                    }\
-                }\
-            }\
-        }\
-    }
-    ```]
-    , caption: [Макро-функция для обхода графа инструкций в шейдере]
+  image("assets/code_for_macro.png")
+  , caption: [Макро-функция для обхода графа инструкций в шейдере]
+  , kind: image
 )<for_macro>
 
 Разбор макро-функции:
@@ -405,12 +381,11 @@ LLVMpipe -- программный рендерер, использующий LL
 Это критично для интерпретатора, так как порядок выполнения инструкций влияет на корректность вычислений.
 
 Сигнатура функции `interpret_nir` выглядит следующим образом:
+#pagebreak()
 #figure(
-    sourcecode[```c
-    bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer,
-                       unsigned int buffer_offset, unsigned int vertex_id_offset, struct draw_context *draw);
-    ```]
-    , caption: [Сигнатура функции interpret_nir]
+  image("assets/code_interpret_sign.png")
+  , caption: [Сигнатура функции interpret_nir]
+  , kind: image
 )
 
 Ниже представлено краткое описание параметров функции:
@@ -424,133 +399,54 @@ LLVMpipe -- программный рендерер, использующий LL
 
 Для дальнейшего использования предлагается рассмотреть внутреннее устройство сложных типов данных, переданных в параметрах функции.
 
-=== Шейдер промежуточного представления
+== Шейдер промежуточного представления
 
 Структура nir_shader является контейнером для всего содержимого шейдера в виде NIR.
 Она используется для хранения и обработки шейдерного кода в унифицированном виде на этапах
 компиляции и оптимизации перед генерацией машинного кода для конкретного графического процессора.
 Структура типа nir_shader имеет следующий вид:
-#figure(sourcecode(```c
-typedef struct nir_shader {
-   gc_ctx *gctx;
-
-   /** список переменных (nir_variable) */
-   struct exec_list variables;
-
-   /** Набор драйверо-зависимых настроек для шейдера.
-   *
-   * Ожидается, что память для настроек хранится в единой статической
-   * копии в драйвере.
-   */
-   const nir_shader_compiler_options *options;
-
-   /** Различные биты хранящие информацию о шейдере полезную на этапе компиляции. */
-   struct shader_info info;
-
-   /** Список функций (nir_functions)*/
-   struct exec_list functions;
-
-   /**
-   * Размер пространства для переменных по типу load_input_*, load_uniform_* и т.д.
-   * Это специфичные для каждого бэкенда единицы измерения, которые скорее всего
-   * будут представлены байтами, словами или 4-х мерными векторами, что зависит от
-   * контекста бэкенда.
-   */
-   unsigned num_inputs, num_uniforms, num_outputs;
-
-   /** Размер необходимой неявно связанной глобальной памяти в байтах. */
-   unsigned global_mem_size;
-
-   /** Размер необходимого рабочего пространства в байтах */
-   unsigned scratch_size;
-
-   /** Константные данные, ассоциируемые с этим шейдером
-   *
-   * Константные данные загружаются через load_constant интринзики
-   * (для сравнения nir инструкция load_const напрямую подставляет значения)
-   * Обычно данная инструкция является артефактом генерации другой
-   * инструкции: nir_opt_large_constants (таким образом, шейдерам не нужно
-   * вызывать load_const во временный массив, когда возникает необходимость
-   * напрямую обратиться к константному массиву).
-   */
-   void *constant_data;
-
-   /** Размер константных данных ассоциируемых с шейдером в байтах. */
-   unsigned constant_data_size;
-
-   nir_xfb_info *xfb_info;
-
-   unsigned printf_info_count;
-   u_printf_info *printf_info;
-
-   bool has_debug_info;
-} nir_shader;
-```), caption: [Структура nir_shader])
+#pagebreak()
+#figure(
+  image("assets/code_nir_shader_0.png")
+  , caption: [Структура nir_shader]
+  , kind: image
+)
+#pagebreak()
+#figure(
+  image("assets/code_nir_shader_1.png")
+  , caption: [Структура nir_shader (продолжение)]
+  , kind: image
+)
 В комментариях, заключенных в ```/** */``` представлены пояснения к наиболее важным полям структуры.
 
 Здесь ```exec_list``` представляет из себя структуру с узлами начала и конца списка:
-#figure(sourcecode(```c
-  struct exec_list {
-     struct exec_node head_sentinel;
-     struct exec_node tail_sentinel;
-  };
-  ```), caption: [Структура exec_list]
+#figure(
+  image("assets/code_exec_list.png")
+  , caption: [Структура exec_list]
+  , kind: image
 )
 Узлы начала и конца списка представлены следующей структурой:
+#pagebreak()
 #figure(
-  sourcecode(```c
-  struct exec_node {
-      struct exec_node *next;
-      struct exec_node *prev;
-  };
-  ```
-  )
+  image("assets/code_exec_node.png")
   , caption: [Структура exec_node]
+  , kind: image
 )
 Каждый узел представляет из себя элемент двусвязного списка с указателями на следующий и предыдущий элементы.
 Наибольший интерес этот тип данных представляет для нас в использовании совместно с макро-функцией @exec_node_data.
 Это макро-функция предоставляет функционал извлечения данных из exec_node, путём приведения типа к произвольному.
 Ниже представлен листинг макро-функции ```exec_node_data```:
 #figure(
-  sourcecode(
-    ```c
-    /**
-     * Получить указатель на содержащую exec_node структуру
-     *
-     * Передать указатель на exec_node, встроенный в структуру, получить указатель на структуру,
-     * содержащую exec_node
-     *
-     * \param type  Базовый тип структуры, содержащей exec_node
-     * \param node  Указатель на exec_node
-     * \param field Имя поля базового типа, содержащего exec_node
-     */
-    #define exec_node_data(type, node, field) \
-       ((type *) (((uintptr_t) node) - exec_list_offsetof(type, field, node)))
-    ```
-  )
+  image("assets/code_exec_node_data.png")
   , caption: [Определение макро-функции exec_node_data]
+  , kind: image
 )<exec_node_data>
 Эта макроподстановка позволяет воспользоваться следующими функциями:
+#pagebreak()
 #figure(
-  sourcecode(
-    ```c
-    #define exec_node_data_forward(type, node, field) \
-        (!exec_node_is_tail_sentinel(node) ? exec_node_data(type, node, field) : NULL)
-
-    #define exec_node_data_head(type, list, field) \
-        exec_node_data_forward(type, (list)->head_sentinel.next, field)
-
-    /**
-     * Итерирует по всему списку от головы до хвоста списка. Удаление безопасно для всех
-     * узлов кроме текущего.
-     */
-    #define foreach_list_typed(type, node, field, list)            \
-        for (type * node = exec_node_data_head(type, list, field); \
-        node != NULL;                                              \
-        node = exec_node_data_next(type, node, field))
-    ```
-  )
+  image("assets/code_foreach_list_typed.png")
   , caption: [Определение макро-функций предоставляющих интерфейс для работы с exec_node и exec_list]
+  , kind: image
 )
 Здесь ```exec_node_data_forward``` позволяет получить следующее значение в списке или NULL.
 ```exec_node_data_head``` используется для получения первого первого элемента списка.
@@ -561,25 +457,15 @@ typedef struct nir_shader {
 - `true`: успешное выполнение шейдера для всех вершин
 - `false`: ошибка выполнения (ошибка памяти, неподдерживаемая инструкция, сбой вычислений)
 
-=== Реализация функции интерпретатора
+== Реализация функции интерпретатора
 
 Имплементация функции `interpret_nir` заключается в последовательной обработке шейдера применительно к каждой вершине отдельно.
 NIR-шейдеры в контексте vertex shader выполняются для каждой вершины независимо, что позволяет реализовать простой параллелизм.
 Ниже представлена реализация функции `interpret_nir`:
 #figure(
-    sourcecode[```c
-bool interpret_nir(nir_shader *nir, unsigned int count, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer,
-                   unsigned int buffer_offset, unsigned int vertex_id_offset, struct draw_context *draw) {
-    inresults_t inresults;
-    inresults_init(&inresults, 160);
-    for (size_t vertex_id = 0; vertex_id < count; vertex_id++) {
-        render_shader(nir, verts, vbuffer, buffer_offset, vertex_id + vertex_id_offset, &inresults, draw);
-    }
-    inresults_destroy(&inresults);
-    return true;
-}
-    ```]
-    , caption: [Имплементация функции interpret_nir]
+  image("assets/code_interpret_nir_impl.png")
+  , caption: [Имплементация функции interpret_nir]
+  , kind: image
 )<interpret_nir_func>
 
 Разбор реализации:
@@ -599,14 +485,11 @@ Vertex shader выполняется независимо для каждой в
 
 Можно заметить, что при обработке шейдера используется пользовательский тип данных inresults_t.
 Данный тип данных представляет из себя структуру вида:
-#figure(sourcecode(```c
-typedef struct {
-    uint32_t data_size;
-    uint32_t data_empty_offset;
-    float* data;
-} inresults_t;
-```)
-, caption: [Структура inresults_t])
+#figure(
+  image("assets/code_inresults_struct.png")
+  , caption: [Структура inresults_t]
+  , kind: image
+)
 Здесь поле ```data_size``` хранит количество элементов в поле ```data```, ```data_empty_offset``` хранит
 отступ в памяти до следующего пустого места массива данных. Поле ```data``` представляет из себя
 массив элементов типа ```float```.
@@ -614,13 +497,11 @@ typedef struct {
 обеспечивая необходимый уровень безопасности при работе с динамически выделенной памятью.
 
 Интерфейс работы с типом inresults_t декларирован следующим образом:
-#figure(sourcecode(```c
-void inresults_init(inresults_t *results, uint32_t data_size);
-void inresults_destroy(inresults_t *results);
-uint32_t inresults_save_new(inresults_t *results, float *data, uint32_t size);
-float *inresults_get(inresults_t *results, uint32_t offset);
-```)
-, caption: [Интерфейс взаимодействия с inresults_t])
+#figure(
+  image("assets/code_inresults_interface.png")
+  , caption: [Интерфейс взаимодействия с inresults_t]
+  , kind: image
+)
 Функции ```inresults_init``` и ```inresults_destroy``` предоставляют возможность правильно и безопасно
 создать объект в начале обработки шейдера и уничтожить объект и очистить памяти в конце, соответственно.
 Функция ```inresults_save_new``` позволяет добавлять новое значение в массив данных, обеспечивая
@@ -633,44 +514,15 @@ float *inresults_get(inresults_t *results, uint32_t offset);
 Перебирая в цикле каждую инструкцию шейдера, в зависимости от типа инструкции вызывается нужный обработчик и производит
 необходимые вычисления. Данная функция объявлена статической (ограничивает область видимости файлом) и её имплементация представлена ниже:
 #figure(
-    sourcecode[```c
-static void render_shader(nir_shader *nir, struct vertex_header *verts, struct draw_vertex_buffer *vbuffer,
-                          unsigned int buffer_offset, unsigned int vertex_id, inresults_t* inresults, struct draw_context *draw) {
-    inresults->data_empty_offset = 0;
-    foreach_instr_in_shader(nir, {
-        switch (instr->type) {
-            case nir_instr_type_deref:
-                nir_deref_instr *deref_instr = nir_instr_as_deref(instr);
-                nir_deref_instr_handler(deref_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            case nir_instr_type_load_const:
-                nir_load_const_instr *load_instr = nir_instr_as_load_const(instr);
-                nir_load_const_instr_handler(load_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            case nir_instr_type_alu:
-                nir_alu_instr *alu_instr = nir_instr_as_alu(instr);
-                nir_alu_instr_handler(alu_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            case nir_instr_type_intrinsic:
-                nir_intrinsic_instr *intrinsic_instr = nir_instr_as_intrinsic(instr);
-                nir_intrinsic_instr_handler(intrinsic_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            case nir_instr_type_call:
-                nir_call_instr *call_instr = nir_instr_as_call(instr);
-                nir_call_instr_handler(call_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            case nir_instr_type_jump:
-                nir_jump_instr *jump_instr = nir_instr_as_jump(instr);
-                nir_jump_instr_handler(jump_instr, inresults, buffer_offset, vertex_id, vbuffer, draw);
-                break;
-            default:
-                fprintf(stderr, "Unknown instruction type: %d\n", instr->type);
-                exit(1);
-        }
-    });
-}
-    ```]
-    , caption: [Имплементация статической функции render_shader]
+  image("assets/code_render_shader_impl_0.png")
+  , caption: [Имплементация статической функции render_shader]
+  , kind: image
+)
+#pagebreak()
+#figure(
+  image("assets/code_render_shader_impl_1.png")
+  , caption: [Имплементация статической функции render_shader (продолжение)]
+  , kind: image
 )<render_shader_func>
 
 Разбор реализации render_shader:
@@ -721,66 +573,23 @@ static void render_shader(nir_shader *nir, struct vertex_header *verts, struct d
 
 Переменная `instr` имеет тип `nir_instr`, описание которого представлено ниже:
 #figure(
-  sourcecode(```c
-    typedef struct nir_instr {
-       struct exec_node node;
-       nir_block *block;
-       nir_instr_type type;
-
-       /*
-        * Флаги, переданные для оптимизации и анализа
-        */
-       uint8_t pass_flags;
-
-       /*
-        * Используется как nir_shader::has_debug_info, чтобы предоставлять
-        * функциям возможность собирать отладочную информацию,
-        * но не предоставляет доступ к nir_shader.
-        */
-       bool has_debug_info;
-
-       /** Глобальный индекс инструкции. */
-       uint32_t index;
-    } nir_instr;
-    ```
-  )
+  image("assets/code_nir_instr_struct.png")
   , caption: [Структура nir_instr]
+  , kind: image
 )
 
 Приведения типов инструкций, которые используются в `render_shader` заданы следующими макро-функциями:
+#pagebreak()
 #figure(
-  sourcecode(
-  ```c
-  NIR_DEFINE_CAST(nir_instr_as_alu, nir_instr, nir_alu_instr, instr,
-                  type, nir_instr_type_alu)
-  NIR_DEFINE_CAST(nir_instr_as_deref, nir_instr, nir_deref_instr, instr,
-                  type, nir_instr_type_deref)
-  NIR_DEFINE_CAST(nir_instr_as_call, nir_instr, nir_call_instr, instr,
-                  type, nir_instr_type_call)
-  NIR_DEFINE_CAST(nir_instr_as_jump, nir_instr, nir_jump_instr, instr,
-                  type, nir_instr_type_jump)
-  NIR_DEFINE_CAST(nir_instr_as_intrinsic, nir_instr, nir_intrinsic_instr, instr,
-                  type, nir_instr_type_intrinsic)
-  NIR_DEFINE_CAST(nir_instr_as_load_const, nir_instr, nir_load_const_instr, instr,
-                  type, nir_instr_type_load_const)
-  ```
-  )
+  image("assets/code_nir_cast.png")
   , caption: [Приведения типов инструкций nir]
+  , kind: image
 )
 Этого получилось достичь, благодаря макросу `NIR_DEFINE_CAST`, полное тело которого отображено ниже:
 #figure(
-  sourcecode(
-  ```c
-  #define NIR_DEFINE_CAST(name, in_type, out_type, field,\
-                          type_field, type_value)\
-     static inline out_type *\
-     name(const in_type *parent)\
-     {\
-        assert(parent && parent->type_field == type_value);\
-        return exec_node_data(out_type, parent, field);\
-     }
-  ```
-  )
+  image("assets/code_nir_define_cast.png")
+  , caption: [Реализация макроса NIR_DEFINE_CAST]
+  , kind: image
 )
 
 Данный макрос определяет локальную функцию. На вход макро-функция получает: имя новой функции,
@@ -803,8 +612,6 @@ static void render_shader(nir_shader *nir, struct vertex_header *verts, struct d
 Кадр работы приложения представлен ниже:
 
 #figure(image("assets/vkcube_fig0.png"), caption: [Работа приложения vkcube с использованием интерпретатора NIR])
-
-== Анализ полученных результатов
 
 Для оценки качества работы интерпретатора используется утилита MangoHUD. Данная программа работает в фоновом режиме.
 Она позволяет вывести на экран процент загрузки центрального процессора, графического ускорителя и количество кадров в секунду.
