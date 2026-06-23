@@ -11,26 +11,31 @@ nvidia_nv30_chip:
   type: Web
   title: NVIDIA NV30
   url: https://www.techpowerup.com/gpu-specs/nvidia-nv30.g20
+  date: 2026-05-22
 
 rop_wiki:
   type: Web
   title: Render output unit
   url: https://en.wikipedia.org/wiki/Render_output_unit
+  date: 2026-05-22
 
 turing_microarchitecture_wiki:
   type: Web
   title: Turing (микроархитектура)
   url: https://en.wikipedia.org/wiki/Turing_(microarchitecture)
+  date: 2026-05-22
 
 turing_archi:
   type: Web
   title: NVIDIA TURING GPU ARCHITECTURE
   url: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
+  date: 2026-05-22
 
 nvidia_wiki:
   type: Web
   title: Nvidia
   url: https://ru.wikipedia.org/wiki/Nvidia
+  date: 2026-05-22
 
 graph_review:
   type: Article
@@ -52,106 +57,127 @@ tesla_microarchi:
   type: Web
   title: NVIDIA Tesla A Unified Graphics and Computing Architecture
   url: https://www.techpowerup.com/gpu-specs/docs/nvidia-tesla-architecture.pdf
+  date: 2026-05-22
 
 fermi_archi:
   type: Web
   title: NVIDIA's Next Generation CUDA Compute Architecture
   url: https://www.techpowerup.com/gpu-specs/docs/nvidia-fermi-compute-architecture.pdf
+  date: 2026-05-22
 
 blackwell_archi:
   type: Web
   title: NVIDIA RTX BLACKWELL GPU ARCHITECTURE
   url: https://www.techpowerup.com/gpu-specs/docs/nvidia-blackwell-architecture.pdf
+  date: 2026-05-22
 
 gpu_wiki:
   type: Web
   title: Видеокарта
   url: https://ru.wikipedia.org/wiki/Видеокарта
+  date: 2026-04-25
 
 sisd_wiki:
   type: Web
   title: SISD
   url: https://ru.wikipedia.org/wiki/SISD
+  date: 2026-04-25
 
 simd_wiki:
   type: Web
   title: SIMD
   url: https://ru.wikipedia.org/wiki/SIMD
+  date: 2026-04-25
 
 misd_wiki:
   type: Web
   title: MISD
   url: https://ru.wikipedia.org/wiki/MISD
+  date: 2026-04-25
 
 mimd_wiki:
   type: Web
   title: MIMD
   url: https://ru.wikipedia.org/wiki/MIMD
+  date: 2026-04-25
 
 flin_taxonomy_wiki:
   type: Web
   title: Таксономия Флинна
   url: https://en.wikipedia.org/wiki/Flynn%27s_taxonomy
+  date: 2026-04-25
 
 amd_wiki:
   type: Web
   title: amd
   url: https://en.wikipedia.org/wiki/AMD
+  date: 2026-05-23
 
 epoch_1:
   type: Web
   title: Part I The first fully programmable GPUs-a rewiew
   url: https://www.jonpeddie.com/news/part-i-the-first-fully-programmable-gpus-a-review/
+  date: 2026-05-23
 
 amd_r600_isa:
   type: Web
   title: R600-Family Instruction Set Architecture
   url: https://www.techpowerup.com/gpu-specs/docs/ati-r600-isa.pdf
+  date: 2026-05-23
 
 amd_r600_terascale_dns:
   type: Web
   title: История развития графики AMD/ATI. Часть 2 путь универсальности
   url: https://club.dns-shop.ru/blog/t-99-videokartyi/101511-istoriya-razvitiya-grafiki-amd-ati-chast-2-put-universalnosti/#sub_Radeon__HD2000__DirectX__10__i__superskalyarnaya__TeraScale
+  date: 2026-05-23
 
 amd_evergreen_isa:
   type: Web
   title: Evergreen Family Instruction Set Architecture Instructions and Microcode
   url: https://www.techpowerup.com/gpu-specs/docs/ati-evergreen-isa.pdf
+  date: 2026-05-23
 
 amd_gcn1_archi:
   type: Web
   title: AMD GrAPHICS CORES NEXT (GCN) ARCHITECTURE
   url: https://www.techpowerup.com/gpu-specs/docs/amd-gcn1-architecture.pdf
+  date: 2026-05-24
 
 workitem_info:
   type: Web
   title: Введение в OpenCL
   url: https://habr.com/ru/articles/124925/
+  date: 2026-05-24
 
 workgroup_info:
   type: Web
   title: Учимся разрабатывать для GPU на примере операции GEMM
   url: https://habr.com/ru/companies/yadro/articles/934878/
+  date: 2026-05-24
 
 rdna_microarchi:
   type: Web
   title: RDNA (microarchitecture)
   url: https://en.wikipedia.org/wiki/RDNA_(microarchitecture)
+  date: 2026-05-24
 
 compute_unit_amd:
   type: Web
   title: Compute unit
   url: https://rocm.docs.amd.com/projects/omniperf/en/amd-staging/conceptual/compute-unit.html
+  date: 2026-05-24
 
 interface_wiki:
   type: Web
   title: Интерфейс
   url: https://ru.wikipedia.org/wiki/Интерфейс
+  date: 2026-05-25
 
 amba_wiki:
   type: Web
   title: AMBA
   url: https://ru.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture
+  date: 2026-05-25
 
 alu_haris:
   type: chapter
@@ -185,16 +211,19 @@ alu_wiki:
   type: Web
   title: ALU
   url: https://en.wikipedia.org/wiki/Arithmetic_logic_unit
+  date: 2026-05-25
 
 fpu_wiki:
   type: Web
   title: FPU
   url: https://en.wikipedia.org/wiki/Floating-point_unit
+  date: 2026-05-25
 
 ieee_754_wiki:
   type: Web
   title: IEEE_754
   url: https://ru.wikipedia.org/wiki/IEEE_754
+  date: 2026-05-26
 
 ieee_754_standart:
   type: Article
@@ -221,6 +250,7 @@ isa_wiki:
   type: Web
   title: Instruction Set Architecture
   url: https://en.wikipedia.org/wiki/Instruction_set_architecture
+  date: 2026-05-26
 
 guide_to_risc_processors:
     type: chapter
@@ -251,13 +281,24 @@ interconnect_reg_cloud:
   type: Web
   title: "Что такое Interconnect: аппаратные и сетевые технологии"
   url: https://reg.cloud/blog/chto-takoe-interconnect/?utm_source=google.com&utm_medium=organic&utm_campaign=reg.cloud&utm_referrer=google.com&utm_content=%2Fblog%2Fchto-takoe-interconnect%2F
+  date: 2026-05-26
 
 round_robin_wiki:
   type: Web
   title: "Round-Robin"
   url: https://ru.wikipedia.org/wiki/Round-robin_(%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC)
+  date: 2026-05-26
 
 instruction_pipelining_wiki:
   type: Web
   title: "Instruction pipelining"
   url: https://en.wikipedia.org/wiki/Instruction_pipelining
+  date: 2026-05-26
+
+gost_ip:
+   type: Web
+   title: ГОСТ Р 70916-2023
+   date: 2024-01-01
+   url:
+     value: https://normadocs.ru/gost_r_70916-2023
+     date: 2026-05-29

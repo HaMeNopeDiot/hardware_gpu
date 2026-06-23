@@ -20,7 +20,7 @@ Rankine, являлся NVIDIA NV30. Он обладал 125 миллионам�
 Блок-схема архитектуры графического процессора NVIDIA архитектуры Rankine изображена на @image:archi_nvidia_nv30:
 
 #figure(
-    image("images/nvidia_nv30_architecture.png", width: 50%),
+    image("images/nvidia_nv30_architecture.png", width: 40%),
     caption: [Блок-схема архитектуры графического процессора архитектуры Rankine]
 )
 <image:archi_nvidia_nv30>
@@ -526,18 +526,20 @@ AHB эта шина имеет фазы адреса и данных, но зн�
 
 Сравнительную таблицу всех представленных интерфейсов AMBA можно увидеть в @table:amba_comp:
 
-#figure(align(center, table(
-  columns: (2fr, 1fr, 1fr, 1fr),
-  align: center, // (x, y) => if (x == 0) or (y == 0) {horizon + center} else {left},
+#block(breakable: false)[
+    #figure(align(center, table(
+        columns: (2fr, 1fr, 1fr, 1fr),
+        align: center, // (x, y) => if (x == 0) or (y == 0) {horizon + center} else {left},
 
-  // Headers
-  [*Интерфейс*],            [*APB*],               [*AHB*],                          [*AXI*],
-  [*Производительность*],   [Низкая],              [Высокая],                        [Очень высокая],
-  [*Сложность разработки*], [Низкая],              [Средняя],                        [Высокая],
-  [*Применение*],           [Медленная периферия], [Системная шина среднего уровня], [Память, CPU, DSP, графика],
+        // Headers
+        [*Интерфейс*],            [*APB*],               [*AHB*],                          [*AXI*],
+        [*Производительность*],   [Низкая],              [Высокая],                        [Очень высокая],
+        [*Сложность разработки*], [Низкая],              [Средняя],                        [Высокая],
+        [*Применение*],           [Медленная периферия], [Системная шина среднего уровня], [Память, CPU, DSP, графика],
 
-))
-, caption: [Сравнительная таблица интерфейсов AMBA]) <table:amba_comp>
+    ))
+    , caption: [Сравнительная таблица интерфейсов AMBA]) <table:amba_comp>
+]
 
 === Интерфейс передачи данных и инструкций (AHB)
 
@@ -622,8 +624,8 @@ AHB эта шина имеет фазы адреса и данных, но зн�
 Все классы архитектур по Флинну представлены на @image:flin_taxonomy:
 
 #figure(
-    image("images/flin_taxonomy.png"),
-    caption: [Все виды архитектур по таксономии Флинна]
+    image("images/flin_taxonomy.png", width: 80%),
+    caption: [Все виды архитектур по таксономии Флинна],
 )
 <image:flin_taxonomy>
 
