@@ -6,18 +6,18 @@ from instruction import Instruction
 class Assembler:
     DEFINITIONS = {
         # ubo_base should be the beginning of the vertex_buffer.mem file
-        "ubo_base": 0x1000_0000,
+        "ubo_base": 0x0000_0000,
         #
         # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _00B0)
-        "in_position_base": 0x1000_00B0,
+        "in_position_base": 0x0000_00B0,
         "in_position_stride": 0x000_0010,
         #
         # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _0230)
-        "in_color_base": 0x1000_0230,
+        "in_color_base": 0x0000_0230,
         "in_color_stride": 0x0000_0010,
         #
         # It is within the vertex_buffer.mem file (don't change last 4 numbers, i mean these -> _03B0)
-        "in_normal_base": 0x1000_03B0,
+        "in_normal_base": 0x0000_03B0,
         "in_normal_stride": 0x0000_0010,
         #
         # I will not have any time to properly integrate your core into the llvmpipe, so set numbers below to whatever you want
@@ -113,6 +113,7 @@ class Assembler:
             imm = self.DEFINITIONS[imm]
 
         rs1 = self.REGISTER_NAMES["zero"]
+        is_set = False
         if imm.bit_length() > 12:
             # lui
             self.__U_type_instruction(
@@ -121,8 +122,9 @@ class Assembler:
                 imm=(imm >> 12),
             )
             rs1 = rd
+            is_set = True
 
-        if (imm & 0xFFF) != 0:
+        if (imm & 0xFFF) != 0 or not is_set:
             # addi
             self.__L_type_instruction(
                 opcode=self.INSTRUCTION_OPCODES["addi"],
@@ -147,8 +149,8 @@ class Assembler:
 
     def sw(self, instr: Instruction):
         opcode = self.INSTRUCTION_OPCODES[instr.opcode]
-        rs1 = self.REGISTER_NAMES[instr.args[0]]
-        rs2 = self.REGISTER_NAMES[instr.args[1]]
+        rs1 = self.REGISTER_NAMES[instr.args[1]]
+        rs2 = self.REGISTER_NAMES[instr.args[0]]
         imm = int(instr.args[2], base=10)
 
         self.__S_type_instruction(
@@ -312,7 +314,7 @@ class Assembler:
             and rs1.bit_length() <= 5
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
-        code = (opcode << 25) | (rs1 << 20) | (rs2 << 15) | (rd << 10) | (imm << 0)
+        code = (opcode << 25) | (rd << 20) | (rs2 << 15) | (rs1 << 10) | (imm << 0)
         self.binary += code.to_bytes(4, byteorder="little", signed=False)
 
     def __U_type_instruction(self, imm: int = 0, rd: int = 0, opcode: int = 0):

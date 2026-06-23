@@ -26,11 +26,16 @@ parser = Lark(lark_grammar, ambiguity="explicit")
 source_code = NirCodeLoader().transform(parser.parse(source_code))
 target_code = Transpiler().transpile(source_code)
 target_code = Optimizer().optimize(target_code)
+
+
+
 generator = BasicBlockGenerator()
 target_code = generator.generate(target_code)
 
+
 for i in range(len(target_code)):
-    print(f"{target_code[i]}")
+    print(f"{i:04} : {target_code[i]}")
+
 
 # print("\n\n")
 # print(f"Storage Registers: \n{generator.storage_registers}")
