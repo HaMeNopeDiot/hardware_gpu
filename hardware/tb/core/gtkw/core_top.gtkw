@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Tue Jun 23 10:03:59 2026
+[*] Tue Jun 23 12:22:29 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Tue Jun 23 09:11:27 2026"
-[dumpfile_size] 28495904
+[dumpfile_mtime] "Tue Jun 23 12:21:43 2026"
+[dumpfile_size] 85230846
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 23473600
+[timestart] 1409900
 [size] 1920 1116
-[pos] -46 -46
-*-16.451603 23654600 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-17.351603 2081300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
@@ -35,52 +35,8 @@ core.busy_o
 -DECODER
 @c00200
 -CMD
-@2028
-^1 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_type.txt
-core.core_decoder_u.cmd_op_type[1:0]
-@c00200
--U_CMD
-@22
-core.core_decoder_u.cmd.u.imm[19:0]
-core.core_decoder_u.cmd.u.rd_addr[4:0]
-@1401200
--U_CMD
-@c00200
--L_CMD
-@22
-core.core_decoder_u.cmd.l.imm[14:0]
 @2022
-^2 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/l_op_t.txt
-core.core_decoder_u.cmd.l.operand[4:0]
-@22
-core.core_decoder_u.cmd.l.rd_addr[4:0]
-core.core_decoder_u.cmd.l.rs1_addr[4:0]
-@1401200
--L_CMD
-@c00200
--S_CMD
-@22
-core.core_decoder_u.cmd.s.imm[9:0]
-@2022
-^3 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/s_op_t.txt
-core.core_decoder_u.cmd.s.operand[4:0]
-@22
-core.core_decoder_u.cmd.s.rd_addr[4:0]
-core.core_decoder_u.cmd.s.rs1_addr[4:0]
-core.core_decoder_u.cmd.s.rs2_addr[4:0]
-@1401200
--S_CMD
-@28
-core.core_decoder_u.lsu_cmd_valid
-core.core_decoder_u.fpu_cmd_valid
-@1401200
--CMD
-@200
--TU
-@800200
--CMD
-@2022
-^6 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
+^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
 core.core_decoder_u.gen_debug_info.command.op[3:0]
 @28
 core.core_decoder_u.gen_debug_info.command.extra[2:0]
@@ -88,15 +44,19 @@ core.core_decoder_u.gen_debug_info.command.extra[2:0]
 core.core_decoder_u.gen_debug_info.command.imm[19:0]
 @24
 core.core_decoder_u.gen_debug_info.command.rd_a[4:0]
-@25
 core.core_decoder_u.gen_debug_info.command.rs1_a[4:0]
-@24
 core.core_decoder_u.gen_debug_info.command.rs2_a[4:0]
 core.core_decoder_u.gen_debug_info.command.rs3_a[4:0]
 core.core_decoder_u.gen_debug_info.cmd_idx[31:0]
-@1000200
+@1401200
 -CMD
+@200
+-TU
+@c00201
+-THREADS
 @800200
+-T0
+@c00200
 -RF
 @22
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[1][31:0]
@@ -130,11 +90,8 @@ core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[28][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[29][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[30][31:0]
 core.gen_threads[0].thread_unit_u.tu_regfile_u.rf[31][31:0]
-@1000200
+@1401200
 -RF
-@800200
--THREADS
--T0
 @1000200
 -T0
 @c00200
@@ -170,7 +127,7 @@ core.gen_threads[1].thread_unit_u.tu_regfile_u.rf[8][31:0]
 @28
 core.gen_threads[1].thread_unit_u.next_thread_state[1:0]
 @2028
-^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
+^5 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
 core.gen_threads[1].thread_unit_u.thread_state[1:0]
 @22
 core.gen_threads[1].thread_unit_u.vid_i[31:0]
@@ -190,7 +147,7 @@ core.gen_threads[2].thread_unit_u.lsu_ready_i
 core.gen_threads[2].thread_unit_u.rs2[31:0]
 core.gen_threads[2].thread_unit_u.rd[31:0]
 @2028
-^4 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
+^5 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
 core.gen_threads[2].thread_unit_u.thread_state[1:0]
 @28
 core.gen_threads[2].thread_unit_u.state[2:0]
@@ -234,7 +191,7 @@ core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[5][31:0]
 @1401200
 -RF
 -T3
-@1000200
+@1401201
 -THREADS
 @200
 -Arbiter
@@ -257,13 +214,13 @@ core.core_arbitrage_u.no_req_from_threads
 -Arbiter
 @200
 -LSU
-@800200
+@c00200
 -LSU
 @22
 core.core_lsu_u.ahb_master_u.haddr[31:0]
 core.core_lsu_u.ahb_master_u.hwdata[31:0]
 core.core_lsu_u.ahb_master_u.hrdata[31:0]
-@1000200
+@1401200
 -LSU
 @200
 -FETCHER
@@ -283,9 +240,9 @@ core.core_fetcher_u.ahb_master_u.data_valid_o
 @22
 core.core_fetcher_u.ahb_master_u.data_o[31:0]
 @2024
-^5 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
+^6 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
 core.core_fetcher_u.ahb_master_u.state[2:0]
-^5 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
+^6 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
 core.core_fetcher_u.ahb_master_u.next_state[2:0]
 @1401200
 -AHB

@@ -14,7 +14,7 @@ from core.core_top import   ISACheckTest, \
                             FPUCheckMAXTest, \
                             VKCubeTest
 
-#@cocotb.test()
+@cocotb.test()
 async def isa_test(dut):
     await ISACheckTest(dut, "isa_test").run()
 
@@ -43,6 +43,6 @@ async def fpu_neg_test(dut):
 async def fpu_max_test(dut):
     await FPUCheckMAXTest(dut, "fpu_max_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def vkcube(dut):
     await VKCubeTest(dut, "vkcube_test").run()

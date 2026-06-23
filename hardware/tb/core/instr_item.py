@@ -23,7 +23,7 @@ class InstItem():
         self.addr = addr
         self.instr = instr
         self.ahb_sm = ahb_slave_model
-        cocotb.log.info(f"instr: 0x{instr.get_machine_code():08x}")
+        cocotb.log.debug(f"instr: 0x{instr.get_machine_code():08x}")
         self.ahb_sm.write_memory(addr, DEF_AHB_SZ, instr.get_machine_code())
 
     async def load_instr(self, clk, dut):
