@@ -242,6 +242,8 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_buf_len <= '0;
+    else if (~en_i)
+        inst_buf_len <= '0;
     else if (store_inst && deploy_inst)
         inst_buf_len <= inst_buf_len;
     else if (store_inst)
