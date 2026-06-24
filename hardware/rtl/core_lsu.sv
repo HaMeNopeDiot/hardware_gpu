@@ -234,25 +234,6 @@ always_comb begin
     end
 end
 
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         rd <= '0;
-//     else if (get_res && op_is_load)
-//         rd <= mem_data;
-//     else
-//         rd <= '0;
-// end
-
-// always_ff @(posedge clk or negedge rst_n) begin
-//     if (~rst_n)
-//         rd_valid <= '0;
-//     else if (get_res && op_is_load)
-//         rd_valid <= mem_ans_valid;
-//     else
-//         rd_valid <= '0;
-// end
-
-
 /*============================================================================//
 region WRITE
 //============================================================================*/

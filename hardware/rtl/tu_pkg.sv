@@ -22,7 +22,7 @@ package tu_pkg;
 
     typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
 
-    /* Danya, take a notice please:
+    /* take a notice please:
     typedef struct packed {
         logic a; <- high bit
         logic b;

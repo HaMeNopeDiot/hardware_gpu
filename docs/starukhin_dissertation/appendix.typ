@@ -191,8 +191,6 @@
   sourcecode(lang: "systemverilog")[#raw(read("../../hardware/rtl/core.sv"))]
 )
 
-#pagebreak()
-
 
 // #figure(
 //   sourcecode(lang: "python")[#raw(read("code/inresults.h"))]

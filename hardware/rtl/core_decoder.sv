@@ -288,7 +288,7 @@ cmd_union_t     cmd_ff;
 dec_op_type_e   cmd_op_type_ff;
 
 logic  no_fpu_cmd_valid;
-assign no_fpu_cmd_valid = l_cmd_valid || u_cmd_valid || s_cmd_valid; // maked it dumb.
+assign no_fpu_cmd_valid = l_cmd_valid || u_cmd_valid || s_cmd_valid; // maked it silly and simple.
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
