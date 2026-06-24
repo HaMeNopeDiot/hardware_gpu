@@ -14,14 +14,8 @@
   show raw: set text(font: "Times New Roman", size: 14pt)
   show figure: set block(breakable: true)
   show heading: set align(center)
-  show heading: set text(size: 14pt)
+  show heading: set text(size: 14pt, weight: "bold")
   show heading: set block(below: line_margin)
-  show heading.where(level: 2): it => {text(style: "italic", weight: "bold", size: 14pt, it)}
-  show heading.where(level: 3): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
-  show heading.where(level: 4): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
-  show heading.where(level: 5): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
-  show heading.where(level: 6): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
-  show heading.where(level: 7): it => {align(left, text(style: "italic", weight: "regular", size: 14pt, it))}
   doc
 }
 
@@ -49,7 +43,9 @@
 
 #set heading(numbering: "1.")
 
-#include "title.typ"
+//#include "title.typ"
+#set page(margin: (top: 0cm, right: 1cm))
+#move(dx: -0.68cm, image("assets/title.pdf", height: 110%))
 
 #set page(
   header: context [

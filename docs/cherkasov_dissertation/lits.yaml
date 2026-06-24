@@ -1,12 +1,10 @@
 graph_review:
   type: Article
-  title: Обзор и анализ 2D графических ускорителей
-  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+  title: "Дудкин И.А. Обзор аналогов 2D графических ускорителей во встроенных системах / И.А. Дудкин, Д.М. Старухин, В.В. Черкасов \/\/ Математика, информационные технологии, приложения : сборник материалов Межвузовской научной конференции «Математика, информационные технологии, приложения» (Воронеж, 24-25 апреля 2025 г.). — Воронеж : Издательско-полиграфический центр «Научная книга», 2025. — С.209-216."
 
 graph_arch:
   type: Article
-  title: Разработка архитектуры аппаратной реализации 2D графического ускорителя
-  author: ["И.А. Дудкин", "Д.М. Старухин", "В.В. Черкасов"]
+  title: "Дудкин И.А. Разработка архитектуры аппаратной реализации 2D графического ускорителя / И.А. Дудкин, Д.М. Старухин, В.В. Черкасов \/\/ Актуальные проблемы прикладной математики, информатики и механики : сборник материалов Международной научной конференции «Актуальные проблемы прикладной математики, информатики и механики» (Воронеж, 1-3 декабря 2025 г.). — Воронеж : ООО «Издательство Прометей», 2026. — С.1584-1588."
 
 amd:
   type: Original
@@ -23,243 +21,217 @@ c_programming_language:
 
 language_classes:
   type: Book
-  title: Introduction to Compilers and Language Design Second Edition
-  author:
-    - Prof. Douglas Thain
-  url:
-    date: 2026-06-18
-    value: http://compilerbook.org
+  title: "Douglas Thain Introduction to Compilers and Language Design Second Edition : учебное пособие / Douglas Thain — Notre Dame : University of Notre Dame du Lac, 2023. — 247 с."
 
 gcc:
   type: Web
   title: GCC, the GNU Compiler Collection
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://gcc.gnu.org/
 
 flynn:
   type: Article
-  title: Some Computer Organizations and Their Effectiveness
-  author: Flynn, Michael J.
-  publisher:
-    name: IEEE Transactions on Computers
+  title: "Michael J. Flynn Computer Organizations and Their Effectiveness / Michael J. Flynn // IEEE Transactions on Computers. — 1972. — Vol. C-21. — №9. — P. 948-960."
 
 lsu_w:
   type: Web
   title: Load-storage unit
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit#:~:text=In%20computer%20engineering%2C%20a%20load,back%20to%20memory%20from%20registers.
 
 haris:
   type: Book
-  title: Цифровая схемотехника и архитектура компьютера
-  author:
-    - Дэвид М. Хэррис
-    - Сара Л. Хэррис
-  publisher:
-    name: Morgan Kaufman
+  title: "Хэррис Д.М. Цифровая схемотехника и архитектура компьютера : учебное пособие / Д.М. Хэррис, С.Л. Хэррис — Delaware : Elsevier Inc., 2013 — 1684 с."
 
 mesa:
   type: Repository
   title: Mesa 3D
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://gitlab.freedesktop.org/mesa/mesa
 
 rtl_wiki:
   type: Web
   title: Уровень регистровых передач
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://ru.wikipedia.org/wiki/Уровень_регистровых_передач
 
 llvmpipe_doc:
   type: Web
   title: LLVMpipe
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://docs.mesa3d.org/drivers/llvmpipe.html
 
 nir_doc:
   type: Web
   title: NIR Intermediate Representation (NIR)
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://docs.mesa3d.org/nir/index.html
 
 tgsi_doc:
   type: Web
   title: TGSI
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://docs.mesa3d.org/gallium/tgsi.html
 
 vulkan_doc:
   type: Web
   title: Vulkan Docs
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://github.com/KhronosGroup/Vulkan-Docs
 
 three_address_code:
   type: Web
   title: Three-address code
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Three-address_code
 
 mesa3d_doc:
   type: Web
   title: Mesa 3D Documentation
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://docs.mesa3d.org/index.html
 
 spirv_wiki:
   type: Web
   title: Standard Portable Intermediate Representation
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Standard_Portable_Intermediate_Representation
 
 isa_wiki:
   type: Web
   title: Instruction set architecture
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Instruction_set_architecture
 
 ir_wiki:
   type: Web
   title: Intermediate representation
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Intermediate_representation
 
 simd_wiki:
   type: Web
   title: Single instruction, multiple data
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Single_instruction,_multiple_data
 
 nvidia_turing_gpu:
-  type: Book
+  type: Web
   title: NVIDIA TURING GPU ARCHITECTURE
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://www.techpowerup.com/gpu-specs/docs/nvidia-turing-architecture.pdf
 
 gpp:
-  type: Chapter
+  type: Web
   title: Graphics Pipeline Performance
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://developer-nvidia-com.translate.goog/gpugems/gpugems/part-v-performance-and-practicalities/chapter-28-graphics-pipeline-performance?_x_tr_sl=en&_x_tr_tl=ru&_x_tr_hl=ru&_x_tr_pto=sge
 
 register_file_wiki:
   type: Web
   title: Регистровый файл
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%BE%D0%B2%D1%8B%D0%B9_%D1%84%D0%B0%D0%B9%D0%BB
 
 load_store_unit_wiki:
   type: Web
   title: Load-store unit
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Load%E2%80%93store_unit
 
 simt_wiki:
   type: Web
   title: Single Instruction, multiple threads
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Single_instruction,_multiple_threads
 
 riscv_article:
   type: Article
   title: Исследование технологии RISC-V
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://www.mathnet.ru/links/74f6f2e62d9510259e3a97a45b3ff6f1/tisp500.pdf
 
 riscv_standard:
   type: Web
   title: Библиотека стандарта RISC-V
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://docs.riscv.org/reference/home/index.html
 
 intel_atnt_syntax:
   type: Web
   title: Язык ассемблера x86
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/X86_assembly_language
 
 jit_wiki:
   type: Web
   title: Just-in-time compilation
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Just-in-time_compilation
 
 llvm_doc:
   type: Web
   title: The LLVM Compiler Infrastructure
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://llvm.org/
 
 verification_habr:
   type: Web
   title: Верификация цифровых схем. Обзор
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://habr.com/ru/articles/481542/
 
 ipblocks_gost:
   type: Book
-  title: ГОСТ Р 70916-2023. БЛОКИ СЛОЖНО-ФУНКЦИОНАЛЬНЫЕ Термины и определения
+  title: "ГОСТ Р 70916-2023. Блоки сложно-функциональные. Термины и определения — Москва : Госстандарт России : Издательство стандартов, 2023 — 12 с."
 
 dragon_book:
   type: Book
-  title: "Compilers: Principles, Techniques, and Tools"
-  author:
-    - Alfred V. Aho
-    - Monica S. Lam
-    - Ravi Sethi
-    - Jeffrey D. Ullman
-  publisher:
-    name: Pearson Education, Inc
+  title: "Compilers: Principles, Techniques, and Tools : учебное пособие / Alfred V. Aho [и др.] — 2-е изд. — London : Pearson Education Inc., 2007 — 1035 с."
 
 systemverilogstandard:
   type: Book
-  title: IEEE Standard for SystemVerilog - Unified Hardware Design, Specificatrion, and Verification Language
-  author:
-    - IEEE Computer Society
-    - IEEE Standards Association Corporate Advisory Group
+  title: "IEEE Standard for SystemVerilog - Unified Hardware Design, Specificatrion, and Verification Language. — New York City : IEEE Standards Association, 2013 — 1315 с."
 
 computer_organization:
   type: Book
-  title: The Essentials of Computer Organization and Architecture
-  author:
-    - Linda Null
-    - Julia Lobur
+  title: "Linda Null The Essentials of Computer Organization and Architecture : учебное пособие / Linda Null, Julia Lobur. — 5-ое изд. —  Sudburry : Jones & Bartlett Publishers, 2003 — 705 с."
 
 phillips_machine:
   type: Web
   title: Phillips Machine
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://en.wikipedia.org/wiki/Phillips_Machine
 
 vulkan_tutorial:
   type: Web
   title: Vulkan Tutorial
   url:
-    date: 2026-06-18
+    date: 2026-05-18
     value: https://vulkan-tutorial.com/Drawing_a_triangle/Graphics_pipeline_basics/Introduction
