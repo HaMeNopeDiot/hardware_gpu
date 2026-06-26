@@ -22,7 +22,7 @@ package tu_pkg;
 
     typedef logic [REGFILE_AW - 1 : 0] regfile_addr_t;
 
-    /* Danya, take a notice please:
+    /* take a notice please:
     typedef struct packed {
         logic a; <- high bit
         logic b;
@@ -144,7 +144,8 @@ package tu_pkg;
     // lsu
     typedef struct packed {
         l_op_e                  operand;            // 5
-        regfile_addr_t          rs1_addr, rd_addr;  // 5 * 2 = 10
+        regfile_addr_t          rd_addr;            // 5
+        regfile_addr_t          rs1_addr;           // 5
         logic [L_IMM_W - 1: 0]  imm;                // x
     } l_cmd_t;
 
@@ -163,7 +164,9 @@ package tu_pkg;
     // upper imid
     typedef struct packed {
         s_op_e                  operand;
-        regfile_addr_t          rs1_addr, rs2_addr, rd_addr;
+        regfile_addr_t          rd_addr;
+        regfile_addr_t          rs2_addr;
+        regfile_addr_t          rs1_addr;
         logic [S_IMM_W - 1: 0]  imm;
     } s_cmd_t;
 
@@ -213,6 +216,34 @@ package tu_pkg;
         TU_STATE_DONE    = 3
     } tu_state_e;
 
+    /*==========================================================================//
+    region DEBUG STRUCTURE
+    //==========================================================================*/
+
+    localparam int unsigned DBG_CMD_W = 4;
+    typedef enum  logic [DBG_CMD_W - 1: 0] {
+        CMD_UNKN    = 0,
+        CMD_RET     = 1,
+        CMD_LW      = 2,
+        CMD_SW      = 3,
+        CMD_LUI     = 4,
+        CMD_ADDI    = 5,
+        CMD_ADD     = 6,
+        CMD_MUL     = 7,
+        CMD_FADD    = 8,
+        CMD_FMUL    = 9,
+        CMD_FDIV    = 10,
+        CMD_FSQRT   = 11,
+        CMD_FNEG    = 12,
+        CMD_FMAX    = 13
+    } cmd_op_t;
+
+    typedef struct packed {
+        cmd_op_t                op;
+        regfile_addr_t          rs1_a, rs2_a, rs3_a, rd_a;
+        logic [U_IMM_W - 1: 0]  imm;
+        logic [2: 0]            extra;
+    } dbg_cmd_t;
 
     // ======================================================================== //
 endpackage

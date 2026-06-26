@@ -131,7 +131,8 @@ assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
 
 
 logic  stop_load_pc;
-assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2); // need 2 cycles to determine what happenin
+assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2);
+// need 2 cycles to determine what happenin`
 
 logic  stop_load_pc_ff;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -141,14 +142,18 @@ always_ff @(posedge clk or negedge rst_n) begin
         stop_load_pc_ff <= stop_load_pc;
 end
 
+logic [DW - 1: 0] getted_data;
+logic gdata_valid;  //, gdata_valid_prev;
+
+logic  fetcher_ready;
+assign fetcher_ready = ~stop_load_pc_ff;
 
 logic  q_data_get;
-assign q_data_get = gdata_valid;
+assign q_data_get  = gdata_valid && fetcher_ready;
 
-logic q_data_give;
+logic  q_data_give;
+assign q_data_give = instr_valid_o && dec_ready_i;
 
-logic [DW - 1: 0] getted_data;
-logic gdata_valid;//, gdata_valid_prev;
 
 logic [DW - 1: 0] pc_i_ff;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -179,7 +184,7 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 logic  ahb_rq;
-assign ahb_rq = (en_i || make_it_done) && ~stop_load_pc_ff;
+assign ahb_rq = (en_i || make_it_done) && ~stop_load_pc;
 
 
 logic en_i_prev;
@@ -193,7 +198,6 @@ end
 logic  start;
 assign start = ~en_i_prev && en_i;
 
-assign q_data_give = instr_valid_o && dec_ready_i;
 // write q_data_get
 
 logic [DW - 1       : 0]    inst_q [INST_Q_SZ];
@@ -209,11 +213,16 @@ logic  inst_q_full;
 assign inst_q_empty = inst_buf_len   == '0;
 assign inst_q_full  = free_buf_space == '0;
 
+logic  store_inst;
+assign store_inst = q_data_get && ~inst_q_full;
+
+logic  deploy_inst;
+assign deploy_inst = q_data_give && ~inst_q_empty;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_ptr_q <= '0;
-    else if (q_data_get && ~inst_q_full)
+    else if (store_inst)
         if (inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
             inst_ptr_q <= '0;
         else
@@ -223,7 +232,7 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         next_inst_ptr_q <= '0;
-    else if (q_data_give && ~inst_q_empty)
+    else if (deploy_inst)
         if (next_inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
             next_inst_ptr_q <= '0;
         else
@@ -233,11 +242,13 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_buf_len <= '0;
-    else if (q_data_get && ~inst_q_full && q_data_give && ~inst_q_empty)
+    else if (~en_i)
+        inst_buf_len <= '0;
+    else if (store_inst && deploy_inst)
         inst_buf_len <= inst_buf_len;
-    else if (q_data_get && ~inst_q_full)
+    else if (store_inst)
         inst_buf_len <= inst_buf_len + (INST_Q_W + 1)'(1);
-    else if (q_data_give && ~inst_q_empty)
+    else if (deploy_inst)
         inst_buf_len <= inst_buf_len - (INST_Q_W + 1)'(1);
 end
 
@@ -246,7 +257,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         for (int unsigned i = 0; i < INST_Q_SZ; i++) begin: gen_reset_inst_q
             inst_q[i] <= '0;
         end
-    else if (q_data_get && ~inst_q_full)
+    else if (store_inst)
         inst_q[inst_ptr_q] <= getted_data;
 
 end

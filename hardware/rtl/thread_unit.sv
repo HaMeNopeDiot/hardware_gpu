@@ -293,7 +293,7 @@ always_comb begin
         data_w = fpu_result.result_data;
         wr_en = '1;
     end
-    else if (u_cmd_valid && u_cmd.operand == '0) begin
+    else if (u_cmd_valid && u_cmd.operand == '0 && thread_state != TU_STATE_REQUEST) begin
         addr_w = u_cmd.rd_addr;
         data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
         wr_en  = '1;
