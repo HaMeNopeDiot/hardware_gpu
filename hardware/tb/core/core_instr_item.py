@@ -16,6 +16,8 @@ FIMM_W = DW - (AW * 4 + OP_W + OP_T_W + 3)
 UIMM_W = DW - (AW + OP_W + OP_T_W)          # 32 - 5 - 5 - 2 = 32 - 12 = 20
 SIMM_W = DW - (AW * 3 + OP_W + OP_T_W)
 
+from core.core_enums    import CoreOp
+
 class CoreInstItem():
     def __init__(self,
                 op_type: InstTE = None,
@@ -34,6 +36,57 @@ class CoreInstItem():
         self.rd_addr    = rd_addr
         self.imm        = imm
         self.extra      = extra
+
+    def get_opcode(self) -> int:
+        return (self.op_type.value << OP_W) | self.op.value
+
+    def get_op(self) -> CoreOp:
+        match self.op_type:
+            case InstTE.UPP:
+                match self.op:
+                    case UPPopTE.LUI:
+                        return CoreOp.LUI
+                    case UPPopTE.RET:
+                        return CoreOp.RET
+                    case _:
+                        assert False, f"Unknown {self.op_type.name} operation type"
+            case InstTE.LOAD:
+                match self.op:
+                    case LoadOpTE.LW:
+                        return CoreOp.LW
+                    case LoadOpTE.ADDI:
+                        return CoreOp.ADDI
+                    case _:
+                        assert False, f"Unknown {self.op_type.name} operation type"
+            case InstTE.FPU:
+                match self.op:
+                    case FPUopTE.ADD:
+                        return CoreOp.FADD
+                    case FPUopTE.MUL:
+                        return CoreOp.FMUL
+                    case FPUopTE.DIV:
+                        return CoreOp.FDIV
+                    case FPUopTE.SQRT:
+                        return CoreOp.FSQRT
+                    case FPUopTE.NEG:
+                        return CoreOp.FNEG
+                    case FPUopTE.MAX:
+                        return CoreOp.FMAX
+                    case _:
+                        assert False, f"Unknown {self.op_type.name} operation type"
+            case InstTE.STORE:
+                match self.op:
+                    case StoreOpTE.ADD:
+                        return CoreOp.ADD
+                    case StoreOpTE.MUL:
+                        return CoreOp.MUL
+                    case StoreOpTE.SW:
+                        return CoreOp.SW
+                    case _:
+                        assert False, f"Unknown {self.op_type.name} operation type"
+            case _:
+                assert False, "Unknown isntruction type"
+
 
     def _get_stype_from_machine_code(self, value):
         # Извлекаем поля, инвертируя логику get_machine_code

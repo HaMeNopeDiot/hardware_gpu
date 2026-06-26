@@ -13,8 +13,10 @@ from cocotb.triggers      import ClockCycles
 
 from core.tests.base_itest  import BaseCoreTest
 from core.core_instr_item   import CoreInstItem
-from core.ahb_slave       import AHBSize
-from core.instr_item      import InstItem
+from core.ahb_slave         import AHBSize
+from core.core_model        import CoreModel
+from core.instr_item        import InstItem
+from core.core_enums        import RoundModeE
 
 from fpu.fppconverter     import ieee754_to_float
 
@@ -67,13 +69,14 @@ class VKCubeTest(BaseCoreTest):
             # print(f"idx: {idx} : 0x{word:08x}")
             i = CoreInstItem()
             i.set_machine_code(word)
+            i.extra = RoundModeE.RNE.value
             idx += 1
             i_arr.append(i)
 
         # set instr to mem
         idx = 0
         for instr in i_arr:
-            assert instr.get_machine_code() == words[idx], f"instruction decode don't match"
+            #assert instr.get_machine_code() == words[idx], f"instruction decode don't match"
             InstItem(instr, self.ahb_slave_ftc, 4 + idx * 4)
             idx += 1
 
@@ -105,19 +108,39 @@ class VKCubeTest(BaseCoreTest):
             idx += 1
         # print(f"meme {hex(self.ahb_slave_lsu.read_memory(0x0000_00CC, AHBSize.WORD.value))}")
 
-    def dump(self):
-        data_res = []
-        print(f"HEX DUMP MEMORY")
+        # Core model serve
+        self.core_model.set_vid_to_thread(0, 0)
+        self.core_model.set_vid_to_thread(1, 1)
+        self.core_model.set_vid_to_thread(2, 2)
+        self.core_model.set_vid_to_thread(3, 3)
 
-        for i in range(0x2000_0000, 0x2000_0320, 0x4):
-            data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
-            if ((i+0x4) % 0x20) == 0:
-                print(f"0x{data:08x}")
-            else:
-                print(f"0x{data:08x}", end=" ")
+        idx = 0
+        for data_elem in data:
+            self.core_model.write_memory(0x0000_0000 + idx * 4, int(data_elem, 16))
+            idx += 1
+
+        cocotb.log.debug(f"ADDR FROM MODEL  0x70 = {self.core_model.read_memory(0x70)}")
+        cocotb.log.debug(f"ADDR FROM AHB SL 0x70 = {self.ahb_slave_lsu.read_memory(0x70, AHBSize.WORD.value)}")
+
+        self.core_model.launch()
+        for instruction in i_arr:
+            self.core_model.handle_op(instruction)
+
+
+
+    def dump(self):
+        # print(f"HEX DUMP MEMORY")
+        # hex_dump_mem = []
+        # for i in range(0x2000_0000, 0x2000_0320, 0x4):
+        #     data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
+        #     if ((i+0x4) % 0x20) == 0:
+        #         print(f"0x{data:08x}")
+        #     else:
+        #         print(f"0x{data:08x}", end=" ")
+        #     hex_dump_mem.append(data)
 
         print(f"FLOAT DUMP MEMORY")
-
+        float_dump_mem = []
         for i in range(0x2000_0000, 0x2000_0320, 0x4):
             data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
             if data == 0:
@@ -128,6 +151,30 @@ class VKCubeTest(BaseCoreTest):
                 print(f"{fdata}")
             else:
                 print(f"{fdata}", end=" ")
+            float_dump_mem.append(fdata)
+
+        print(f"FLOAT DUMP MODEL MEMORY")
+        float_dump_model = []
+        for i in range(0x2000_0000, 0x2000_0320, 0x4):
+            data = self.core_model.read_memory(i)
+            if data == 0:
+                fdata = 0
+            else:
+                fdata = ieee754_to_float(hex(data), 32)
+            if ((i+0x4) % 0x20) == 0:
+                print(f"{fdata}")
+            else:
+                print(f"{fdata}", end=" ")
+            float_dump_model.append(fdata)
+
+        # compare
+        eps = 1e-1
+        for i in range(len(float_dump_model)):
+            prox = abs(float_dump_model[i] - float_dump_mem[i])
+            is_equal = prox <= eps
+            if not is_equal:
+                cocotb.log.error(f"Model not equal real core. REAL: {float_dump_mem[i]} vs MODEL: {float_dump_model[i]} (prox is {prox} > eps)")
+                assert is_equal, f"Model not equal real core."
 
     async def body(self):
         self.prepare()

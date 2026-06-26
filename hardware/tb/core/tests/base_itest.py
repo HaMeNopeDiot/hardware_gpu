@@ -11,6 +11,7 @@ from cocotb.triggers    import Timer, ClockCycles
 
 from core.ahb_slave       import AHBSlaveModel
 from core.apb_master      import APB4Master
+from core.core_model      import CoreModel
 
 from utility.defines    import DW
 
@@ -40,10 +41,10 @@ class BaseCoreTest:
         self.dut = dut
         self.clk = dut.clk
         self.rst_n = dut.rst_n
-        self.ahb_slave_lsu = None
-        self.ahb_slave_ftc = None
+        self.ahb_slave_lsu  = None
+        self.ahb_slave_ftc  = None
         self.apb_master_csr = None
-
+        self.core_model     = CoreModel(name="core")
 
     async def prebody(self):
         clk = self.clk

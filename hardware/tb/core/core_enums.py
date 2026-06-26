@@ -42,3 +42,18 @@ class RoundModeE(Enum):
     RMM = 0b100 # to nearest, tie away from zero
     ROD = 0b101 # to odd
     DYN = 0b111 # risc-v dynamic RM, invalid if passed to operations
+
+class CoreOp(Enum):
+    LW      = 0
+    SW      = 1
+    LUI     = 2
+    ADDI    = 3
+    FADD    = 4
+    FMUL    = 5
+    FDIV    = 6
+    FSQRT   = 7
+    FNEG    = 8
+    FMAX    = 9
+    ADD     = 10
+    MUL     = 11
+    RET     = 12
