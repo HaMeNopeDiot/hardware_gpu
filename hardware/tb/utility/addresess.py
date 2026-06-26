@@ -3,7 +3,7 @@
 # --------------------------------------------------------------
 from enum import Enum
 
-BYTES_CNT = 4
+from utility.defines    import BYTES_CNT
 
 class CSRAddr(Enum):
     CORE_CTRL = 0x0 * BYTES_CNT

@@ -1,4 +1,10 @@
-# apb4_master.py
+#------------------------------------------------------------------------------#
+# Author:                Starukhin Danila M.
+# Author's e-mail:       sniperusus2002@gmail.com
+# -----------------------------------------------------------------------------#
+# Purpose: APB master model
+# Date: 2026/06
+#------------------------------------------------------------------------------#
 
 import cocotb
 from cocotb.triggers import RisingEdge, ReadOnly, Timer

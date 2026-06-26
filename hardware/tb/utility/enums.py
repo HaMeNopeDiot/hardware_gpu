@@ -47,5 +47,3 @@ class DirectionE(Enum):
     READ = 0
     WRITE = 1
 
-DEFAULT_F_T = FpFormatE.FP64
-DEFAULT_I_T = IntFormatE.INT64

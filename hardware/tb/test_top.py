@@ -1,18 +1,25 @@
-# test_my_design.py (simple)
+#------------------------------------------------------------------------------#
+# Author:                Starukhin Danila M.
+# Author's e-mail:       sniperusus2002@gmail.com
+# -----------------------------------------------------------------------------#
+# Purpose: TOP file for testbenches
+# Date: 2026/06
+#------------------------------------------------------------------------------#
 
 import cocotb
 
-from fpu.fpnew_top import fpu_test
-from tu.tu_top  import tu_test
+#from fpu.fpnew_top import fpu_test
+#from tu.tu_top  import tu_test
 
-from core.core_top import   ISACheckTest, \
-                            FPUCheckADDTest, \
-                            FPUCheckMULTest, \
-                            FPUCheckDIVTest, \
-                            FPUCheckSQRTTest, \
-                            FPUCheckNEGTest, \
-                            FPUCheckMAXTest, \
-                            VKCubeTest
+from core.tests.fpu_core_test   import  FPUCheckADDTest, \
+                                        FPUCheckMULTest, \
+                                        FPUCheckDIVTest, \
+                                        FPUCheckSQRTTest, \
+                                        FPUCheckNEGTest, \
+                                        FPUCheckMAXTest
+
+from core.tests.base_core_test  import ISACheckTest
+from core.tests.vkcube_core_test    import VKCubeTest
 
 @cocotb.test()
 async def isa_test(dut):
