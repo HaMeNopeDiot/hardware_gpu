@@ -75,14 +75,15 @@ module thread_unit
 
     import tu_pkg::dw_value_t;
 #(
-    parameter  int unsigned DW = 64,
-    parameter  int unsigned REGFILE_SIZE = 8,
-    localparam int unsigned AW = $clog2(REGFILE_SIZE),
-    parameter  bit          LATCH_R_ADDR = 1,
-    parameter  bit          ONLY_LINT = `ifdef LINT 1 `else 0 `endif,
+    parameter  int unsigned     DW                  = 64,
+    parameter  int unsigned     REGFILE_SIZE        = 8,
+    localparam int unsigned     AW                  = $clog2(REGFILE_SIZE),
+    parameter  bit              LATCH_R_ADDR        = 1,
+    parameter  bit              ONLY_LINT           = `ifdef LINT 1 `else 0 `endif,
 
+    parameter  fpu_features_t   FPU_CONFIGURATION   = RV32F_Xsflt, // RV32F_Xsflt or RV64D_Xsflt
+    parameter  int unsigned     FDW                 = FPU_CONFIGURATION == RV64D_Xsflt? 64: 32
 
-    localparam fpu_features_t FPU_FEATURES = DW == 64? RV64D_Xsflt: RV32F_Xsflt
 ) (
     /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                clk,
@@ -231,19 +232,42 @@ logic               alu_rr; // result ready
 thread_result_t fpu_result;
 
 logic [DW - 1: 0]       op_1, op_2, op_3;
-logic [2: 0][DW - 1: 0] operands;
+
+
+logic [2: 0][FDW - 1: 0] operands;
 
 // assign operands = {op_1, op_2, op_3};
-always_comb begin
-    if (dec_cmd_valid)
-        case (dec_cmd.op)
-            ADD:        operands = {op_1, op_2, op_3};
-            default:    operands = {op_3, op_2, op_1};
-        endcase
-    else
-        operands = {op_1, op_2, op_3};
+if (FDW == DW) begin: gen_fdw_eq_dw
+    always_comb begin
+        if (dec_cmd_valid)
+            case (dec_cmd.op)
+                ADD:        operands = {op_1, op_2, op_3};
+                default:    operands = {op_3, op_2, op_1};
+            endcase
+        else
+            operands = {op_1, op_2, op_3};
+    end
 end
+else begin: gen_fdw_bigger_dw
+    logic [FDW - 1: 0] fop_1, fop_2, fop_3;
+    assign fop_1 = {(FDW - DW)'(1'b1), op_1};
+    assign fop_2 = {(FDW - DW)'(1'b1), op_2};
+    assign fop_3 = {(FDW - DW)'(1'b1), op_3};
 
+    always_comb begin
+        if (dec_cmd_valid)
+            case (dec_cmd.op)
+                ADD:        operands = { fop_1,
+                                         fop_2,
+                                         fop_3 };
+                default:    operands = { fop_3,
+                                         fop_2,
+                                         fop_1 };
+            endcase
+        else
+            operands = {fop_1, fop_2, fop_3};
+    end
+end
 
 
 logic  busy_o;
@@ -290,7 +314,7 @@ always_comb begin
     end
     else if (state == FPU_RESULT) begin
         addr_w = addr_result;
-        data_w = fpu_result.result_data;
+        data_w = fpu_result.result_data[DW - 1: 0];
         wr_en = '1;
     end
     else if (u_cmd_valid && u_cmd.operand == '0 && thread_state != TU_STATE_REQUEST) begin
@@ -509,7 +533,7 @@ if (ONLY_LINT == 0) begin: gen_real_fpu
     fpnew_top #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
         // Type of FPU configuration. Do not touch
-        .Features       (RV32F_Xsflt),
+        .Features       (FPU_CONFIGURATION),
         .Implementation (DEFAULT_NOREGS),
         .DivSqrtSel     (THMULTI),
         .TagType        (tags_t),
@@ -552,7 +576,7 @@ else begin: gen_dummy_fpu
         fpu_dummy #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
         // Type of FPU configuration. Do not touch
-        .Features       (FPU_FEATURES),
+        .Features       (FPU_CONFIGURATION),
         .Implementation (DEFAULT_NOREGS),
         .DivSqrtSel     (THMULTI),
         .TagType        (tags_t),
@@ -572,7 +596,7 @@ else begin: gen_dummy_fpu
         .dst_fmt_i      (fp_format_data),               // <- (type of outcoming data)
         .int_fmt_i      (int_format_data),              // <- (type of data, if it int)
         /*==============### PROPERTIES SIGNALS ###===============*/
-        .vectorial_op_i ('0),                           // <- (vectorial mode)
+        .vectorial_op_i ('1),                           // <- (vectorial mode)
         .simd_mask_i    ('0),                           // <-
         .flush_i        ('0),                           // <-
         .tag_i          (dec_cmd.tag),                  // <- (tag of operation set)

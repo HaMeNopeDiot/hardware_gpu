@@ -15,6 +15,7 @@ package tu_pkg;
     import fpnew_pkg::OP_BITS;
 
     import base_pkg::DW;
+    import base_pkg::FDW;
 
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 32;
@@ -32,8 +33,8 @@ package tu_pkg;
     */
 
     typedef struct packed {
-        logic [DW - 1: 0] value;
-        logic             valid;
+        logic [DW - 1: 0]   value;
+        logic               valid;
     } dw_value_t;
 
     /*==========================================================================//
@@ -55,8 +56,8 @@ package tu_pkg;
     } thread_info_t;
 
     typedef struct packed {
-        logic [DW - 1: 0] result_data;
-        thread_info_t     info;
+        logic [FDW - 1: 0]  result_data;
+        thread_info_t       info;
     } thread_result_t;
 
     /*==========================================================================//
