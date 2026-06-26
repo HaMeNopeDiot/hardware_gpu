@@ -2,7 +2,7 @@
 LICENSE.*
 *.cff
 docs/*
-*__pycache__*
+__pycache__
 vendor/*
 util/*
 */sim_build/*
@@ -12,3 +12,4 @@ cvfpu/
 *.xml
 *.vcd
 */*/sim_build/*
+../nir_to_assembly/__pycache__/
