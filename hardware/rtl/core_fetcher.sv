@@ -232,6 +232,8 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         next_inst_ptr_q <= '0;
+    else if (~en_i)
+        next_inst_ptr_q <= inst_ptr_q;
     else if (deploy_inst)
         if (next_inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
             next_inst_ptr_q <= '0;
@@ -287,6 +289,7 @@ ahb_master #(
     //================### COMMON SIGNALS ###=================//
     .clk          (clk          ),  // <-
     .rst_n        (rst_n        ),  // <-
+    .en_i         (en_i         ),  // <-
     //==================### AHB SIGNALS ###==================//
     .ahb_i        (ahb_i        ),  // <-
     .ahb_o        (ahb_o        ),  // ->

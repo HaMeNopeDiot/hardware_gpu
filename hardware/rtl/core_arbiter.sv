@@ -23,6 +23,7 @@ module core_arbiter
     input  tu_state_e                       threads_state [THREAD_CNT],
 
     output logic        [THREAD_W - 1: 0]   thread_sel,
+    output logic                            thread_sel_valid,
     output logic                            no_req_from_threads
     //========================================================================//
 );
@@ -65,7 +66,8 @@ module core_arbiter
     region OUT
     //========================================================================*/
 
-    assign thread_sel = thread_ptr;
+    assign thread_sel       = thread_ptr;
+    assign thread_sel_valid = thread_req;
 
     //========================================================================*/
 endmodule

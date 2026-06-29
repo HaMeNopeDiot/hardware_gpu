@@ -183,6 +183,7 @@ logic               ftc_instr_valid;
 logic               dec_ready;
 
 logic               thread_en [THREAD_CNT];
+logic               thread_sel_valid;
 
 
 // CSR <-> CORE
@@ -205,7 +206,7 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 logic  thread_change;
-assign thread_change = thread_sel_d1 != thread_sel;
+assign thread_change = thread_sel_valid;
 
 
 reg_if               rt_if [THREAD_CNT](); // registers thread interface
@@ -270,7 +271,8 @@ core_arbiter #(
     .rst_n                  (rst_n              ),    // <-
     .threads_state          (thread_states      ),    // <-
     .thread_sel             (thread_sel         ),    // ->
-    .no_req_from_threads    (no_req_from_threads)     // ->
+    .no_req_from_threads    (no_req_from_threads),    // ->
+    .thread_sel_valid       (thread_sel_valid   )     // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -339,6 +341,7 @@ core_lsu #(
     //================### COMMON SIGNALS ###=================//
     .clk               (clk                ),   // <-
     .rst_n             (rst_n              ),   // <-
+    .en_i              (csr_en             ),   // <-
     //=============### SIGNALS FROM DECODER ###==============//
     .lsu_op            (lsu_cmd            ),   // <-
     .lsu_op_valid      (lsu_cmd_valid      ),   // <-

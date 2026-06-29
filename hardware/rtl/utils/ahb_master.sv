@@ -55,6 +55,7 @@ module ahb_master
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                    clk,
     input  logic                    rst_n,
+    input  logic                    en_i,
 
     /*========================### AHB SIGNALS ###=============================*/
     input  ahb_sports_t             ahb_i,
@@ -127,45 +128,48 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 always_comb begin
-    case (state)
-        AHB_FSM_IDLE:
-            if (req_active)
-                next_state = AHB_FSM_SADDR;
-            else
+    if (~en_i)
+        next_state = AHB_FSM_IDLE;
+    else
+        case (state)
+            AHB_FSM_IDLE:
+                if (req_active)
+                    next_state = AHB_FSM_SADDR;
+                else
+                    next_state = AHB_FSM_IDLE;
+            AHB_FSM_SADDR:
+                if (req_active)
+                    next_state = AHB_FSM_BOTH;
+                else
+                    next_state = AHB_FSM_SDATA;
+            AHB_FSM_SDATA:
+                if (hready)
+                    if (req_active)
+                        next_state = AHB_FSM_BOTH;
+                    else if (~hresp)
+                        next_state = AHB_FSM_SDATA;
+                    else
+                        next_state = AHB_FSM_ERROR;
+                else
+                    next_state = AHB_FSM_SDATA;
+            AHB_FSM_BOTH:
+                if (hready)
+                    if (req_active)
+                        next_state = AHB_FSM_BOTH;
+                    else if (~hresp)
+                        next_state = AHB_FSM_SDATA;
+                    else
+                        next_state = AHB_FSM_ERROR;
+                else
+                    next_state = AHB_FSM_BOTH;
+            AHB_FSM_ERROR:
+                if (req_active)
+                    next_state = AHB_FSM_SADDR;
+                else
+                    next_state = AHB_FSM_ERROR;
+            default:
                 next_state = AHB_FSM_IDLE;
-        AHB_FSM_SADDR:
-            if (req_active)
-                next_state = AHB_FSM_BOTH;
-            else
-                next_state = AHB_FSM_SDATA;
-        AHB_FSM_SDATA:
-            if (hready)
-                if (req_active)
-                    next_state = AHB_FSM_BOTH;
-                else if (~hresp)
-                    next_state = AHB_FSM_SDATA;
-                else
-                    next_state = AHB_FSM_ERROR;
-            else
-                next_state = AHB_FSM_SDATA;
-        AHB_FSM_BOTH:
-            if (hready)
-                if (req_active)
-                    next_state = AHB_FSM_BOTH;
-                else if (~hresp)
-                    next_state = AHB_FSM_SDATA;
-                else
-                    next_state = AHB_FSM_ERROR;
-            else
-                next_state = AHB_FSM_BOTH;
-        AHB_FSM_ERROR:
-            if (req_active)
-                next_state = AHB_FSM_SADDR;
-            else
-                next_state = AHB_FSM_ERROR;
-        default:
-            next_state = AHB_FSM_IDLE;
-    endcase
+        endcase
 end
 
 // old version

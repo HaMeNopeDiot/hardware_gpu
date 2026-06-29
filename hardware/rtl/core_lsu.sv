@@ -36,6 +36,7 @@ module core_lsu
     /*============================### COMMON SIGNALS ###======================*/
     input  logic                    clk,
     input  logic                    rst_n,
+    input  logic                    en_i,
 
     /*=========================### SIGNALS FROM DECODER ###===================*/
     input  lsu_cmd_e                lsu_op,
@@ -273,6 +274,7 @@ ahb_master #(
     //================### COMMON SIGNALS ###=================//
     .clk          (clk          ),  // <-
     .rst_n        (rst_n        ),  // <-
+    .en_i         (en_i         ),  // <-
     //==================### AHB SIGNALS ###==================//
     .ahb_i        (ahb_i        ),  // <-
     .ahb_o        (ahb_o        ),  // ->
