@@ -39,9 +39,12 @@ module core
 
     // LSU
     import lsu_pkg::lsu_cmd_e;
+
 #(
     parameter  int unsigned DW               = 32,
     parameter  int unsigned MEM_AW           = 32,
+    parameter  int unsigned CSR_AW           = 7,
+
     parameter  int unsigned TU_REGILE_SZ     = 32,
     parameter  int unsigned TU_LATCH_R_ADDR  = 1,
     parameter  bit          ONLY_LINT        = `ifdef LINT 1 `else 0 `endif,
@@ -85,7 +88,7 @@ module core
     output  logic                       csr_pready,
     output  logic                       csr_pslverr,
     // input  apb4_mports_t                csr_apb_o
-    input   logic [MEM_AW - 1: 0]       csr_paddr,
+    input   logic [CSR_AW - 1: 0]       csr_paddr,
     input   logic [DW - 1: 0]           csr_pwdata,
     input   logic [STROBE - 1: 0]       csr_pstrb,
     input   logic                       csr_psel,
@@ -355,7 +358,7 @@ core_lsu #(
 // NOTE: write a purpose here
 core_csrm_hndl #(
     .DW         (DW),
-    .AW         (MEM_AW),
+    .AW         (CSR_AW),
     .THREAD_CNT (THREAD_CNT)
 ) core_csrm_hndl_u (
     //================### COMMON SIGNALS ###=================//

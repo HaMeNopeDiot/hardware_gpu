@@ -225,13 +225,13 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 
-logic [DW - 1: 0]   alu_or; // operation result
-logic               alu_rr; // result ready
+logic [DW - 1: 0]           alu_or; // operation result
+logic                       alu_rr; // result ready
 
 
-thread_result_t fpu_result;
+thread_result_t             fpu_result;
 
-logic [DW - 1: 0]       op_1, op_2, op_3;
+logic [DW - 1: 0]           op_1, op_2, op_3;
 
 
 logic [2: 0][FDW - 1: 0] operands;

@@ -9,7 +9,9 @@
 package base_pkg;
     // ======================= ### COMMON STRUCTS ### ========================= //
     localparam int unsigned DW              = 32;
-    localparam int unsigned FDW             = 64; // FIXME
+    localparam int unsigned FDW             = 32; // FIXME
     parameter int unsigned  AW              = 32;
+
+    parameter int unsigned  CSR_AW          = 7;
     // ======================================================================== //
 endpackage
