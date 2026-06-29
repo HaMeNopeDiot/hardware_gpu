@@ -11,7 +11,6 @@ region MODULE DEFINITION
 //===================================================================================*/
 module core_arbiter
     import tu_pkg::tu_state_e;
-    import tu_pkg::core_state_e;
     import tu_pkg::TU_STATE_REQUEST;
 #(
     parameter  int unsigned THREAD_CNT       = 4,

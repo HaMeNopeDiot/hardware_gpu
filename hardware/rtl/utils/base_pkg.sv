@@ -12,6 +12,6 @@ package base_pkg;
     localparam int unsigned FDW             = 32; // FIXME
     parameter int unsigned  AW              = 32;
 
-    parameter int unsigned  CSR_AW          = 7;
+    parameter int unsigned  CSR_AW          = 6;
     // ======================================================================== //
 endpackage

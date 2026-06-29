@@ -87,6 +87,22 @@ package core_reg_structure_pkg;
     //     (F_PARAM_W)'(F_ACCESS_RW)
     // };
 
+    /*==========================================================================//
+    region THREAD UNIT ENABLER
+    //==========================================================================*/
+
+    // ======================== ### THREAD UNIT ENABLER ### =================== //
+    localparam int unsigned TU_EN_F_NUM = 1;
+    localparam int unsigned TU_EN_ARR_W = TU_EN_F_NUM * F_PARAM_W;
+
+    // WIDTH
+    localparam logic [TU_EN_ARR_W - 1: 0] TU_EN_F_W = {
+        (F_PARAM_W)'(F_TU_EN_SZ )
+    };
+    // OFFSETS
+    localparam logic [TU_EN_ARR_W - 1: 0] TU_EN_F_OFS = {
+        (F_PARAM_W)'(F_TU_EN_OFS )
+    };
 
 
     // ======================================================================== //

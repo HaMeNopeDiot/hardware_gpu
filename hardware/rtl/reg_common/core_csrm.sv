@@ -38,7 +38,8 @@ region MODULE DEFINITION
     output logic [DW - 1: 0]                vid_o [THREAD_CNT],
 
     output logic [DW - 1: 0]                cur_pc_o,
-    input  logic                            pc_readed_i
+    input  logic                            pc_readed_i,
+    output logic                            thread_en_o [THREAD_CNT]
     //==========================================================================//
 );
 
@@ -48,10 +49,12 @@ region LOGIC VARIABLE DEFINITION
 logic [DW - 1: 0] core_ctrl_rdata;
 logic [DW - 1: 0] pc_rdata;
 logic [DW - 1: 0] vid_rdata         [THREAD_CNT];
+logic [DW - 1: 0] tu_en_rdata;
 
 logic [DW - 1: 0] core_ctrl_wedata;
 logic [DW - 1: 0] pc_wedata;
 logic [DW - 1: 0] vid_wedata        [THREAD_CNT];
+logic [DW - 1: 0] tu_en_wedata;
 /*==============================================================================//
 region ASSIGNES
 //==============================================================================*/
@@ -62,12 +65,16 @@ assign is_core_ctrl_addr    = addr == (AW)'(R_CORE_CTRL_OFS);
 logic  is_pc_addr;
 assign is_pc_addr           = addr == (AW)'(R_PC_OFS);
 
+logic  is_tu_addr;
+assign is_tu_addr           = addr == (AW)'(R_TU_EN_OFS);
+
 /*==============================================================================//
 region WRITE ENABLE LOGIC
 //==============================================================================*/
 
 assign core_ctrl_wedata = ret_i                 ? (DW)'(1)  : (is_core_ctrl_addr? wedata: '0);
 assign pc_wedata        = pc_readed_i && en_o   ? (DW)'('1) : (is_pc_addr       ? wedata: '0);
+assign tu_en_wedata     = is_tu_addr            ? wedata: '0;
 
 /*==============================================================================//
 region VID DATA LOGIC
@@ -120,6 +127,9 @@ end
 logic [DW - 1: 0] pc_wdata;
 assign pc_wdata = pc_readed_i && en_o? pc_rdata + (DW)'(STRB_W): wdata_masked;
 
+logic [DW - 1: 0] tu_en_wdata;
+assign tu_en_wdata = wdata_masked;
+
 /*==============================================================================//
 region RDATA LOGIC
 //==============================================================================*/
@@ -137,6 +147,8 @@ always_comb begin
             rdata = core_ctrl_rdata;
         (AW)'(R_PC_OFS):
             rdata = pc_rdata;
+        (AW)'(R_TU_EN_OFS):
+            rdata = tu_en_rdata;
         default:
             if (addr_in_vid_range)
                 rdata = cur_vid;
@@ -152,6 +164,10 @@ region INNER OUT LOGIC
 
 assign cur_pc_o = pc_rdata;
 assign en_o     = core_ctrl_rdata[0];
+
+for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_thread_en_signals
+    assign thread_en_o[i] = tu_en_rdata[i];
+end
 
 /*==============================================================================//
 region INSTANCES
@@ -197,7 +213,25 @@ prim_register #(
     //=======================================================//
 );
 
-
+// [THREAD EN]
+prim_register #(
+    // ----------------- GLOBAL PARAMETERS ----------------- //
+    .DW(DW),
+    // ----------------- FIELDS PARAMETERS ----------------- //
+    .F_NUM  (TU_EN_F_NUM),
+    .F_W    (TU_EN_F_W),
+    .F_OFS  (TU_EN_F_OFS)
+    // ----------------------------------------------------- //
+) tu_en_reg (
+    /*================### COMMON SIGNALS ###=================*/
+    .clk    (clk),                       // <-
+    .rst_n  (rst_n),                     // <-
+    /*================### PACKET SIGNALS ###=================*/
+    .wdata  (tu_en_wdata),               // <-
+    .wedata (tu_en_wedata),              // <-
+    .rdata  (tu_en_rdata)                // ->
+    //=======================================================//
+);
 
 // [VID DATA]
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_vid_regs

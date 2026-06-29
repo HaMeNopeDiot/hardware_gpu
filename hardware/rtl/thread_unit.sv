@@ -88,7 +88,7 @@ module thread_unit
     /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                clk,
     input  logic                rst_n,
-
+    input  logic                en,
     /*===========================### CMD SIGNALS ###==========================*/
     input  cmd_union_t          cmd,
     input  dec_op_type_e        cmd_op_type,
@@ -126,31 +126,32 @@ assign rd               = r_if.rd.value;
 assign rd_valid         = r_if.rd.valid;
 
 // Dec
-logic  l_cmd_valid, u_cmd_valid, s_cmd_valid;
-assign l_cmd_valid = cmd_op_type == L_CMD;
-assign u_cmd_valid = cmd_op_type == U_CMD;
-assign s_cmd_valid = cmd_op_type == S_CMD;
+logic  l_cmd_valid, u_cmd_valid, s_cmd_valid, f_cmd_valid;
+assign l_cmd_valid = en && (cmd_op_type == L_CMD);
+assign u_cmd_valid = en && (cmd_op_type == U_CMD);
+assign s_cmd_valid = en && (cmd_op_type == S_CMD);
+assign f_cmd_valid = en && dec_cmd_valid;
 
 l_cmd_t l_cmd;
-assign  l_cmd = l_cmd_valid? cmd.l: '0;
+assign  l_cmd = en & l_cmd_valid? cmd.l: '0;
 
 u_cmd_t u_cmd;
-assign  u_cmd = u_cmd_valid? cmd.u: '0;
+assign  u_cmd = en & u_cmd_valid? cmd.u: '0;
 
 s_cmd_t s_cmd;
-assign  s_cmd = s_cmd_valid? cmd.s: '0;
+assign  s_cmd = en & s_cmd_valid? cmd.s: '0;
 
 logic  store_op, load_op;
-assign store_op = s_cmd_valid? cmd.s.operand == SOP_SW: '0;
-assign load_op  = l_cmd_valid? cmd.l.operand == LOP_LW: '0;
+assign store_op = en && s_cmd_valid? cmd.s.operand == SOP_SW: '0;
+assign load_op  = en && l_cmd_valid? cmd.l.operand == LOP_LW: '0;
 
 /*============================================================================//
 region FSM
 //============================================================================*/
 
-fsm_fpu_state_e state; // fpu
+fsm_fpu_state_e fpu_state; // fpu
 logic  fpu_is_idle;
-assign fpu_is_idle = state == FPU_IDLE;
+assign fpu_is_idle = fpu_state == FPU_IDLE;
 
 tu_state_e next_thread_state, cur_thread_state;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -161,32 +162,35 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 always_comb begin
-    case (cur_thread_state)
-        TU_STATE_IDLE:
-            if (~fpu_is_idle)
-                next_thread_state   = TU_STATE_BUSY;
-            else if (load_op || store_op) // TU wants request to LSU
-                next_thread_state   = TU_STATE_REQUEST;
-            else
-                next_thread_state   = TU_STATE_IDLE;
-        TU_STATE_REQUEST:
-            if (lsu_ready_i)
-                next_thread_state   = TU_STATE_DONE;
-            else
-                next_thread_state   = TU_STATE_REQUEST;
-        TU_STATE_DONE:
-            if (load_op || store_op) // In some case need instant be prepaired to next cmd
-                next_thread_state   = TU_STATE_REQUEST;
-            else
-                next_thread_state   = TU_STATE_IDLE;
-        TU_STATE_BUSY:
-            if (fpu_is_idle)
-                next_thread_state   = TU_STATE_IDLE;
-            else
-                next_thread_state   = TU_STATE_BUSY;
-        default:
-            next_thread_state       = TU_STATE_IDLE;
-    endcase
+    if (~en)
+        next_thread_state   = TU_STATE_IDLE;
+    else
+        case (cur_thread_state)
+            TU_STATE_IDLE:
+                if (~fpu_is_idle)
+                    next_thread_state   = TU_STATE_BUSY;
+                else if (load_op || store_op) // TU wants request to LSU
+                    next_thread_state   = TU_STATE_REQUEST;
+                else
+                    next_thread_state   = TU_STATE_IDLE;
+            TU_STATE_REQUEST:
+                if (lsu_ready_i)
+                    next_thread_state   = TU_STATE_DONE;
+                else
+                    next_thread_state   = TU_STATE_REQUEST;
+            TU_STATE_DONE:
+                if (load_op || store_op) // In some case need instant be prepaired to next cmd
+                    next_thread_state   = TU_STATE_REQUEST;
+                else
+                    next_thread_state   = TU_STATE_IDLE;
+            TU_STATE_BUSY:
+                if (fpu_is_idle)
+                    next_thread_state   = TU_STATE_IDLE;
+                else
+                    next_thread_state   = TU_STATE_BUSY;
+            default:
+                next_thread_state       = TU_STATE_IDLE;
+        endcase
 end
 
 assign thread_state = cur_thread_state;
@@ -239,7 +243,7 @@ logic [2: 0][FDW - 1: 0] operands;
 // assign operands = {op_1, op_2, op_3};
 if (FDW == DW) begin: gen_fdw_eq_dw
     always_comb begin
-        if (dec_cmd_valid)
+        if (f_cmd_valid)
             case (dec_cmd.op)
                 ADD:        operands = {op_1, op_2, op_3};
                 default:    operands = {op_3, op_2, op_1};
@@ -255,7 +259,7 @@ else begin: gen_fdw_bigger_dw
     assign fop_3 = {(FDW - DW)'(1'b1), op_3};
 
     always_comb begin
-        if (dec_cmd_valid)
+        if (f_cmd_valid)
             case (dec_cmd.op)
                 ADD:        operands = { fop_1,
                                          fop_2,
@@ -271,7 +275,7 @@ end
 
 
 logic  busy_o;
-assign busy_o          = state != FPU_IDLE;
+assign busy_o = fpu_state != FPU_IDLE;
 
 logic wr_en;
 logic [AW - 1: 0] addr_w;
@@ -283,13 +287,13 @@ if (LATCH_R_ADDR) begin: gen_latch_r_addr
     always_ff @(posedge clk or negedge rst_n) begin
         if (~rst_n)
             ff_addr_r <= '0;
-        else if (dec_cmd_valid)
+        else if (f_cmd_valid)
             ff_addr_r <= dec_cmd.ar;
         else if (~busy_o)
             ff_addr_r <= '0;
     end
 
-    assign addr_result = dec_cmd_valid? dec_cmd.ar: ff_addr_r;
+    assign addr_result = f_cmd_valid? dec_cmd.ar: ff_addr_r;
 end
 else begin: gen_no_latch_r_addr
     assign addr_result = dec_cmd.ar;
@@ -312,7 +316,7 @@ always_comb begin
         data_w = alu_or;
         wr_en  = alu_rr;
     end
-    else if (state == FPU_RESULT) begin
+    else if (fpu_state == FPU_RESULT) begin
         addr_w = addr_result;
         data_w = fpu_result.result_data[DW - 1: 0];
         wr_en = '1;
@@ -507,21 +511,21 @@ tu_regfile #(
 // ///////////////////////////////////////////////////////// //
 
 // ///////////////////////////////////////////////////////// //
-//                      *** CU FSM ***                       //
-// NOTE: write a purpose here
+//                      *** TU FSM ***                       //
+// NOTE: TU FSM model to check FPU state
 tu_fpu_fsm tu_fpu_fsm_u (
     //================### COMMON SIGNALS ###=================//
     .clk         (clk),             // <-
     .rst_n       (rst_n),           // <-
     /*================### COMMON SIGNALS ###=================*/
-    .ready       (dec_cmd_valid),   // <-
+    .ready       (f_cmd_valid),     // <-
     //===============### HANDSHAKE SIGNALS ###===============//
     .in_ready_o  (in_ready_o),      // <-
     .out_valid_o (out_valid_o),     // <-
     .out_ready_i (out_ready_i),     // ->
     .in_valid_i  (in_valid_i),      // ->
     /*================### STATUS SIGNALS ###=================*/
-    .state       (state)            // ->
+    .state       (fpu_state)        // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
