@@ -22,6 +22,7 @@ module top_env
     import core_regblk_pkg::*;
 #(
     parameter   int unsigned MEM_AW         = 32,
+    parameter   int unsigned CSR_AW         = 7,
     parameter   int unsigned MEM_DW         = 32,
     parameter   int unsigned REGFILE_SZ     = 32,
     parameter   int unsigned THREAD_CNT     = 4,
@@ -62,18 +63,25 @@ thread_info_t   thread_info;
 region FUNCTIONS
 //============================================================================*/
 
+/* I fully understand that I'm creating two memory banks of size 1 << RMEM, each
+utilized only up to half their capacity. However, I don't want to get overly
+involved with implementing bank switching based on the most significant bit for
+this testbench, so I decided to keep it as is.*/
+
+// load memory with data
 function automatic load_values(input mem_t data);
-    for (int unsigned i = 0; i < (1 << (MEM_AW - 1)); i++) begin
+    for (int unsigned i = 0; i < (1 << (RMEM_AW - 1)); i++) begin
         ahb_fet_mem_u.mem[i] = data[i];
-        ahb_lsu_mem_u.mem[i] = data[(1 << (MEM_AW - 1)) + i];
+        ahb_lsu_mem_u.mem[i] = data[(1 << (RMEM_AW - 1)) + i];
     end
 endfunction
 
+// save values from memory. Reterns mem_t data
 function automatic mem_t save_values();
     mem_t lmem;
     for (int unsigned i = 0; i < NUM_REG_MEM; i++) begin
-        lmem[i]                         = ahb_fet_mem_u.mem[i];
-        lmem[(1 << (MEM_AW - 1)) + i]   = ahb_lsu_mem_u.mem[i];
+        lmem[i]                          = ahb_fet_mem_u.mem[i];
+        lmem[(1 << (RMEM_AW - 1)) + i]   = ahb_lsu_mem_u.mem[i];
     end
     return lmem;
 endfunction
@@ -81,6 +89,7 @@ endfunction
 // section APB
 //----------------------------------------------------------------------------//
 
+// Clear APB bus as Master
 task automatic apb_release_bus();
     apb_in.paddr    <= '0;
     apb_in.pwdata   <= '0;
@@ -90,8 +99,9 @@ task automatic apb_release_bus();
     apb_in.penable  <= '0;
 endtask
 
+// Make write txn
 task automatic apb_write(
-    input  logic [MEM_AW - 1: 0]    addr,
+    input  logic [CSR_AW - 1: 0]    addr,
     input  logic [MEM_DW - 1: 0]    data,
     input  logic [STROBE - 1: 0]    strb       = (STROBE)'('1),
     input logic                     make_space = 1'b0
@@ -117,8 +127,9 @@ task automatic apb_write(
     end
 endtask
 
+// Make read txn
 task automatic apb_read(
-    input logic [MEM_AW - 1: 0]     addr,
+    input logic [CSR_AW - 1: 0]     addr,
     input logic                     make_space = 1'b0
                         );
     @(posedge clk); // set first cycle (set parameters)
@@ -140,12 +151,13 @@ task automatic apb_read(
     end
 endtask
 
+// Activate read txn APB loop. Do not call this task.
 // verilog_lint: waive explicit-task-lifetime
 task monitor_core_active();
     logic [MEM_DW - 1: 0] ccr;
     begin
         while (active) begin
-            apb_read((MEM_AW)'(R_CORE_CTRL_OFS));
+            apb_read((CSR_AW)'(R_CORE_CTRL_OFS));
             ccr = apb_out.prdata;
             if (ccr[F_CORE_EN_OFS] == '1)
                 active = '0;
@@ -153,7 +165,7 @@ task monitor_core_active();
     end
 endtask
 
-
+// Start Core
 // verilog_lint: waive explicit-task-lifetime
 task start();
     logic [MEM_DW - 1: 0] vid       [THREAD_CNT];
@@ -172,12 +184,12 @@ task start();
             begin
                 // set vid to each thread
                 for (int unsigned i = 0; i < THREAD_CNT; i++) begin
-                    apb_write(RS_VID_OFS, (MEM_DW)'(vid[i]));
+                    apb_write((CSR_AW)'(RS_VID_OFS), (MEM_DW)'(vid[i]));
                 end
                 // set start program counter
-                apb_write((MEM_AW)'(R_PC_OFS),         (MEM_DW)'(start_pc));
+                apb_write((CSR_AW)'(R_PC_OFS),         (MEM_DW)'(start_pc));
                 // launch core
-                apb_write((MEM_AW)'(R_CORE_CTRL_OFS),  (MEM_DW)'(1));
+                apb_write((CSR_AW)'(R_CORE_CTRL_OFS),  (MEM_DW)'(1));
                 active = 1;
                 // Check state of core
                 monitor_core_active();
@@ -216,6 +228,7 @@ region INSTANCES
 core #(
     .DW              (MEM_DW                        ),
     .MEM_AW          (MEM_AW                        ),
+    .CSR_AW          (CSR_AW                        ),
     .TU_REGILE_SZ    (REGFILE_SZ                    ),
     .TU_LATCH_R_ADDR (1                             ),
     .ONLY_LINT       (`ifdef LINT 1 `else 0 `endif  ),
