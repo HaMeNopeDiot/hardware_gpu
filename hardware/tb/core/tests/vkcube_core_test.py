@@ -142,6 +142,7 @@ class VKCubeTest(BaseCoreTest):
                 cocotb.log.error(f"Model not equal real core. REAL: {float_dump_mem[i]} vs MODEL: {float_dump_model[i]} (prox is {prox} > eps)")
                 assert is_equal, f"Model not equal real core."
 
+
     async def body(self):
         self.prepare()
         # nucelar launch ready
@@ -153,3 +154,5 @@ class VKCubeTest(BaseCoreTest):
         while (self.dut.busy_o.value == 1):
            await ClockCycles(self.clk, 1)
         self.dump()
+        #await ClockCycles(self.clk, 2000)
+        await self.unload_all_regfiles(0x1000)

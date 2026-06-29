@@ -5,7 +5,12 @@
 # Purpose: Core Enums
 # Date: 2026/06
 #------------------------------------------------------------------------------#
-from enum import Enum
+from enum import Enum, IntEnum
+
+class Primer(IntEnum):
+    VALUE = 42
+
+print(Primer.VALUE)
 
 class InstTE(Enum):
     UPP   = 0

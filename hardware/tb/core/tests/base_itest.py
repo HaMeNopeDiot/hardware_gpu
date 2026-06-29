@@ -10,6 +10,7 @@ import cocotb
 from cocotb.triggers    import Timer, ClockCycles
 
 from core.ahb_slave       import AHBSlaveModel
+from core.ahb_slave       import AHBSize
 from core.apb_master      import APB4Master
 from core.core_model      import CoreModel
 
@@ -19,7 +20,11 @@ from numbers import Real
 from decimal import Decimal
 from utility.addresess import CSRAddr
 
-from utility.defines    import CORES_CNT, THREADS_CNT, HZ
+from utility.defines    import CORES_CNT, THREADS_CNT, HZ, REGFILE_SZ
+
+from core.core_enums      import LoadOpTE, StoreOpTE, UPPopTE
+from core.instr_item      import InstItem
+from core.core_instr_item import CILI, CISI, CIUI
 
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
     while True:
@@ -110,3 +115,65 @@ class BaseCoreTest:
         cocotb.log.warning(f"Hz / CI: {cpi}")
         cocotb.log.warning(f"MIPS: {HZ / (cpi * 1e+6)}")
         cocotb.log.warning(f"TFLOPS: {tflops}")
+
+    async def unload_all_regfiles(self, iaddr):
+        # dump from regfiles to memory
+        jcell = (1 << AHBSize.WORD.value)
+        for thread_idx in range(THREADS_CNT):
+            thread_ofs = thread_idx * (REGFILE_SZ + 1)
+            pc_start_addr = iaddr + thread_ofs * jcell
+            cocotb.log.debug(f"Make thread-{thread_idx} instructions with {pc_start_addr:08x} offset")
+            for reg_idx in range(REGFILE_SZ):
+                addr_ofs = (thread_ofs + reg_idx) * jcell
+                InstItem(CISI(op=StoreOpTE.SW,
+                              imm = addr_ofs,
+                              rd_addr = 0,
+                              rs1_addr = 0,
+                              rs2_addr = reg_idx),
+                         self.ahb_slave_ftc, addr=iaddr + addr_ofs)
+                cocotb.log.debug(f"Sended instruction for {reg_idx}-reg by {(iaddr + addr_ofs):08x} address")
+
+            InstItem(CIUI(op=UPPopTE.RET,
+                          imm = 0x00,
+                          rd_addr = 0),
+                    self.ahb_slave_ftc, iaddr + addr_ofs + jcell)
+            cocotb.log.debug(f"Sended instruction EoP by {(iaddr + addr_ofs + jcell):08x} address")
+
+            cocotb.start_soon(self.cnt_busy_cycles(REGFILE_SZ + 1))
+            thread_en_mask = 1 << thread_idx
+            cocotb.log.debug(f"thread_en_mask: {thread_en_mask}")
+            await self.apb_master_csr.write(CSRAddr.TU_EN.value    , thread_en_mask,    0b1111)
+            await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , pc_start_addr ,    0b1111)
+            await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1           ,    0b1111)
+
+            while (self.dut.busy_o.value == 1):
+                await ClockCycles(self.clk, 1)
+
+        # load dump from memory
+        regfile_l = []
+        for thread_idx in range(THREADS_CNT):
+            thread_ofs = thread_idx * (REGFILE_SZ + 1)
+            reg_l = []
+            cocotb.log.debug(f"THREAD: {thread_idx}")
+            for reg_idx in range(REGFILE_SZ):
+                addr_ofs = (thread_ofs + reg_idx) * jcell
+                cocotb.log.debug(f"addr_ofs: {addr_ofs:08x}")
+                reg_data = self.ahb_slave_lsu.read_word(addr_ofs)
+                reg_l.append(reg_data)
+            regfile_l.append(reg_l)
+
+        # print dump
+        cocotb.log.info(f"> Regfile dumps <")
+        idx = 0
+        for reg_l in regfile_l:
+            cocotb.log.info(f"Thread: {idx}")
+            jdx = 0
+            for reg in reg_l:
+                if jdx % 8 == 7:
+                    print(f" {reg:08x}", end="\n")
+                elif jdx % 8 == 0:
+                    print(f"{jdx:03x}:{(jdx+8):03x}: {reg:08x}", end="")
+                else:
+                    print(f" {reg:08x}", end="")
+                jdx += 1
+            idx += 1

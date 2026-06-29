@@ -1,19 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Fri Jun 26 12:31:11 2026
+[*] Mon Jun 29 12:51:38 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Fri Jun 26 12:26:52 2026"
-[dumpfile_size] 47932278
+[dumpfile_mtime] "Mon Jun 29 12:47:49 2026"
+[dumpfile_size] 41230753
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 9773300
+[timestart] 36016300
 [size] 1920 1116
 [pos] -1 -1
-*-14.951603 9838400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-16.751602 36110000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
+[treeopen] core.core_decoder_u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
+[treeopen] core.core_fetcher_u.
+[treeopen] core.core_fetcher_u.instr_o.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
 [treeopen] core.gen_threads[0].
 [treeopen] core.gen_threads[0].thread_unit_u.
@@ -33,7 +36,7 @@ core.busy_o
 @200
 -M
 -DECODER
-@c00200
+@800200
 -CMD
 @2022
 ^1 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
@@ -48,7 +51,9 @@ core.core_decoder_u.gen_debug_info.command.rs1_a[4:0]
 core.core_decoder_u.gen_debug_info.command.rs2_a[4:0]
 core.core_decoder_u.gen_debug_info.command.rs3_a[4:0]
 core.core_decoder_u.gen_debug_info.cmd_idx[31:0]
-@1401200
+@28
+core.core_decoder_u.cmd_op_type[1:0]
+@1000200
 -CMD
 @200
 -TU
@@ -150,7 +155,6 @@ core.gen_threads[2].thread_unit_u.rd[31:0]
 ^2 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/tu_state.txt
 core.gen_threads[2].thread_unit_u.thread_state[1:0]
 @28
-core.gen_threads[2].thread_unit_u.state[2:0]
 core.gen_threads[2].thread_unit_u.dec_cmd_valid
 @22
 core.gen_threads[2].thread_unit_u.dec_cmd.a1[4:0]
@@ -208,18 +212,24 @@ core.core_arbitrage_u.no_req_from_threads
 -Arbiter
 @200
 -LSU
-@c00200
+@800201
 -LSU
-@22
+@23
 core.core_lsu_u.ahb_master_u.haddr[31:0]
 core.core_lsu_u.ahb_master_u.hwdata[31:0]
 core.core_lsu_u.ahb_master_u.hrdata[31:0]
-@1401200
+@1000201
 -LSU
 @200
 -FETCHER
 @c00200
 -FETCHER
+@28
+core.core_fetcher_u.inst_q_empty
+core.core_fetcher_u.store_inst
+core.core_fetcher_u.q_data_give
+@22
+core.core_fetcher_u.getted_data[31:0]
 @28
 core.core_fetcher_u.q_data_get
 @c00200
@@ -244,15 +254,9 @@ core.core_fetcher_u.ahb_master_u.next_state[2:0]
 @200
 -CMD
 -DEBUG
-@22
-core.gen_threads[0].thread_unit_u.fpu_result.result_data[63:0]
 @28
-core.gen_threads[0].thread_unit_u.fp_format_data[2:0]
-@22
-core.gen_threads[0].thread_unit_u.op_1[31:0]
-core.gen_threads[0].thread_unit_u.op_2[31:0]
-core.gen_threads[0].thread_unit_u.op_3[31:0]
-core.gen_threads[0].thread_unit_u.op_2[31:0]
-core.gen_threads[0].thread_unit_u.op_1[31:0]
+core.core_fetcher_u.instr_o.op_type[1:0]
+core.core_fetcher_u.next_inst_ptr_q[2:0]
+core.core_fetcher_u.inst_ptr_q[2:0]
 [pattern_trace] 1
 [pattern_trace] 0
