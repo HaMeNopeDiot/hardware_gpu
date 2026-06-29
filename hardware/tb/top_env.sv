@@ -39,6 +39,7 @@ module top_env
 region DEFINITIONS
 //============================================================================*/
 typedef logic [MEM_DW - 1: 0] mem_t [NUM_REG_MEM];
+typedef int mem_func_t [NUM_REG_MEM];
 
 /* verilator lint_off UNUSEDSIGNAL */
 ahb_mports_t    lsu_ahb_o, fet_ahb_o;
@@ -69,7 +70,8 @@ involved with implementing bank switching based on the most significant bit for
 this testbench, so I decided to keep it as is.*/
 
 // load memory with data
-function automatic load_values(input mem_t data);
+export "DPI-C" function load_values;
+function automatic load_values(input mem_func_t data);
     for (int unsigned i = 0; i < (1 << (RMEM_AW - 1)); i++) begin
         ahb_fet_mem_u.mem[i] = data[i];
         ahb_lsu_mem_u.mem[i] = data[(1 << (RMEM_AW - 1)) + i];
@@ -77,8 +79,9 @@ function automatic load_values(input mem_t data);
 endfunction
 
 // save values from memory. Reterns mem_t data
-function automatic mem_t save_values();
-    mem_t lmem;
+// export "DPI-C" function save_values;
+function automatic mem_func_t save_values();
+    mem_func_t lmem;
     for (int unsigned i = 0; i < NUM_REG_MEM; i++) begin
         lmem[i]                          = ahb_fet_mem_u.mem[i];
         lmem[(1 << (RMEM_AW - 1)) + i]   = ahb_lsu_mem_u.mem[i];
@@ -167,6 +170,7 @@ endtask
 
 // Start Core
 // verilog_lint: waive explicit-task-lifetime
+export "DPI-C" task start;
 task start();
     logic [MEM_DW - 1: 0] vid       [THREAD_CNT];
     logic [MEM_DW - 1: 0] start_pc;
@@ -199,6 +203,7 @@ task start();
 endtask
 
 // verilog_lint: waive explicit-function-lifetime
+export "DPI-C" function is_done;
 function logic is_done();
     return core_busy_fe;
 endfunction
@@ -206,11 +211,6 @@ endfunction
 /*============================================================================//
 region INITIAL
 //============================================================================*/
-
-initial begin
-    $readmemh("mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
-    $readmemb("mem/vertex_shader.mem", ahb_fet_mem_u.mem);
-end
 
 /*============================================================================//
 region LOGIC

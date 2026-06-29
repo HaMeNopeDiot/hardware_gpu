@@ -538,6 +538,15 @@ if with_platform_android and get_option('platform-sdk-version') >= 29
   add_project_link_arguments('-Wl,-plugin-opt=-emulated-tls=0', language: ['c', 'cpp'])
 endif
 
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/Vtop_env__ALL.a', language: ['c', 'cpp'])
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/verilated.o', language: ['c', 'cpp'])
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/verilated_threads.o', language: ['c', 'cpp'])
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/verilated_vcd_c.o', language: ['c', 'cpp'])
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/verilated_timing.o', language: ['c', 'cpp'])
+add_project_link_arguments('-Wl,' + meson.project_source_root() + '/../hardware/build/verilated_dpi.so', language: ['c', 'cpp'])
+c_cpp_args += '-lm -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd'
+
+
 # -mtls-dialect=gnu2 speeds up non-initial-exec TLS significantly but requires
 # full toolchain (including libc) support.
 have_mtls_dialect = false
