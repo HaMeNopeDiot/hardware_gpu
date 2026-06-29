@@ -94,8 +94,8 @@ class ISACheckTest(BaseCoreTest):
 
         # do
         cocotb.start_soon(self.cnt_busy_cycles(14))
-        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4,       0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,       0b1111)
 
         while (self.dut.busy_o.value == 1):
             await ClockCycles(self.clk, 1)

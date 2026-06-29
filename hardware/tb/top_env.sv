@@ -188,6 +188,8 @@ task start();
                 end
                 // set start program counter
                 apb_write((CSR_AW)'(R_PC_OFS),         (MEM_DW)'(start_pc));
+                // Enable all threads
+                apb_write((CSR_AW)'(R_TU_EN_OFS),      (MEM_DW)'((1 << THREAD_CNT) - 1));
                 // launch core
                 apb_write((CSR_AW)'(R_CORE_CTRL_OFS),  (MEM_DW)'(1));
                 active = 1;

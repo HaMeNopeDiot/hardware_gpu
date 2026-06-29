@@ -69,10 +69,11 @@ class BaseCoreTest:
                                     clock = dut.clk,
                                     reset = dut.rst_n)
 
-        await self.apb_master_csr.write(CSRAddr.CORE_VID.value       , 0x0, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x4 , 0x1, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x8 , 0x2, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0xC , 0x3, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.TU_EN.value             , 0b1111, 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value          , 0x0   , 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x4    , 0x1   , 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0x8    , 0x2   , 0b1111)
+        await self.apb_master_csr.write(CSRAddr.CORE_VID.value + 0xC    , 0x3   , 0b1111)
 
     async def body(self):
         pass # virtual
