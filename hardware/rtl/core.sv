@@ -205,9 +205,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         thread_sel_d1 <= thread_sel;
 end
 
-logic  thread_change;
-assign thread_change = thread_sel_valid;
-
 
 reg_if               rt_if [THREAD_CNT](); // registers thread interface
 reg_if               rl_if ();             // registers lsu interface
@@ -345,7 +342,7 @@ core_lsu #(
     //=============### SIGNALS FROM DECODER ###==============//
     .lsu_op            (lsu_cmd            ),   // <-
     .lsu_op_valid      (lsu_cmd_valid      ),   // <-
-    .thread_req_start  (thread_change      ),   // <-
+    .thread_req_start  (thread_sel_valid   ),   // <-
     .threads_req_done  (no_req_from_threads),   // <-
     //===========### SIGNALS FROM THREAD UNIT ###============//
     .r_if              (rl_if.lsu          ),   // <->
