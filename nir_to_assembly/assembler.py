@@ -22,13 +22,13 @@ class Assembler:
         #
         # I will not have any time to properly integrate your core into the llvmpipe, so set numbers below to whatever you want
         #
-        ".gl_Position_base": 0x2000_0000,
+        ".gl_Position_base": 0x0000_1000,
         ".gl_Position_stride": 0x0000_00C0,
         #
-        "vVaryingColor_base": 0x2000_0010,
+        "vVaryingColor_base": 0x0000_10C0,
         "vVaryingColor_stride": 0x000_00C0,
         #
-        "stack_base": 0x3000_0000,
+        "stack_base": 0x0000_2000,
         "stack_size": 0x0000_0100,
     }
 
@@ -71,23 +71,24 @@ class Assembler:
     }
 
     INSTRUCTION_OPCODES = {
-        "lw":       0b010_0000, # L
-        "sw":       0b110_0000, # S
-        "lui":      0b000_0000, # U
-        "addi":     0b010_0001, # L
-        "fadd":     0b100_0010, # F
-        "fmul":     0b100_0011, # F
-        "fdiv":     0b100_0100, # F
-        "fsqrt":    0b100_0101, # F
-        "fneg":     0b100_0110, # F
-        "fmax":     0b100_0111, # F
-        "add":      0b110_0001, # S
-        "mul":      0b110_0010, # S
-        "ret":      0b000_0001, # U
+        "lw": 0b010_0000,  # L
+        "sw": 0b110_0000,  # S
+        "lui": 0b000_0000,  # U
+        "addi": 0b010_0001,  # L
+        "fadd": 0b100_0010,  # F
+        "fmul": 0b100_0011,  # F
+        "fdiv": 0b100_0100,  # F
+        "fsqrt": 0b100_0101,  # F
+        "fneg": 0b100_0110,  # F
+        "fmax": 0b100_0111,  # F
+        "add": 0b110_0001,  # S
+        "mul": 0b110_0010,  # S
+        "ret": 0b000_0001,  # U
     }
 
     def __init__(self) -> None:
         self.binary = b""
+        self.text = ""
 
     def assemble(self, source_code: list[Instruction]) -> bytes:
         """
@@ -273,6 +274,7 @@ class Assembler:
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rd << 20) | (rs1 << 15) | (imm << 0)
         self.binary += code.to_bytes(4, byteorder="little", signed=False)
+        self.text += f"{code:08x}\n"
 
     def __F_type_instruction(
         self,
@@ -303,6 +305,7 @@ class Assembler:
             | (imm << 0)
         )
         self.binary += code.to_bytes(4, byteorder="little", signed=False)
+        self.text += f"{code:08x}\n"
 
     def __S_type_instruction(
         self, imm: int = 0, rd: int = 0, rs2: int = 0, rs1: int = 0, opcode: int = 0
@@ -315,6 +318,7 @@ class Assembler:
             and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rd << 20) | (rs2 << 15) | (rs1 << 10) | (imm << 0)
+        self.text += f"{code:08x}\n"
         self.binary += code.to_bytes(4, byteorder="little", signed=False)
 
     def __U_type_instruction(self, imm: int = 0, rd: int = 0, opcode: int = 0):
@@ -322,4 +326,5 @@ class Assembler:
             imm.bit_length() <= 20 and rd.bit_length() <= 5 and opcode.bit_length() <= 7
         ), "One of the elements requires more bits, than the instruction type allows"
         code = (opcode << 25) | (rd << 20) | (imm << 0)
+        self.text += f"{code:08x}\n"
         self.binary += code.to_bytes(4, byteorder="little", signed=False)

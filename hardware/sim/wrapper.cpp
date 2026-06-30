@@ -22,7 +22,7 @@ MyVtop verilator_rtl_init(void) {
     assert(scope);
     svSetScope(scope);
 
-    // Verilated::traceEverOn(true);
+    Verilated::traceEverOn(true);
 
     const int RESET_TIMING = 3;
     for (int i = 0; i < RESET_TIMING; i++) {
@@ -49,7 +49,7 @@ void verilator_rtl_run(MyVtop item) {
     VerilatedContext *contextp = (VerilatedContext *)item.contextp;
 
     vtop->start();
-    const int MAX_ITERATIONS = 100;
+    const int MAX_ITERATIONS = 30000;
     int iter = 0;
     while (!vtop->is_done() && iter < MAX_ITERATIONS) {
         vtop->eval();
