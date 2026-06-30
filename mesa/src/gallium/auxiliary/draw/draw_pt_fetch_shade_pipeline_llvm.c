@@ -607,6 +607,13 @@ typedef struct {
 MyVtop verilator_rtl_init(void);
 void verilator_rtl_destroy(MyVtop item);
 void verilator_rtl_run(MyVtop item);
+void verilator_rtl_read_outputs(
+    MyVtop item,
+    float *buffer,
+    size_t height,
+    size_t width,
+    int print_debug
+);
 
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
@@ -714,33 +721,35 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       //
 
       /* Run vertex fetch shader */
-      clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
-                                                &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
-                                                llvm_vert_info.verts,
-                                                draw->pt.user.vbuffer,
-                                                fetch_info->count,
-                                                start,
-                                                fpme->vertex_size,
-                                                draw->pt.vertex_buffer,
-                                                draw->instance_id,
-                                                vertex_id_offset,
-                                                draw->start_instance,
-                                                elts,
-                                                draw->pt.user.drawid,
-                                                draw->pt.user.viewid);
+      // clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
+      //                                           &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
+      //                                           llvm_vert_info.verts,
+      //                                           draw->pt.user.vbuffer,
+      //                                           fetch_info->count,
+      //                                           start,
+      //                                           fpme->vertex_size,
+      //                                           draw->pt.vertex_buffer,
+      //                                           draw->instance_id,
+      //                                           vertex_id_offset,
+      //                                           draw->start_instance,
+      //                                           elts,
+      //                                           draw->pt.user.drawid,
+      //                                           draw->pt.user.viewid);
 
-      MyVtop simulation = verilator_rtl_init();
-      verilator_rtl_run(simulation);
-      verilator_rtl_destroy(simulation);
 
       /* Finished with fetch and vs */
+      // the image is always in bounds of the screen
+      clipped = false;
+
+
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      printf("Vertex shader output:\n");
-      printf("Vertex size: %d\n", vert_info->vertex_size);
-      printf("Stride: %d\n", vert_info->stride);
-      printf("Count: %d\n", vert_info->count);
+      MyVtop simulation = verilator_rtl_init();
+      verilator_rtl_run(simulation);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, 768, 1024, 1);
+      verilator_rtl_destroy(simulation);
+      exit(0);
 
 
       // printf("AFTER: \n");
@@ -758,8 +767,6 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       //    }
 
       // }
-
-      exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment
