@@ -600,6 +600,13 @@ int vertecies_info(struct draw_context * draw) {
    return 0;
 }
 
+typedef struct {
+    void *contextp;
+    void *vtop;
+} MyVtop;
+MyVtop verilator_rtl_init(void);
+void verilator_rtl_destroy(MyVtop item);
+void verilator_rtl_run(MyVtop item);
 
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
@@ -670,7 +677,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
          elts = fetch_info->elts;
       }
 
-      clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
+      // clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
 
       // Finding Ubo(Nemo)
       // printf("User.vbuffer: %d\n", draw->pt.user.vbuffer->size);
@@ -722,14 +729,18 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
                                                 draw->pt.user.drawid,
                                                 draw->pt.user.viewid);
 
+      MyVtop simulation = verilator_rtl_init();
+      verilator_rtl_run(simulation);
+      verilator_rtl_destroy(simulation);
+
       /* Finished with fetch and vs */
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      // printf("Vertex shader output:\n");
-      // printf("Vertex size: %d\n", vert_info->vertex_size);
-      // printf("Stride: %d\n", vert_info->stride);
-      // printf("Count: %d\n", vert_info->count);
+      printf("Vertex shader output:\n");
+      printf("Vertex size: %d\n", vert_info->vertex_size);
+      printf("Stride: %d\n", vert_info->stride);
+      printf("Count: %d\n", vert_info->count);
 
 
       // printf("AFTER: \n");
@@ -748,7 +759,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
 
       // }
 
-      // exit(0);
+      exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment

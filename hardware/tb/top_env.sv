@@ -31,14 +31,17 @@ module top_env
 
     localparam  int unsigned STROBE         = MEM_DW / 8,
     localparam  int unsigned NUM_REG_MEM    = 1 << RMEM_AW
-) (
-    input logic clk,
-    input logic rst_n
-);
+) ();
+logic clk;
+logic rst_n;
+
+always #5 clk = ~clk;
+
 /*============================================================================//
 region DEFINITIONS
 //============================================================================*/
 typedef logic [MEM_DW - 1: 0] mem_t [NUM_REG_MEM];
+typedef int mem_func_t [(1 << RMEM_AW)];
 
 /* verilator lint_off UNUSEDSIGNAL */
 ahb_mports_t    lsu_ahb_o, fet_ahb_o;
@@ -69,22 +72,36 @@ involved with implementing bank switching based on the most significant bit for
 this testbench, so I decided to keep it as is.*/
 
 // load memory with data
-function automatic load_values(input mem_t data);
-    for (int unsigned i = 0; i < (1 << (RMEM_AW - 1)); i++) begin
-        ahb_fet_mem_u.mem[i] = data[i];
-        ahb_lsu_mem_u.mem[i] = data[(1 << (RMEM_AW - 1)) + i];
+export "DPI-C" function load_values;
+function automatic load_values(input mem_func_t data);
+    for (int unsigned i = 0; i < (1 << RMEM_AW); i++) begin
+        ahb_lsu_mem_u.mem[i] = data[i];
     end
 endfunction
 
 // save values from memory. Reterns mem_t data
-function automatic mem_t save_values();
-    mem_t lmem;
-    for (int unsigned i = 0; i < NUM_REG_MEM; i++) begin
-        lmem[i]                          = ahb_fet_mem_u.mem[i];
-        lmem[(1 << (RMEM_AW - 1)) + i]   = ahb_lsu_mem_u.mem[i];
-    end
-    return lmem;
+// DESPAIR!
+parameter int OUTPUT_ATTRIBUTES_BASE   = 0;
+parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 192;
+parameter int OUTPUT_ATTRIBUTES_ATTR_STRIDE = 16;
+parameter int OUTPUT_ATTRIBUTES_COORD_STRIDE = 4;
+export "DPI-C" function get_vertex_attribute;
+function automatic int get_vertex_attribute(
+    input int vertex_id,
+    input int attribute_id,
+    input int coord_id
+);
+    int attribute;
+    int address;
+
+    address = OUTPUT_ATTRIBUTES_BASE;
+    address += OUTPUT_ATTRIBUTES_VERTEX_STRIDE * vertex_id;
+    address += OUTPUT_ATTRIBUTES_ATTR_STRIDE * attribute_id;
+    address += OUTPUT_ATTRIBUTES_COORD_STRIDE * coord_id;
+
+    return ahb_lsu_mem_u.mem[address];
 endfunction
+
 
 // section APB
 //----------------------------------------------------------------------------//
@@ -167,6 +184,7 @@ endtask
 
 // Start Core
 // verilog_lint: waive explicit-task-lifetime
+export "DPI-C" task start;
 task start();
     logic [MEM_DW - 1: 0] vid       [THREAD_CNT];
     logic [MEM_DW - 1: 0] start_pc;
@@ -201,6 +219,7 @@ task start();
 endtask
 
 // verilog_lint: waive explicit-function-lifetime
+export "DPI-C" function is_done;
 function logic is_done();
     return core_busy_fe;
 endfunction
@@ -210,8 +229,15 @@ region INITIAL
 //============================================================================*/
 
 initial begin
-    $readmemh("mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
-    $readmemb("mem/vertex_shader.mem", ahb_fet_mem_u.mem);
+    $dumpfile("top_env.vcd");
+    $dumpvars(0, top_env);
+
+    clk = '0;
+    rst_n = '0;
+    #3 rst_n = '1;
+
+    $readmemh("../hardware/mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
+    $readmemh("../hardware/mem/vertex_shader.mem", ahb_fet_mem_u.mem);
 end
 
 /*============================================================================//
