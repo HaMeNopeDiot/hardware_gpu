@@ -62,3 +62,5 @@ class CoreOp(Enum):
     ADD     = 10
     MUL     = 11
     RET     = 12
+
+FPU_OP = {CoreOp.FADD, CoreOp.FMUL, CoreOp.FDIV, CoreOp.FSQRT, CoreOp.FNEG, CoreOp.FMAX}

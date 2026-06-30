@@ -22,7 +22,7 @@ module top_env
     import core_regblk_pkg::*;
 #(
     parameter   int unsigned MEM_AW         = 32,
-    parameter   int unsigned CSR_AW         = 7,
+    parameter   int unsigned CSR_AW         = 6,
     parameter   int unsigned MEM_DW         = 32,
     parameter   int unsigned REGFILE_SZ     = 32,
     parameter   int unsigned THREAD_CNT     = 4,
@@ -107,7 +107,8 @@ endfunction
 //----------------------------------------------------------------------------//
 
 // Clear APB bus as Master
-task automatic apb_release_bus();
+// verilog_lint: waive explicit-task-lifetime
+task apb_release_bus();
     apb_in.paddr    <= '0;
     apb_in.pwdata   <= '0;
     apb_in.pstrb    <= '0;
@@ -117,37 +118,38 @@ task automatic apb_release_bus();
 endtask
 
 // Make write txn
-task automatic apb_write(
-    input  logic [CSR_AW - 1: 0]    addr,
-    input  logic [MEM_DW - 1: 0]    data,
-    input  logic [STROBE - 1: 0]    strb       = (STROBE)'('1),
-    input logic                     make_space = 1'b0
-                        );
-    @(posedge clk); // set first cycle (set parameters)
-    apb_in.paddr   = addr;
-    apb_in.pwdata  = data;
-    apb_in.pstrb   = strb;
-    apb_in.psel    = 1'b1;
-    apb_in.pwrite  = 1'b1;
-    apb_in.penable = 1'b0;
-    @(posedge clk); // set second and subsequent cycles
-    apb_in.penable = 1'b1;
-    #1;
-    while (apb_out.pready == 1'b0) begin
-        @(posedge clk);
+// verilog_lint: waive explicit-task-lifetime
+task apb_write(
+        input logic [CSR_AW - 1:0] addr,
+        input logic [MEM_DW - 1:0] data,
+        input logic [STROBE - 1:0] strb = (STROBE)'('1),
+        input logic                make_space = 1'b0
+                            );
+        @(posedge clk); // set first cycle (set parameters)
+        apb_in.paddr   <= addr;
+        apb_in.pwdata  <= data;
+        apb_in.pstrb   <= strb;
+        apb_in.psel    <= 1'b1;
+        apb_in.pwrite  <= 1'b1;
+        apb_in.penable <= 1'b0;
+        @(posedge clk); // set second and subsequent cycles
+        apb_in.penable <= 1'b1;
         #1;
-    end
-    if (apb_out.pslverr)
-        $display ("SLVERR");
-    if (make_space) begin
-        apb_release_bus();
-    end
-endtask
+        while (apb_out.pready == 1'b0) begin
+            @(posedge clk);
+            #1;
+        end
+        if (make_space) begin
+            apb_release_bus();
+        end
+    endtask
+
 
 // Make read txn
-task automatic apb_read(
-    input logic [CSR_AW - 1: 0]     addr,
-    input logic                     make_space = 1'b0
+// verilog_lint: waive explicit-task-lifetime
+task apb_read(
+    input logic [CSR_AW - 1:0] addr,
+    input logic                make_space = 1'b0
                         );
     @(posedge clk); // set first cycle (set parameters)
     #1;
@@ -168,6 +170,7 @@ task automatic apb_read(
     end
 endtask
 
+
 // Activate read txn APB loop. Do not call this task.
 // verilog_lint: waive explicit-task-lifetime
 task monitor_core_active();
@@ -175,9 +178,9 @@ task monitor_core_active();
     begin
         while (active) begin
             apb_read((CSR_AW)'(R_CORE_CTRL_OFS));
-            ccr = apb_out.prdata;
+            ccr <= apb_out.prdata;
             if (ccr[F_CORE_EN_OFS] == '1)
-                active = '0;
+                active <= '0;
         end
     end
 endtask
@@ -190,19 +193,19 @@ task start();
     logic [MEM_DW - 1: 0] start_pc;
     begin
         for (int unsigned i = 0; i < THREAD_CNT; i++) begin
-            vid[i] = (MEM_DW)'(i);
+            vid[i] <= (MEM_DW)'(i);
         end
         // Also you can set theese vid
-        // vid[0]      = 32'(0);
-        // vid[1]      = 32'(1);
-        // vid[2]      = 32'(2);
-        // vid[3]      = 32'(3);
-        start_pc    = 32'(0);
+        // vid[0]      <= 32'(0);
+        // vid[1]      <= 32'(1);
+        // vid[2]      <= 32'(2);
+        // vid[3]      <= 32'(3);
+        start_pc    <= 32'(0);
         fork
             begin
                 // set vid to each thread
                 for (int unsigned i = 0; i < THREAD_CNT; i++) begin
-                    apb_write((CSR_AW)'(RS_VID_OFS), (MEM_DW)'(vid[i]));
+                    apb_write((CSR_AW)'(RS_VID_OFS + i * STROBE), (MEM_DW)'(vid[i]));
                 end
                 // set start program counter
                 apb_write((CSR_AW)'(R_PC_OFS),         (MEM_DW)'(start_pc));
@@ -210,7 +213,9 @@ task start();
                 apb_write((CSR_AW)'(R_TU_EN_OFS),      (MEM_DW)'((1 << THREAD_CNT) - 1));
                 // launch core
                 apb_write((CSR_AW)'(R_CORE_CTRL_OFS),  (MEM_DW)'(1));
-                active = 1;
+                active <= 1;
+                @(posedge clk);
+                apb_release_bus();
                 // Check state of core
                 monitor_core_active();
             end
@@ -232,8 +237,8 @@ initial begin
     $dumpfile("top_env.vcd");
     $dumpvars(0, top_env);
 
-    clk = '0;
-    rst_n = '0;
+    clk      = '0;
+    rst_n    = '0;
     #3 rst_n = '1;
 
     $readmemh("../hardware/mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);

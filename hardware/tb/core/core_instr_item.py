@@ -37,8 +37,20 @@ class CoreInstItem():
         self.imm        = imm
         self.extra      = extra
 
+    def set(self,
+            instr: CoreOp,
+            rs1_addr: int = 0,
+            rs2_addr: int = 0,
+            rs3_addr: int = 0,
+            rd_addr: int = 0,
+            imm: int = 0,
+            extra: int = 0
+            ):
+        pass
+
     def get_opcode(self) -> int:
         return (self.op_type.value << OP_W) | self.op.value
+
 
     def get_op(self) -> CoreOp:
         match self.op_type:

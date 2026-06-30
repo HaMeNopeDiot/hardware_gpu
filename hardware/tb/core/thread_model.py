@@ -13,7 +13,7 @@ import cocotb
 
 from utility.defines        import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT
 
-from core.core_enums        import CoreOp
+from core.core_enums        import CoreOp, FPU_OP
 from core.core_instr_item   import CoreInstItem
 from core.regfile_model     import RegfileModel
 
@@ -52,14 +52,8 @@ class ThreadModel():
     def read_regfile(self, addr: int) -> int:
         return self._regfile.read(addr)
 
-    def _fpu_calc(self, instr: CoreInstItem, op: CoreOp):
-        rs1_addr = instr.rs1_addr
-        rs2_addr = instr.rs2_addr
-        rs1_i754 = self.read_regfile(rs1_addr)
-        rs2_i754 = self.read_regfile(rs2_addr)
-        cocotb.log.debug(f"rs1: {rs1_i754} from {rs1_addr}; rs2: {rs2_i754} from {rs2_addr};")
-        rs1 = ieee754_to_float(rs1_i754, self._dw)
-        rs2 = ieee754_to_float(rs2_i754, self._dw)
+    def _fpu_op_calc(self, op: CoreOp, rs1: float, rs2: float) -> float:
+        rd = 0
         match op:
             case CoreOp.FADD:
                 rd = rs1 + rs2
@@ -75,7 +69,23 @@ class ThreadModel():
                 rd = max(rs1, rs2)
             case _:
                 assert False, f"Unknown Core Op in fpu calc: {op}"
+        return rd
+
+    def _fpu_calc(self, instr: CoreInstItem, op: CoreOp):
+        rs1_addr = instr.rs1_addr
+        rs2_addr = instr.rs2_addr
+        # read registers from setted address
+        rs1_i754 = self.read_regfile(rs1_addr)
+        rs2_i754 = self.read_regfile(rs2_addr)
+        cocotb.log.debug(f"rs1: {rs1_i754} from {rs1_addr}; rs2: {rs2_i754} from {rs2_addr};")
+        # If we use FPU operation we need to convert data for FPU to float from ieee754
+        rs1 = ieee754_to_float(rs1_i754, self._dw)
+        rs2 = ieee754_to_float(rs2_i754, self._dw)
+        # Operate
+        rd = self._fpu_op_calc(op, rs1, rs2)
+        # Convert float result to ieee754
         rd_i754 = float_to_i754(rd, self._dw)
+        # Write result in regfile
         self.write_regfile(instr.rd_addr, rd_i754)
 
     def handle_op(self, instr: CoreInstItem, data: int = 0) -> int:
@@ -86,12 +96,7 @@ class ThreadModel():
         rs2_addr = instr.rs2_addr
         imm = instr.imm
 
-        fpu_ops = {
-            CoreOp.FADD,  CoreOp.FMUL, CoreOp.FDIV,
-            CoreOp.FSQRT, CoreOp.FNEG, CoreOp.FMAX
-        }
-
-        if op in fpu_ops:
+        if op in FPU_OP:
             self._fpu_calc(instr, op)
         else:
             match op:
