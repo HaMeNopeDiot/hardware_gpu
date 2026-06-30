@@ -10,7 +10,7 @@ import cocotb
 import numpy as np
 
 from core.tests.base_itest  import BaseCoreTest
-from fpu.fppconverter import ieee754_to_float, float_to_i754
+from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 
 from core.core_enums      import LoadOpTE, StoreOpTE, FPUopTE, UPPopTE, RoundModeE
 from core.core_instr_item import CILI, CIFI, CISI, CIUI
@@ -116,7 +116,7 @@ class ISACheckTest(BaseCoreTest):
                 r_addr = 0x1080 + ((i * 4) + j) * (1 << 2)
                 r_tmp = self.ahb_slave_lsu.read_memory(r_addr, AHBSize.WORD.value)
                 cocotb.log.info(f"- A: {hex(r_addr)}; D: {r_tmp}")
-                r_val = ieee754_to_float(hex(r_tmp), 32)
+                r_val = hex_ieee754_to_float(hex(r_tmp), 32)
                 r_fpu.append(r_val)
             r_fpu_res.append(r_fpu)
 

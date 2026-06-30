@@ -3,7 +3,7 @@
 import cocotb
 from cocotb.triggers import Timer, ClockCycles
 
-from fpu.fppconverter import ieee754_to_float
+from fpu.fppconverter import hex_ieee754_to_float
 
 from numbers import Real
 from decimal import Decimal
@@ -20,7 +20,7 @@ def print_result(result):
         if len(res) - 2 < 16:
             res = "0x" + (16 + 2 - len(res)) * "0" + res[2:]
         cocotb.log.info(f"TRY TO SEND HEX: {res}")
-        cocotb.log.info(f"RESULT: {(ieee754_to_float(res[2:], 64))}")
+        cocotb.log.info(f"RESULT: {(hex_ieee754_to_float(res[2:], 64))}")
 
 
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
@@ -67,7 +67,7 @@ async def tu_test(dut):
     await ClockCycles(clk, 20)
 
     await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 4))
-    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+    data = hex_ieee754_to_float(hex(tu_bfm.data_o.value), 64)
     await ClockCycles(clk, 10)
     cocotb.log.info(f"data: {data}")
 
@@ -75,7 +75,7 @@ async def tu_test(dut):
     await tu_bfm.drive_dec_cmd(TUCmdItem([4, 2, 3], 5, OperationE.ADD, tag=2))
 
     await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 5))
-    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+    data = hex_ieee754_to_float(hex(tu_bfm.data_o.value), 64)
     await ClockCycles(clk, 10)
     cocotb.log.info(f"data: {data}")
 
@@ -88,7 +88,7 @@ async def tu_test(dut):
 
     await ClockCycles(clk, 10)
     await tu_bfm.drive_lsu_cmd(Lsu2TUCmdItem(DirectionE.READ, 4))
-    data = ieee754_to_float(hex(tu_bfm.data_o.value), 64)
+    data = hex_ieee754_to_float(hex(tu_bfm.data_o.value), 64)
 
 
     await ClockCycles(clk, 30)

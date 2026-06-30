@@ -1,29 +1,26 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Mon Jun 29 12:51:38 2026
+[*] Tue Jun 30 07:06:46 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Mon Jun 29 12:47:49 2026"
-[dumpfile_size] 41230753
+[dumpfile_mtime] "Tue Jun 30 06:52:24 2026"
+[dumpfile_size] 41227607
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
 [timestart] 36016300
 [size] 1920 1116
-[pos] -1 -1
+[pos] -46 -46
 *-16.751602 36110000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
-[treeopen] core.core_decoder_u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
-[treeopen] core.core_fetcher_u.
 [treeopen] core.core_fetcher_u.instr_o.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
-[treeopen] core.gen_threads[0].
 [treeopen] core.gen_threads[0].thread_unit_u.
 [treeopen] core.gen_threads[0].thread_unit_u.cmd.
 [treeopen] core.gen_threads[1].thread_unit_u.
-[treeopen] core.gen_threads[2].
 [treeopen] core.gen_threads[2].thread_unit_u.
+[treeopen] core.gen_threads[3].
 [treeopen] core.gen_threads[3].thread_unit_u.
 [sst_width] 290
 [signals_width] 583
@@ -36,7 +33,7 @@ core.busy_o
 @200
 -M
 -DECODER
-@800200
+@c00200
 -CMD
 @2022
 ^1 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
@@ -53,13 +50,12 @@ core.core_decoder_u.gen_debug_info.command.rs3_a[4:0]
 core.core_decoder_u.gen_debug_info.cmd_idx[31:0]
 @28
 core.core_decoder_u.cmd_op_type[1:0]
-@1000200
+@1401200
 -CMD
 @200
 -TU
-@c00200
--THREADS
 @800200
+-THREADS
 -T0
 @c00200
 -RF
@@ -176,19 +172,58 @@ core.gen_threads[2].thread_unit_u.tu_regfile_u.rf[31][31:0]
 @1401200
 -RF
 -T2
-@c00200
+@800200
 -T3
-@22
+@c00022
 core.gen_threads[3].thread_unit_u.vid_i[31:0]
-@c00200
+@28
+(0)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(1)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(2)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(3)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(4)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(5)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(6)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(7)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(8)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(9)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(10)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(11)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(12)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(13)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(14)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(15)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(16)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(17)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(18)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(19)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(20)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(21)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(22)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(23)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(24)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(25)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(26)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(27)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(28)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(29)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(30)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+(31)core.gen_threads[3].thread_unit_u.vid_i[31:0]
+@1401200
+-group_end
+@800201
 -RF
-@22
+@23
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[2][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[3][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[4][31:0]
 core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[5][31:0]
-@1401200
+core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[6][31:0]
+core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[7][31:0]
+core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[8][31:0]
+@1000201
 -RF
+@1000200
 -T3
 -THREADS
 @200
@@ -212,13 +247,13 @@ core.core_arbitrage_u.no_req_from_threads
 -Arbiter
 @200
 -LSU
-@800201
+@c00200
 -LSU
-@23
+@22
 core.core_lsu_u.ahb_master_u.haddr[31:0]
 core.core_lsu_u.ahb_master_u.hwdata[31:0]
 core.core_lsu_u.ahb_master_u.hrdata[31:0]
-@1000201
+@1401200
 -LSU
 @200
 -FETCHER

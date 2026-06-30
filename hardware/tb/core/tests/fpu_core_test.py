@@ -15,7 +15,7 @@ from core.core_enums      import LoadOpTE, StoreOpTE, FPUopTE, UPPopTE, RoundMod
 from core.core_instr_item import CILI, CIFI, CISI, CIUI
 from core.instr_item      import InstItem
 from core.ahb_slave       import AHBSize
-from fpu.fppconverter import ieee754_to_float, float_to_i754
+from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR
 
@@ -87,7 +87,7 @@ class FPUCoreTest(BaseCoreTest):
             r_tmp = self.ahb_slave_lsu.read_memory(r_addr, ahb_size)
             cocotb.log.info(f"- A: {hex(r_addr)}; D: {r_tmp}")
             # print(r_tmp)
-            r_val = ieee754_to_float(hex(r_tmp), 32)
+            r_val = hex_ieee754_to_float(hex(r_tmp), 32)
             res.append(r_val)
 
         cocotb.log.info(f"RESULT FPU: {res}")

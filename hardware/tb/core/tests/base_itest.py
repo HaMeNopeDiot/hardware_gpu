@@ -13,6 +13,7 @@ from core.ahb_slave       import AHBSlaveModel
 from core.ahb_slave       import AHBSize
 from core.apb_master      import APB4Master
 from core.core_model      import CoreModel
+from core.regfile_model   import RegfileModel
 
 from utility.defines    import DW
 
@@ -150,30 +151,30 @@ class BaseCoreTest:
                 await ClockCycles(self.clk, 1)
 
         # load dump from memory
-        regfile_l = []
+        regfiles: list[RegfileModel] = []
         for thread_idx in range(THREADS_CNT):
-            thread_ofs = thread_idx * (REGFILE_SZ + 1)
-            reg_l = []
+            regfile = RegfileModel(name = f"regfile-{thread_idx}")
             cocotb.log.debug(f"THREAD: {thread_idx}")
+            thread_ofs = thread_idx * (REGFILE_SZ + 1)
             for reg_idx in range(REGFILE_SZ):
                 addr_ofs = (thread_ofs + reg_idx) * jcell
                 cocotb.log.debug(f"addr_ofs: {addr_ofs:08x}")
                 reg_data = self.ahb_slave_lsu.read_word(addr_ofs)
-                reg_l.append(reg_data)
-            regfile_l.append(reg_l)
+                regfile.write(reg_idx, reg_data, force=True)
+            regfiles.append(regfile)
 
-        # print dump
-        cocotb.log.info(f"> Regfile dumps <")
-        idx = 0
-        for reg_l in regfile_l:
-            cocotb.log.info(f"Thread: {idx}")
-            jdx = 0
-            for reg in reg_l:
-                if jdx % 8 == 7:
-                    print(f" {reg:08x}", end="\n")
-                elif jdx % 8 == 0:
-                    print(f"{jdx:03x}:{(jdx+8):03x}: {reg:08x}", end="")
-                else:
-                    print(f" {reg:08x}", end="")
-                jdx += 1
-            idx += 1
+        cocotb.log.info(f"Readed regfiles from threads:")
+        for regfile in regfiles:
+            regfile.print()
+        cocotb.log.info(f"Readed regfiles from core:")
+        self.core_model.print()
+
+        for i in range(THREADS_CNT):
+            rf     = regfiles[i]
+            thread = self.core_model._threads[i]
+            for j in range(REGFILE_SZ):
+                rfdata = thread._regfile.read(j)
+                tdata = thread.read_regfile(j)
+                is_equal = tdata == rfdata
+                if not is_equal:
+                    cocotb.log.warning(f"Error on {j} index in {i} thread index. {rfdata:08x} <> {tdata:08x}")

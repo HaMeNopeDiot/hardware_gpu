@@ -16,7 +16,7 @@ from core.thread_model  import ThreadModel
 from core.core_enums    import CoreOp
 from core.core_instr_item   import CoreInstItem
 
-from fpu.fppconverter import ieee754_to_float, float_to_i754
+from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 
 
 class CoreModel():
@@ -111,3 +111,7 @@ class CoreModel():
 
     def set_vid_to_thread(self, vid: int, thread_idx: int):
         self._threads[thread_idx].set_vid(vid)
+
+    def print(self, max_regs_in_col: int = 8):
+        for thread in self._threads:
+            thread.print(max_regs_in_col)

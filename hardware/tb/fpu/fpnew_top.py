@@ -4,7 +4,7 @@ import cocotb
 from cocotb.triggers import Timer, ClockCycles
 
 from fpu.fpu_bfm import FPUBfm
-from fpu.fppconverter import ieee754_to_float
+from fpu.fppconverter import hex_ieee754_to_float
 from fpu.fpu_item import FPUItem, FpFormatE, IntFormatE, OperationE
 
 from numbers import Real
@@ -18,7 +18,7 @@ def print_result(result):
         if len(res) - 2 < 16:
             res = "0x" + (16 + 2 - len(res)) * "0" + res[2:]
         cocotb.log.info(f"TRY TO SEND HEX: {res}")
-        cocotb.log.info(f"RESULT: {(ieee754_to_float(res[2:], 64))}")
+        cocotb.log.info(f"RESULT: {(hex_ieee754_to_float(res[2:], 64))}")
 
 
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):

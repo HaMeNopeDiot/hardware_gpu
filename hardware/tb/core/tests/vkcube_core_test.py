@@ -18,7 +18,7 @@ from core.core_model        import CoreModel
 from core.instr_item        import InstItem
 from core.core_enums        import RoundModeE
 
-from fpu.fppconverter     import ieee754_to_float
+from fpu.fppconverter     import float_to_i754, ieee754_to_float
 
 from utility.bin_unpack   import unpack_bin_file, read_vbuffer
 from utility.addresess    import CSRAddr
@@ -109,10 +109,7 @@ class VKCubeTest(BaseCoreTest):
         float_dump_mem = []
         for i in range(0x2000_0000, 0x2000_0320, 0x4):
             data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
-            if data == 0:
-                fdata = 0
-            else:
-                fdata = ieee754_to_float(hex(data), 32)
+            fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
                 print(f"{fdata}")
             else:
@@ -123,10 +120,7 @@ class VKCubeTest(BaseCoreTest):
         float_dump_model = []
         for i in range(0x2000_0000, 0x2000_0320, 0x4):
             data = self.core_model.read_memory(i)
-            if data == 0:
-                fdata = 0
-            else:
-                fdata = ieee754_to_float(hex(data), 32)
+            fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
                 print(f"{fdata}")
             else:
@@ -136,11 +130,15 @@ class VKCubeTest(BaseCoreTest):
         # compare
         eps = 1e-1
         for i in range(len(float_dump_model)):
-            prox = abs(float_dump_model[i] - float_dump_mem[i])
+            model_data = float_dump_model[i]
+            real_data  = float_dump_mem[i]
+            prox = abs(model_data - real_data)
             is_equal = prox <= eps
             if not is_equal:
-                cocotb.log.error(f"Model not equal real core. REAL: {float_dump_mem[i]} vs MODEL: {float_dump_model[i]} (prox is {prox} > eps)")
+                cocotb.log.error(f"Model not equal real core. REAL: {real_data:08x} vs MODEL: {model_data:08x} (prox is {prox} > eps)")
                 assert is_equal, f"Model not equal real core."
+            if model_data != real_data:
+                cocotb.log.warning(f"{i:3}: real data not eq model data: {float_to_i754(real_data, 32):08x} <> {float_to_i754(model_data, 32):08x}")
 
 
     async def body(self):
