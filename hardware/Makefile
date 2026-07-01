@@ -1,6 +1,5 @@
 RTL_NAME_FILE = rtl
 
-IGNORE_WARNINGS = -Wno-ASCRANGE -Wno-WIDTHEXPAND
 
 LINT_DEFINES = -DLINT=1
 
@@ -28,10 +27,27 @@ WRAPPER_EXTERN_HPP = sim/wrapper.h
 
 mesa: regen_sources sim_build
 
+FPU_ROOT_PATH = cvfpu
+FPU_PWD = $(FPU_ROOT_PATH)/src
+
+
+IGNORE_WARNINGS = -Wno-WIDTHTRUNC \
+				-Wno-WIDTHEXPAND \
+				-Wno-USERWARN \
+				-Wno-ASCRANGE \
+				-Wno-SPLITVAR \
+				-Wno-UNSIGNED \
+				-Wno-UNOPTFLAT
+
 .PHONY: regen_sources
 regen_sources:
-	$(VERILATOR) -cc --timing --trace -f rtl_top.f --top-module $(SIM_TOP) -Mdir $(OBJ_DIR) $(LINT_DEFINES) $(IGNORE_WARNINGS)\
-	    --CFLAGS "-shared -fPIC"
+	$(VERILATOR) -cc --timing --trace --trace-structs -f rtl_core.f --top-module $(SIM_TOP) -Mdir $(OBJ_DIR) $(IGNORE_WARNINGS)\
+	    --CFLAGS "-shared -fPIC" \
+		-I$(FPU_PWD) \
+		-I$(FPU_PWD)/common_cells/src \
+		-I$(FPU_PWD)/common_cells/include \
+		-I$(FPU_ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ \
+		-I$(FPU_ROOT_PATH)/vendor/openc910/C910_RTL_FACTORY/gen_rtl/clk/rtl/
 
 .PHONY: sim_build
 sim_build:
