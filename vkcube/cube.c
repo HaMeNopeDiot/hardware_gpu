@@ -442,7 +442,7 @@ render_cube(struct vkcube *vc, struct vkcube_buffer *b, bool wait_semaphore)
    gettimeofday(&tv, NULL);
 
    t = ((tv.tv_sec * 1000 + tv.tv_usec / 1000) -
-        (vc->start_tv.tv_sec * 1000 + vc->start_tv.tv_usec / 1000)) / 5;
+        (vc->start_tv.tv_sec * 1000 + vc->start_tv.tv_usec / 1000)) / 5 / 25;
 
    esMatrixLoadIdentity(&ubo.modelview);
    esTranslate(&ubo.modelview, 0.0f, 0.0f, -8.0f);

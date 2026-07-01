@@ -223,7 +223,7 @@ endtask
 // Start Core
 // verilog_lint: waive explicit-task-lifetime
 export "DPI-C" task start;
-task start();
+task start(input int start_vid);
     logic [MEM_DW - 1: 0] vid       [THREAD_CNT];
     logic [MEM_DW - 1: 0] start_pc;
     begin
@@ -231,10 +231,10 @@ task start();
             vid[i] <= (MEM_DW)'(i);
         end
         // Also you can set theese vid
-        // vid[0]      <= 32'(0);
-        // vid[1]      <= 32'(1);
-        // vid[2]      <= 32'(2);
-        // vid[3]      <= 32'(3);
+        vid[0]      <= 32'(start_vid);
+        vid[1]      <= 32'(start_vid + 1);
+        vid[2]      <= 32'(start_vid + 2);
+        vid[3]      <= 32'(start_vid + 3);
         start_pc    <= 32'(0);
         fork
             begin
