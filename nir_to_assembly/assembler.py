@@ -23,10 +23,10 @@ class Assembler:
         # I will not have any time to properly integrate your core into the llvmpipe, so set numbers below to whatever you want
         #
         ".gl_Position_base": 0x0000_1000,
-        ".gl_Position_stride": 0x0000_00C0,
+        ".gl_Position_stride": 0x0000_0100,
         #
-        "vVaryingColor_base": 0x0000_10C0,
-        "vVaryingColor_stride": 0x000_00C0,
+        "vVaryingColor_base": 0x0000_1010,
+        "vVaryingColor_stride": 0x000_0100,
         #
         "stack_base": 0x0000_2000,
         "stack_size": 0x0000_0100,
