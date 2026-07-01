@@ -360,8 +360,10 @@ end
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         haddr <= '0;
+    else if (req_txn_i)
+        haddr <= addr_i;
     else
-        haddr <= req_txn_i? addr_i: '0;
+        haddr <= haddr;
 end
 
 /*============================================================================//

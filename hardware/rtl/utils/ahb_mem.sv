@@ -8,14 +8,14 @@
 
 
 module ahb_mem #(
-    parameter int DEPTH             = 1024,
-    parameter int AW                = 32,
-    parameter int DW                = 32,
-    parameter int STRB              = DW / 8,
-    parameter int UNALIGNED_BITS    = $clog2(STRB),
-    parameter bit DEBUG_MODE        = 0,
-    parameter int DEBUG_REGS_TRACE  = 10,
-    parameter int DEBUG_TRACE_OFS   = 0
+    parameter  int DEPTH             = 1024,
+    parameter  int AW                = 32,
+    parameter  int DW                = 32,
+    localparam int STRB              = DW / 8,
+    localparam int UNALIGNED_BITS    = $clog2(STRB),
+    parameter  bit DEBUG_MODE        = 0,
+    parameter  int DEBUG_REGS_TRACE  = 10,
+    parameter  int DEBUG_TRACE_OFS   = 0
 )(
     input  logic                HCLK,
     input  logic                HRESETn,
