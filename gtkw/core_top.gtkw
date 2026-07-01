@@ -1,21 +1,30 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Wed Jul  1 05:33:12 2026
+[*] Wed Jul  1 12:31:27 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/mesa/top_env.vcd"
-[dumpfile_mtime] "Wed Jul  1 05:30:25 2026"
-[dumpfile_size] 354022
+[dumpfile_mtime] "Wed Jul  1 12:10:08 2026"
+[dumpfile_size] 1316877
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/gtkw/core_top.gtkw"
-[timestart] 4295
+[timestart] 5500
 [size] 1920 1116
 [pos] -1 -1
-*-6.600000 3310 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-5.800000 5712 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.top_env.
+[treeopen] TOP.top_env.ahb_lsu_mem_u.
 [treeopen] TOP.top_env.core_u.
-[treeopen] TOP.top_env.core_u.core_decoder_u.
+[treeopen] TOP.top_env.core_u.core_fetcher_u.
+[treeopen] TOP.top_env.core_u.gen_threads[0].
+[treeopen] TOP.top_env.core_u.gen_threads[0].thread_unit_u.
+[treeopen] TOP.top_env.core_u.gen_threads[1].
+[treeopen] TOP.top_env.core_u.gen_threads[1].thread_unit_u.
+[treeopen] TOP.top_env.core_u.gen_threads[2].
+[treeopen] TOP.top_env.core_u.gen_threads[2].thread_unit_u.
+[treeopen] TOP.top_env.core_u.gen_threads[3].
+[treeopen] TOP.top_env.core_u.gen_threads[3].thread_unit_u.
 [sst_width] 209
-[signals_width] 206
+[signals_width] 502
 [sst_expanded] 1
 [sst_vpaned_height] 336
 @28
@@ -36,10 +45,139 @@ TOP.top_env.core_u.core_csrm_hndl_u.apb_slave_u.psel
 TOP.top_env.core_u.core_csrm_hndl_u.apb_slave_u.pprot[2:0]
 @1401200
 -APB
+@200
+-AHB Fetcher
+@c00200
+-Fetcher
+-AHB Fetcher
+@22
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.haddr[31:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hrdata[31:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hwdata[31:0]
 @28
-TOP.top_env.core_u.csr_en
-TOP.top_env.core_u.busy_o
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hsize[2:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.htrans[1:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hburst[2:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.state[2:0]
+@22
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hprot[3:0]
+@28
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hmastlock
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hresp
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.hready
+@1401200
+-AHB Fetcher
+@28
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.req_txn_i
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.state[2:0]
+TOP.top_env.core_u.core_fetcher_u.ahb_master_u.next_state[2:0]
+@1401200
+-Fetcher
+@200
+-AHB LSU
+@c00200
+-AHB LSU
+@c00022
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+@28
+(0)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(1)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(2)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(3)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(4)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(5)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(6)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(7)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(8)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(9)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(10)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(11)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(12)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(13)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(14)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(15)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(16)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(17)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(18)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(19)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(20)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(21)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(22)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(23)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(24)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(25)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(26)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(27)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(28)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(29)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(30)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+(31)TOP.top_env.core_u.core_lsu_u.ahb_master_u.haddr[31:0]
+@1401200
+-group_end
+@22
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hrdata[31:0]
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hwdata[31:0]
+@28
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hwrite
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.htrans[1:0]
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hsize[2:0]
+@22
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hprot[3:0]
+@28
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hburst[2:0]
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hresp
+TOP.top_env.core_u.core_lsu_u.ahb_master_u.hready
+@1401200
+-AHB LSU
+@200
+-Decoder
+@800200
+-Decoder
+@2022
+^1 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/cmd_t.txt
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.dbg_op[3:0]
+@22
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.command[46:0]
+@24
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.dbg_rs1a[4:0]
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.dbg_rs2a[4:0]
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.dbg_rda[4:0]
 @25
 TOP.top_env.core_u.core_decoder_u.gen_debug_info.cmd_idx[31:0]
+@22
+TOP.top_env.core_u.core_decoder_u.gen_debug_info.dbg_imm[19:0]
+@28
+TOP.top_env.core_u.core_decoder_u.ret_inst_o
+@1000200
+-Decoder
+@200
+-Debug
+@22
+TOP.top_env.ahb_lsu_mem_u.HADDR[15:0]
+TOP.top_env.ahb_lsu_mem_u.HWDATA[31:0]
+TOP.top_env.ahb_lsu_mem_u.HRDATA[31:0]
+@200
+-DBG2
+@22
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.tu_regfile_u.rf[15][31:0]
+TOP.top_env.core_u.gen_threads[1].thread_unit_u.tu_regfile_u.rf[15][31:0]
+TOP.top_env.core_u.gen_threads[2].thread_unit_u.tu_regfile_u.rf[15][31:0]
+TOP.top_env.core_u.gen_threads[3].thread_unit_u.tu_regfile_u.rf[15][31:0]
+TOP.top_env.core_u.gen_threads[3].thread_unit_u.tu_regfile_u.rf[20][31:0]
+@200
+-DBG3
+@22
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.addr_w[4:0]
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.data_w[31:0]
+@28
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.fpu_state[2:0]
+@22
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.fpu_result[41:0]
+@28
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.in_ready_o
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.in_valid_i
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.tu_fpu_fsm_u.prev_state[2:0]
+@22
+TOP.top_env.core_u.gen_threads[0].thread_unit_u.fpu_result[41:0]
 [pattern_trace] 1
 [pattern_trace] 0
