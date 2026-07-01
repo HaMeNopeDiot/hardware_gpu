@@ -115,9 +115,9 @@ endfunction
 
 // save values from memory. Reterns mem_t data
 // DESPAIR!
-parameter int OUTPUT_ATTRIBUTES_BASE   = 0;
-parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 192;
-parameter int OUTPUT_ATTRIBUTES_ATTR_STRIDE = 16;
+parameter int OUTPUT_ATTRIBUTES_BASE   = 'h0000_10C0;
+parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 'h0000_00C0;
+parameter int OUTPUT_ATTRIBUTES_ATTR_STRIDE = 'h0000_0010;
 parameter int OUTPUT_ATTRIBUTES_COORD_STRIDE = 4;
 export "DPI-C" function get_vertex_attribute;
 function automatic int get_vertex_attribute(

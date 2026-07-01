@@ -607,6 +607,13 @@ typedef struct {
 MyVtop verilator_rtl_init(void);
 void verilator_rtl_destroy(MyVtop item);
 void verilator_rtl_run(MyVtop item);
+void verilator_rtl_read_outputs(
+    MyVtop item,
+    float *buffer,
+    size_t height,
+    size_t width,
+    int print_debug
+);
 
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
@@ -729,36 +736,52 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
                                                 draw->pt.user.drawid,
                                                 draw->pt.user.viewid);
 
-      MyVtop simulation = verilator_rtl_init();
-      verilator_rtl_run(simulation);
-      verilator_rtl_destroy(simulation);
 
       /* Finished with fetch and vs */
+      // the image is always in bounds of the screen
+      // clipped = false;
+
+
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      printf("Vertex shader output:\n");
-      printf("Vertex size: %d\n", vert_info->vertex_size);
-      printf("Stride: %d\n", vert_info->stride);
-      printf("Count: %d\n", vert_info->count);
+      printf("True shader output: \n");
+      for (size_t i = 0; i < vert_info->count; i++) {
+         printf("\tVertex: %d\n", (int)i);
+         float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+
+         for (size_t j = 0; j < 2; j++) {
+            printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+
+            for (size_t k = 0; k < 4; k++) {
+               printf("%f ", ptr[j*4 + k]);
+            }
+            printf("\n");
+         }
+      }
 
 
-      // printf("AFTER: \n");
-      // for (size_t i = 0; i < vert_info->count; i++) {
-      //    printf("\tVertex: %d\n", (int)i);
-      //    float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+      MyVtop simulation = verilator_rtl_init();
+      verilator_rtl_run(simulation);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, 768, 1024, 1);
+      verilator_rtl_destroy(simulation);
 
-      //    for (size_t j = 0; j < 2; j++) {
-      //       printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
 
-      //       for (size_t k = 0; k < 4; k++) {
-      //          printf("%f ", ptr[j*4 + k]);
-      //       }
-      //       printf("\n");
-      //    }
 
-      // }
+      printf("Simulation memory footprint, true offsets: \n");
+      for (size_t i = 0; i < vert_info->count; i++) {
+         printf("\tVertex: %d\n", (int)i);
+         float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
 
+         for (size_t j = 0; j < 2; j++) {
+            printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+
+            for (size_t k = 0; k < 4; k++) {
+               printf("%f ", ptr[j*4 + k]);
+            }
+            printf("\n");
+         }
+      }
       exit(0);
    }
 

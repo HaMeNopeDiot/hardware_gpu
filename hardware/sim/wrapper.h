@@ -7,6 +7,8 @@
 #define EXTERNC
 #endif
 
+#include <stdlib.h>
+
 typedef struct {
     void *contextp;
     void *vtop;
@@ -16,12 +18,15 @@ EXTERNC MyVtop verilator_rtl_init(void);
 EXTERNC void verilator_rtl_destroy(MyVtop item);
 
 EXTERNC void verilator_rtl_write_inputs(
-   float *buffer,
-   unsigned int buffer_len
+    float *buffer,
+    unsigned int buffer_len
 );
 EXTERNC void verilator_rtl_read_outputs(
-   float *buffer,
-   unsigned int buffer_len
+    MyVtop item,
+    float *buffer,
+    size_t height,
+    size_t width,
+    int print_debug
 );
 EXTERNC void verilator_rtl_run(MyVtop item);
 
