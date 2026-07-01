@@ -26,12 +26,14 @@ SIM_TOP=top_env
 WRAPPER_EXTERN_CPP = sim/wrapper.cpp
 WRAPPER_EXTERN_HPP = sim/wrapper.h
 
+mesa: regen_sources sim_build
+
+.PHONY: regen_sources
 regen_sources:
 	$(VERILATOR) -cc --timing --trace -f rtl_top.f --top-module $(SIM_TOP) -Mdir $(OBJ_DIR) $(LINT_DEFINES) $(IGNORE_WARNINGS)\
 	    --CFLAGS "-shared -fPIC"
-	cat $(WRAPPER_EXTERN_CPP) >> $(OBJ_DIR)/V$(SIM_TOP).cpp
-	cat $(WRAPPER_EXTERN_HPP) >> $(OBJ_DIR)/V$(SIM_TOP).h
 
+.PHONY: sim_build
 sim_build:
 	make -C $(OBJ_DIR) -f V$(SIM_TOP).mk -j 5
 	g++ -o $(OBJ_DIR)/verilated_dpi.so /usr/share/verilator/include/verilated_dpi.cpp -pthread -lpthread -latomic -shared -fPIC -lm -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd

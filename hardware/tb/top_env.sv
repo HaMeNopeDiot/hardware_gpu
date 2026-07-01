@@ -72,34 +72,35 @@ involved with implementing bank switching based on the most significant bit for
 this testbench, so I decided to keep it as is.*/
 
 // load memory with data
-export "DPI-C" function load_values;
-function automatic load_values(input mem_func_t data);
-    for (int unsigned i = 0; i < (1 << RMEM_AW); i++) begin
-        ahb_lsu_mem_u.mem[i] = data[i];
-    end
+export "DPI-C" function read_data_mem;
+function automatic int read_data_mem(input int address);
+    return ahb_lsu_mem_u.mem[address];
 endfunction
 
-// save values from memory. Reterns mem_t data
-// DESPAIR!
-parameter int OUTPUT_ATTRIBUTES_BASE   = 'h0000_10C0;
-parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 'h0000_00C0;
-parameter int OUTPUT_ATTRIBUTES_ATTR_STRIDE = 'h0000_0010;
-parameter int OUTPUT_ATTRIBUTES_COORD_STRIDE = 4;
-export "DPI-C" function get_vertex_attribute;
-function automatic int get_vertex_attribute(
-    input int vertex_id,
-    input int attribute_id,
-    input int coord_id
-);
-    int attribute;
-    int address;
+export "DPI-C" function write_data_mem;
+function automatic write_data_mem(input int address, input int data);
+    ahb_lsu_mem_u.mem[address] = data;
+endfunction
 
-    address = OUTPUT_ATTRIBUTES_BASE;
-    address += OUTPUT_ATTRIBUTES_VERTEX_STRIDE * vertex_id;
-    address += OUTPUT_ATTRIBUTES_ATTR_STRIDE * attribute_id;
-    address += OUTPUT_ATTRIBUTES_COORD_STRIDE * coord_id;
+export "DPI-C" function read_fetcher_mem;
+function automatic int read_fetcher_mem(input int address);
+    return ahb_fet_mem_u.mem[address];
+endfunction
 
-    return ahb_lsu_mem_u.mem[address];
+export "DPI-C" function write_fetcher_mem;
+function automatic write_fetcher_mem(input int address, input int data);
+    ahb_fet_mem_u.mem[address] = data;
+endfunction
+
+// quality of life, for things that are unlikely to change accross simulations
+export "DPI-C" function load_vertex_shader_mem;
+function automatic load_vertex_shader_mem();
+    $readmemh("../hardware/mem/vertex_shader.mem", ahb_fet_mem_u.mem);
+endfunction
+
+export "DPI-C" function load_vertex_buffer_mem;
+function automatic load_vertex_buffer_mem();
+    $readmemh("../hardware/mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
 endfunction
 
 
@@ -234,8 +235,6 @@ initial begin
     rst_n = '0;
     #3 rst_n = '1;
 
-    $readmemh("../hardware/mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
-    $readmemh("../hardware/mem/vertex_shader.mem", ahb_fet_mem_u.mem);
 end
 
 /*============================================================================//

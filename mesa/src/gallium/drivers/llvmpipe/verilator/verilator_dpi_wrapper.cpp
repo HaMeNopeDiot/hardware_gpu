@@ -1,5 +1,7 @@
 
+#include "Vtop_env.h"
 #include "Vtop_env__Dpi.h"
+#include "verilator_dpi_wrapper.h"
 #include <stdint.h>
 #include <verilated_syms.h>
 #include <stdio.h>
@@ -23,6 +25,9 @@ MyVtop verilator_rtl_init(void) {
     svSetScope(scope);
 
     Verilated::traceEverOn(true);
+
+    vtop->load_vertex_shader_mem();
+    vtop->load_vertex_buffer_mem();
 
     const int RESET_TIMING = 3;
     for (int i = 0; i < RESET_TIMING; i++) {
@@ -65,6 +70,20 @@ void verilator_rtl_run(MyVtop item) {
 void verilator_rtl_write_inputs(float *buffer, unsigned int buffer_len){}
 
 
+int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
+   const int OUTPUT_BASE = 0x000010C0;
+   const int OUTPUT_VERTEX_STRIDE = 0x000000C0;
+   const int OUTPUT_ATTRIBUTE_STRIDE = 0x00000010;
+   const int OUTPUT_COORD_STRIDE = 0x00000004;
+
+   int address = OUTPUT_BASE;
+   address += OUTPUT_VERTEX_STRIDE * vertex_id;
+   address += OUTPUT_ATTRIBUTE_STRIDE * attribute_id;
+   address += OUTPUT_COORD_STRIDE * coord_id;
+
+   return address;
+}
+
 typedef union {
    int32_t integer;
    float fp;
@@ -88,7 +107,7 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
         for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
             for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                 mem_t value;
-                value.integer = vtop->get_vertex_attribute(vertex, attribute, coord);
+                value.integer = vtop->read_data_mem(hw_get_output_offset(vertex, attribute, coord));
 
                 size_t address = MESA_VERTEX_BASE;
                 address += MESA_VERTEX_STRIDE * vertex;
