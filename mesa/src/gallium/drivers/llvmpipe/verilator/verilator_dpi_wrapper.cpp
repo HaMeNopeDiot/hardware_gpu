@@ -1,5 +1,7 @@
 
+#include "Vtop_env.h"
 #include "Vtop_env__Dpi.h"
+#include "verilator_dpi_wrapper.h"
 #include <stdint.h>
 #include <verilated_syms.h>
 #include <stdio.h>
@@ -23,6 +25,9 @@ MyVtop verilator_rtl_init(void) {
     svSetScope(scope);
 
     Verilated::traceEverOn(true);
+
+    vtop->load_vertex_shader_mem();
+    vtop->load_vertex_buffer_mem();
 
     const int RESET_TIMING = 3;
     for (int i = 0; i < RESET_TIMING; i++) {
@@ -62,18 +67,42 @@ void verilator_rtl_run(MyVtop item) {
     }
 }
 
-void verilator_rtl_write_inputs(float *buffer, unsigned int buffer_len){}
-
-
 typedef union {
    int32_t integer;
    float fp;
 } mem_t;
-void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_t width, int print_debug){
+void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len){
+   Vtop_env *vtop = (Vtop_env *)item.vtop;
+
+   const int UBO_BASE = 0x00000000;
+
+   for (int i = 0; i < buffer_len; i++) {
+      mem_t value;
+      value.fp = buffer[i];
+      vtop->write_data_mem(UBO_BASE + i, value.integer);
+   }
+}
+
+
+int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
+   const int OUTPUT_BASE = 0x000010C0;
+   const int OUTPUT_VERTEX_STRIDE = 0x000000C0;
+   const int OUTPUT_ATTRIBUTE_STRIDE = 0x00000010;
+   const int OUTPUT_COORD_STRIDE = 0x00000004;
+
+   int address = OUTPUT_BASE;
+   address += OUTPUT_VERTEX_STRIDE * vertex_id;
+   address += OUTPUT_ATTRIBUTE_STRIDE * attribute_id;
+   address += OUTPUT_COORD_STRIDE * coord_id;
+
+   return address;
+}
+
+void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug){
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 
     const size_t MESA_VERTEX_BASE = 0u;
-    const size_t MESA_VERTEX_STRIDE = 77u;
+    const size_t MESA_VERTEX_STRIDE = vertex_stride;
     const size_t MESA_ATTRIBUTE_STRIDE = 4u;
     const size_t MESA_COORD_STRIDE = 1u;
 
@@ -88,7 +117,7 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
         for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
             for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                 mem_t value;
-                value.integer = vtop->get_vertex_attribute(vertex, attribute, coord);
+                value.integer = vtop->read_data_mem(hw_get_output_offset(vertex, attribute, coord));
 
                 size_t address = MESA_VERTEX_BASE;
                 address += MESA_VERTEX_STRIDE * vertex;
@@ -139,8 +168,8 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
         buffer[gl_Position_W] = 1.0f / buffer[gl_Position_W];
 
         // viewport transform
-        buffer[gl_Position_X] = (buffer[gl_Position_X] + 1.0f) * width / 2.0f;
-        buffer[gl_Position_Y] = (buffer[gl_Position_Y] + 1.0f) * width / 2.0f;
+        buffer[gl_Position_X] = (buffer[gl_Position_X] + 1.0f) * width;
+        buffer[gl_Position_Y] = (buffer[gl_Position_Y] + 1.0f) * height;
     }
 
 
