@@ -49,11 +49,11 @@ void verilator_rtl_destroy(MyVtop item) {
 }
 
 
-void verilator_rtl_run(MyVtop item) {
+void verilator_rtl_run(MyVtop item, int start_vid) {
     Vtop_env *vtop = (Vtop_env *)item.vtop;
     VerilatedContext *contextp = (VerilatedContext *)item.contextp;
 
-    vtop->start();
+    vtop->start(start_vid);
     const int MAX_ITERATIONS = 30000;
     int iter = 0;
     while (!vtop->is_done() && iter < MAX_ITERATIONS) {
@@ -98,7 +98,8 @@ int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
    return address;
 }
 
-void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug){
+void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug,
+int vertex_offset){
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 
     const size_t MESA_VERTEX_BASE = 0u;
@@ -117,7 +118,7 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride
         for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
             for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                 mem_t value;
-                int hw_address = hw_get_output_offset(vertex, attribute, coord);
+                int hw_address = hw_get_output_offset(vertex_offset + vertex, attribute, coord);
                 value.integer = vtop->read_data_mem(hw_address);
 
                 size_t address = MESA_VERTEX_BASE;

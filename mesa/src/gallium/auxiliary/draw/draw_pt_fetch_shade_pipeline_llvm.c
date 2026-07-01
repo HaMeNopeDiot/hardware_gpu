@@ -606,7 +606,7 @@ typedef struct {
 } MyVtop;
 MyVtop verilator_rtl_init(void);
 void verilator_rtl_destroy(MyVtop item);
-void verilator_rtl_run(MyVtop item);
+void verilator_rtl_run(MyVtop item, int start_vid);
 void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len);
 void verilator_rtl_read_outputs(
     MyVtop item,
@@ -614,7 +614,8 @@ void verilator_rtl_read_outputs(
     size_t vertex_stride,
     size_t height,
     size_t width,
-    int print_debug
+    int print_debug,
+    int vertex_offset
 );
 
 static void
@@ -723,31 +724,31 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       //
 
       /* Run vertex fetch shader */
-      clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
-                                                &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
-                                                llvm_vert_info.verts,
-                                                draw->pt.user.vbuffer,
-                                                fetch_info->count,
-                                                start,
-                                                fpme->vertex_size,
-                                                draw->pt.vertex_buffer,
-                                                draw->instance_id,
-                                                vertex_id_offset,
-                                                draw->start_instance,
-                                                elts,
-                                                draw->pt.user.drawid,
-                                                draw->pt.user.viewid);
+      // clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
+      //                                           &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
+      //                                           llvm_vert_info.verts,
+      //                                           draw->pt.user.vbuffer,
+      //                                           fetch_info->count,
+      //                                           start,
+      //                                           fpme->vertex_size,
+      //                                           draw->pt.vertex_buffer,
+      //                                           draw->instance_id,
+      //                                           vertex_id_offset,
+      //                                           draw->start_instance,
+      //                                           elts,
+      //                                           draw->pt.user.drawid,
+      //                                           draw->pt.user.viewid);
 
 
       /* Finished with fetch and vs */
       // the image is always in bounds of the screen
-      // clipped = false;
+      clipped = false;
 
 
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      bool print_debug = true;
+      bool print_debug = false;
 
       if (print_debug){
          printf("True shader output: \n");
@@ -773,10 +774,10 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       // }
 
       MyVtop simulation = verilator_rtl_init();
-      // verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
-      verilator_rtl_run(simulation);
+      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
+      verilator_rtl_run(simulation, vertex_id_offset);
       verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
-         draw->viewports->scale[1], draw->viewports->scale[0], print_debug);
+         draw->viewports->scale[1], draw->viewports->scale[0], print_debug, vertex_id_offset);
       verilator_rtl_destroy(simulation);
 
 
@@ -797,7 +798,6 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
             }
          }
       }
-      exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment
