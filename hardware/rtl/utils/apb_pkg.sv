@@ -7,12 +7,13 @@
 //------------------------------------------------------------------------------//
 
 package apb_pkg;
-    import base_pkg::*;
+    import base_pkg::DW;
+    import base_pkg::CSR_AW;
 
     localparam int unsigned STROBE = DW / 8;
 
     typedef struct packed {
-        logic [AW     - 1: 0] paddr;
+        logic [CSR_AW - 1: 0] paddr;
         logic [DW     - 1: 0] pwdata;
         logic [STROBE - 1: 0] pstrb;
         logic                 psel;

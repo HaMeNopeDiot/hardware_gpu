@@ -36,6 +36,7 @@ module core_lsu
     /*============================### COMMON SIGNALS ###======================*/
     input  logic                    clk,
     input  logic                    rst_n,
+    input  logic                    en_i,
 
     /*=========================### SIGNALS FROM DECODER ###===================*/
     input  lsu_cmd_e                lsu_op,
@@ -225,12 +226,12 @@ region READ
 
 always_comb begin
     if (get_res && op_is_load) begin
-        rd = mem_data;
-        rd_valid = mem_ans_valid;
+        rd          = mem_data;
+        rd_valid    = mem_ans_valid;
     end
     else begin
-        rd = '0;
-        rd_valid = '0;
+        rd          = '0;
+        rd_valid    = '0;
     end
 end
 
@@ -266,13 +267,14 @@ region INSTANCE
 //                    *** AHB MASTER ***                     //
 // NOTE: Master AHB to memory for LSU
 ahb_master #(
-    .DW (DW),
-    .AW (MEM_AW),
-    .TW (TW)
+    .DW (DW     ),
+    .AW (MEM_AW ),
+    .TW (TW     )
 ) ahb_master_u (
     //================### COMMON SIGNALS ###=================//
     .clk          (clk          ),  // <-
     .rst_n        (rst_n        ),  // <-
+    .en_i         (en_i         ),  // <-
     //==================### AHB SIGNALS ###==================//
     .ahb_i        (ahb_i        ),  // <-
     .ahb_o        (ahb_o        ),  // ->

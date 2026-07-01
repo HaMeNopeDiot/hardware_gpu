@@ -1,7 +1,7 @@
 # --------------------------------------------------------------
 #  fpnew_item.py
 # --------------------------------------------------------------
-from fpu.fppconverter import float_to_ieee754, ieee754_to_float, float_to_i754
+from fpu.fppconverter import float_to_ieee754, hex_ieee754_to_float, float_to_i754
 
 from utility.enums  import OperationE, FpFormatE, IntFormatE, RoundModeE
 from utility.enums  import DEFAULT_F_T, DEFAULT_I_T

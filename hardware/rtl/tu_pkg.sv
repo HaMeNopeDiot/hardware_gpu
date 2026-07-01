@@ -15,6 +15,7 @@ package tu_pkg;
     import fpnew_pkg::OP_BITS;
 
     import base_pkg::DW;
+    import base_pkg::FDW;
 
     // ========================= ### COMMON ENUMS ### ========================= //
     localparam int unsigned REGFILE_SIZE    = 32;
@@ -32,8 +33,8 @@ package tu_pkg;
     */
 
     typedef struct packed {
-        logic [DW - 1: 0] value;
-        logic             valid;
+        logic [DW - 1: 0]   value;
+        logic               valid;
     } dw_value_t;
 
     /*==========================================================================//
@@ -55,8 +56,8 @@ package tu_pkg;
     } thread_info_t;
 
     typedef struct packed {
-        logic [DW - 1: 0] result_data;
-        thread_info_t     info;
+        logic [FDW - 1: 0]  result_data;
+        thread_info_t       info;
     } thread_result_t;
 
     /*==========================================================================//
@@ -198,15 +199,6 @@ package tu_pkg;
     /*==========================================================================//
     region CORE
     //==========================================================================*/
-
-    localparam int unsigned CORE_STATE_W = 3;
-    typedef enum logic [CORE_STATE_W - 1: 0] {
-        CORE_STATE_FETCH   = 0,
-        CORE_STATE_DECODE  = 1,
-        CORE_STATE_LOAD    = 2,
-        CORE_STATE_EXECUTE = 3,
-        CORE_STATE_STORE   = 4
-    } core_state_e;
 
     localparam int unsigned TU_STATE_W = 2;
     typedef enum logic [TU_STATE_W - 1: 0] {

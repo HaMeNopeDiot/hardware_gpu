@@ -28,7 +28,6 @@ target_code = Transpiler().transpile(source_code)
 target_code = Optimizer().optimize(target_code)
 
 
-
 generator = BasicBlockGenerator()
 target_code = generator.generate(target_code)
 
@@ -45,6 +44,9 @@ for i in range(len(target_code)):
 #     print(f"{i:<2} {generator.registers[i]}")
 # print(generator.density_history)
 
-result = Assembler().assemble(target_code)
+assembler = Assembler()
+result = assembler.assemble(target_code)
 with open("vertex_shader.bin", "bw") as file:
     file.write(result)
+with open("vertex_shader.mem", "w") as file:
+    file.write(assembler.text)

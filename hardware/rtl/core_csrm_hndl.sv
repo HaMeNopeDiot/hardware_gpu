@@ -33,9 +33,10 @@ module core_csrm_hndl
     /*=========================### OUT SIGNALS ###============================*/
     input  logic                    ret_i,
     output logic                    en_o,
-    output logic [DW - 1: 0]        vid_o [THREAD_CNT],
+    output logic [DW - 1: 0]        vid_o           [THREAD_CNT],
     input  logic                    pc_readed_i,
-    output logic [DW - 1: 0]        cur_pc_o
+    output logic [DW - 1: 0]        cur_pc_o,
+    output logic                    thread_en_o     [THREAD_CNT]
     //========================================================================//
 );
 
@@ -103,7 +104,8 @@ core_csrm #(
     .en_o       (en_o       ),  // ->
     .vid_o      (vid_o      ),  // ->
     .cur_pc_o   (cur_pc_o   ),  // ->
-    .pc_readed_i(pc_readed_i)   // <-
+    .pc_readed_i(pc_readed_i),  // <-
+    .thread_en_o(thread_en_o)   // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

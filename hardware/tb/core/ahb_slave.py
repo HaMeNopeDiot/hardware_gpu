@@ -1,4 +1,10 @@
-# ahb_slave.py
+#------------------------------------------------------------------------------#
+# Author:                Starukhin Danila M.
+# Author's e-mail:       sniperusus2002@gmail.com
+# -----------------------------------------------------------------------------#
+# Purpose: AHB slave model
+# Date: 2026/06
+#------------------------------------------------------------------------------#
 
 import cocotb
 from cocotb.triggers import RisingEdge, ReadOnly, Timer

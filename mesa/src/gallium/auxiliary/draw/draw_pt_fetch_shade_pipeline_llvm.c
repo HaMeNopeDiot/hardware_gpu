@@ -600,6 +600,23 @@ int vertecies_info(struct draw_context * draw) {
    return 0;
 }
 
+typedef struct {
+    void *contextp;
+    void *vtop;
+} MyVtop;
+MyVtop verilator_rtl_init(void);
+void verilator_rtl_destroy(MyVtop item);
+void verilator_rtl_run(MyVtop item, int start_vid);
+void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len);
+void verilator_rtl_read_outputs(
+    MyVtop item,
+    float *buffer,
+    size_t vertex_stride,
+    size_t height,
+    size_t width,
+    int print_debug,
+    int vertex_offset
+);
 
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
@@ -670,7 +687,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
          elts = fetch_info->elts;
       }
 
-      clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
+      // clipped = interpret_nir(vs->state.ir.nir, fetch_info->count, llvm_vert_info.verts, draw->pt.user.vbuffer, draw->pt.vertex_buffer->buffer_offset, vertex_id_offset, draw);
 
       // Finding Ubo(Nemo)
       // printf("User.vbuffer: %d\n", draw->pt.user.vbuffer->size);
@@ -707,48 +724,80 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       //
 
       /* Run vertex fetch shader */
-      clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
-                                                &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
-                                                llvm_vert_info.verts,
-                                                draw->pt.user.vbuffer,
-                                                fetch_info->count,
-                                                start,
-                                                fpme->vertex_size,
-                                                draw->pt.vertex_buffer,
-                                                draw->instance_id,
-                                                vertex_id_offset,
-                                                draw->start_instance,
-                                                elts,
-                                                draw->pt.user.drawid,
-                                                draw->pt.user.viewid);
+      // clipped = fpme->current_variant->jit_func(&fpme->llvm->vs_jit_context,
+      //                                           &fpme->llvm->jit_resources[MESA_SHADER_VERTEX],
+      //                                           llvm_vert_info.verts,
+      //                                           draw->pt.user.vbuffer,
+      //                                           fetch_info->count,
+      //                                           start,
+      //                                           fpme->vertex_size,
+      //                                           draw->pt.vertex_buffer,
+      //                                           draw->instance_id,
+      //                                           vertex_id_offset,
+      //                                           draw->start_instance,
+      //                                           elts,
+      //                                           draw->pt.user.drawid,
+      //                                           draw->pt.user.viewid);
+
 
       /* Finished with fetch and vs */
+      // the image is always in bounds of the screen
+      clipped = false;
+
+
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      // printf("Vertex shader output:\n");
-      // printf("Vertex size: %d\n", vert_info->vertex_size);
-      // printf("Stride: %d\n", vert_info->stride);
-      // printf("Count: %d\n", vert_info->count);
+      bool print_debug = false;
 
+      if (print_debug){
+         printf("True shader output: \n");
+         for (size_t i = 0; i < vert_info->count; i++) {
+            printf("\tVertex: %d\n", (int)i);
+            float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
 
-      // printf("AFTER: \n");
-      // for (size_t i = 0; i < vert_info->count; i++) {
-      //    printf("\tVertex: %d\n", (int)i);
-      //    float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+            for (size_t j = 0; j < 2; j++) {
+               printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
 
-      //    for (size_t j = 0; j < 2; j++) {
-      //       printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) (j + i*vert_info->stride/4));
+               for (size_t k = 0; k < 4; k++) {
+                  printf("%f ", ptr[j*4 + k]);
+               }
+               printf("\n");
+            }
+         }
+      }
 
-      //       for (size_t k = 0; k < 4; k++) {
-      //          printf("%f ", ptr[j*4 + k]);
-      //       }
-      //       printf("\n");
-      //    }
-
+      // printf("Viewport size: %f %f %f\n", draw->viewports->scale[0], draw->viewports->scale[1], draw->viewports->scale[2]);
+      // exit(0);
+      // // for (size_t i = 0; i < draw->pt.user.vbuffer->size; i++) {
+      //    printf("%x ", ((uint32_t *) draw->pt.user.vbuffer->map)[i]);
       // }
 
-      // exit(0);
+      MyVtop simulation = verilator_rtl_init();
+      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
+      verilator_rtl_run(simulation, vertex_id_offset);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
+         draw->viewports->scale[1], draw->viewports->scale[0], print_debug, vertex_id_offset);
+      verilator_rtl_destroy(simulation);
+
+
+
+      if (print_debug){
+         printf("As loaded, true offsets: \n");
+         for (size_t i = 0; i < vert_info->count; i++) {
+            printf("\tVertex: %d\n", (int)i);
+            float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+
+            for (size_t j = 0; j < 2; j++) {
+               printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+
+               for (size_t k = 0; k < 4; k++) {
+                  printf("%f ", ptr[j*4 + k]);
+               }
+               printf("\n");
+            }
+         }
+      }
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment

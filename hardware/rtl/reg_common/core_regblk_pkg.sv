@@ -15,8 +15,9 @@ package core_regblk_pkg;
     localparam int unsigned  R_CORE_CTRL_OFS               = 'h0 * BYTES_IN_REG;
     // localparam int unsigned  R_CORE_STATUS_OFS             = 'h1 * BYTES_IN_REG;
     localparam int unsigned  R_PC_OFS                      = 'h2 * BYTES_IN_REG;
-    //                       [RESERVED]                    = 'h3 * BYTES_IN_REG;
-    localparam int unsigned  RS_VID_OFS                    = 'h4 * BYTES_IN_REG;
+    localparam int unsigned  R_TU_EN_OFS                   = 'h3 * BYTES_IN_REG;
+    //                       [RESERVED]                    = 'h4 * BYTES_IN_REG;
+    localparam int unsigned  RS_VID_OFS                    = 'h5 * BYTES_IN_REG;
 
     // [FIELDS]
     // - [CORE CONTROL]
@@ -37,6 +38,13 @@ package core_regblk_pkg;
 
     //------------------------ REGISTER PC SIZE PARAMETERS ---------------------//
     localparam int unsigned  F_PC_SZ                            = DW;
+
+    //--------------------- REGISTER TU_EN OFFSETS PARAMETERS ------------------//
+    localparam int unsigned  F_TU_EN_OFS                        = 'h0; // RW
+
+    //----------------------- REGISTER TU_EN SIZE PARAMETERS -------------------//
+    localparam int unsigned  F_TU_EN_SZ                         = DW;
+
 
 
     //--------------------------------------------------------------------------//

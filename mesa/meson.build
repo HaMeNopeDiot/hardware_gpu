@@ -538,6 +538,7 @@ if with_platform_android and get_option('platform-sdk-version') >= 29
   add_project_link_arguments('-Wl,-plugin-opt=-emulated-tls=0', language: ['c', 'cpp'])
 endif
 
+
 # -mtls-dialect=gnu2 speeds up non-initial-exec TLS significantly but requires
 # full toolchain (including libc) support.
 have_mtls_dialect = false

@@ -1,26 +1,23 @@
-#-----------------------------------------------------------------------------//
+#------------------------------------------------------------------------------#
 # Author:                Starukhin Danila M.
 # Author's e-mail:       sniperusus2002@gmail.com
-# ----------------------------------------------------------------------------//
+# -----------------------------------------------------------------------------#
 # Purpose: Core Instruction Item
 # Date: 2026/06
-#-----------------------------------------------------------------------------//
+#------------------------------------------------------------------------------#
 
 from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE
 import cocotb
 
-DW = 32
-AW = 5
-OP_W = 5
-OP_T_W = 2
-
-VID_ADDR = 31
-ZERO_ADDR = 0
+from utility.defines import DW, AW, OP_W, OP_T_W
 
 LIMM_W = DW - (AW * 2 + OP_W + OP_T_W)
 FIMM_W = DW - (AW * 4 + OP_W + OP_T_W + 3)
 UIMM_W = DW - (AW + OP_W + OP_T_W)          # 32 - 5 - 5 - 2 = 32 - 12 = 20
 SIMM_W = DW - (AW * 3 + OP_W + OP_T_W)
+
+from core.core_enums    import CoreOp
+from core.core_op       import CoreOperation
 
 class CoreInstItem():
     def __init__(self,
@@ -41,17 +38,38 @@ class CoreInstItem():
         self.imm        = imm
         self.extra      = extra
 
+    def set(self,
+            instr: CoreOp,
+            rs1_addr: int = 0,
+            rs2_addr: int = 0,
+            rs3_addr: int = 0,
+            rd_addr: int = 0,
+            imm: int = 0,
+            extra: int = 0
+            ):
+        pass
+
+    def get_opcode(self) -> int:
+        return (self.op_type.value << OP_W) | self.op.value
+
+
+    def get_op(self) -> CoreOp:
+        core_op = CoreOperation()
+        core_op.set_op_from_instr(self.op)
+        return core_op.op
+
+
     def _get_stype_from_machine_code(self, value):
         # Извлекаем поля, инвертируя логику get_machine_code
-        imm_mask        = (1 << SIMM_W) - 1
-        addr_mask       = (1 << AW) - 1
-        op_mask         = (1 << OP_W) - 1
-        op_type_mask    = (1 << OP_T_W) - 1
+        imm_mask        = (1 << SIMM_W  ) - 1
+        addr_mask       = (1 << AW      ) - 1
+        op_mask         = (1 << OP_W    ) - 1
+        op_type_mask    = (1 << OP_T_W  ) - 1
 
-        self.imm      = value & imm_mask
-        self.rs1_addr = (value >> SIMM_W) & addr_mask
-        self.rs2_addr = (value >> (SIMM_W + AW)) & addr_mask
-        self.rd_addr  = (value >> (SIMM_W + 2 * AW)) & addr_mask
+        self.imm      = (value                      )  & imm_mask
+        self.rs1_addr = (value >> SIMM_W            )  & addr_mask
+        self.rs2_addr = (value >> (SIMM_W + AW      )) & addr_mask
+        self.rd_addr  = (value >> (SIMM_W + 2 * AW  )) & addr_mask
 
         # Восстанавливаем Enum из значения
         op_val = (value >> (SIMM_W + 3 * AW)) & op_mask
@@ -63,10 +81,10 @@ class CoreInstItem():
         #self.print()
 
     def _get_utype_from_machine_code(self, value):
-        imm_mask        = (1 << UIMM_W) - 1
-        addr_mask       = (1 << AW) - 1
-        op_mask         = (1 << OP_W) - 1
-        op_type_mask    = (1 << OP_T_W) - 1
+        imm_mask        = (1 << UIMM_W  ) - 1
+        addr_mask       = (1 << AW      ) - 1
+        op_mask         = (1 << OP_W    ) - 1
+        op_type_mask    = (1 << OP_T_W  ) - 1
 
         self.imm     = value & imm_mask
         self.rd_addr = (value >> UIMM_W) & addr_mask
@@ -80,10 +98,10 @@ class CoreInstItem():
         #self.print()
 
     def _get_ltype_from_machine_code(self, value):
-        imm_mask        = (1 << LIMM_W) - 1
-        addr_mask       = (1 << AW) - 1
-        op_mask         = (1 << OP_W) - 1
-        op_type_mask    = (1 << OP_T_W) - 1
+        imm_mask        = (1 << LIMM_W  ) - 1
+        addr_mask       = (1 << AW      ) - 1
+        op_mask         = (1 << OP_W    ) - 1
+        op_type_mask    = (1 << OP_T_W  ) - 1
 
         self.imm      = value & imm_mask
         self.rs1_addr = (value >> (LIMM_W)) & addr_mask
@@ -99,18 +117,18 @@ class CoreInstItem():
 
     def _get_ftype_from_machine_code(self, value):
         # extra занимает 3 бита (так как argr_addr сдвинут на FIMM_W + 3)
-        imm_mask     = (1 << FIMM_W) - 1
-        extra_mask   = (1 << 3) - 1
-        addr_mask    = (1 << AW) - 1
-        op_mask      = (1 << OP_W) - 1
-        op_type_mask = (1 << OP_T_W) - 1
+        imm_mask     = (1 << FIMM_W ) - 1
+        extra_mask   = (1 << 3      ) - 1
+        addr_mask    = (1 << AW     ) - 1
+        op_mask      = (1 << OP_W   ) - 1
+        op_type_mask = (1 << OP_T_W ) - 1
 
-        self.imm       = value & imm_mask
-        self.extra     = (value >> FIMM_W) & extra_mask
-        self.rd_addr   = (value >> (FIMM_W + 3)) & addr_mask
-        self.rs3_addr  = (value >> (FIMM_W + 3 + AW)) & addr_mask
-        self.rs2_addr  = (value >> (FIMM_W + 3 + 2 * AW)) & addr_mask
-        self.rs1_addr  = (value >> (FIMM_W + 3 + 3 * AW)) & addr_mask
+        self.imm       = (value                         )  & imm_mask
+        self.extra     = (value >> FIMM_W               )  & extra_mask
+        self.rd_addr   = (value >> (FIMM_W + 3          )) & addr_mask
+        self.rs3_addr  = (value >> (FIMM_W + 3 + AW     )) & addr_mask
+        self.rs2_addr  = (value >> (FIMM_W + 3 + 2 * AW )) & addr_mask
+        self.rs1_addr  = (value >> (FIMM_W + 3 + 3 * AW )) & addr_mask
 
         op_val = (value >> (FIMM_W + 3 + 4 * AW)) & op_mask
         self.op        = FPUopTE(op_val)
@@ -139,26 +157,26 @@ class CoreInstItem():
 
     def _get_stype_machine_code(self) -> int:
         res = 0
-        res =  self.imm                                        \
-            | (self.rs1_addr       <<  SIMM_W)                 \
-            | (self.rs2_addr       << (SIMM_W + AW))           \
-            | (self.rd_addr        << (SIMM_W + 2 * AW))       \
-            | (self.op.value       << (SIMM_W + 3 * AW))       \
-            | (self.op_type.value  << (SIMM_W + 3 * AW + OP_W))
+        res =  self.imm                                             \
+            | (self.rs1_addr       << (SIMM_W)                   )  \
+            | (self.rs2_addr       << (SIMM_W + AW              ))  \
+            | (self.rd_addr        << (SIMM_W + 2 * AW          ))  \
+            | (self.op.value       << (SIMM_W + 3 * AW          ))  \
+            | (self.op_type.value  << (SIMM_W + 3 * AW + OP_W   ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CISI: {hex(res)}")
         return res
 
     def _get_ftype_machine_code(self) -> int:
         res = 0
-        res =  self.imm                                             \
-            | (self.extra          <<  FIMM_W)                      \
-            | (self.rd_addr        << (FIMM_W + 3))                 \
-            | (self.rs3_addr       << (FIMM_W + 3 + 1 * AW))        \
-            | (self.rs2_addr       << (FIMM_W + 3 + 2 * AW))        \
-            | (self.rs1_addr       << (FIMM_W + 3 + 3 * AW))        \
-            | (self.op.value       << (FIMM_W + 3 + 4 * AW))        \
-            | (self.op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W))
+        res =  self.imm                                                \
+            | (self.extra          << (FIMM_W                       )) \
+            | (self.rd_addr        << (FIMM_W + 3                   )) \
+            | (self.rs3_addr       << (FIMM_W + 3 + 1 * AW          )) \
+            | (self.rs2_addr       << (FIMM_W + 3 + 2 * AW          )) \
+            | (self.rs1_addr       << (FIMM_W + 3 + 3 * AW          )) \
+            | (self.op.value       << (FIMM_W + 3 + 4 * AW          )) \
+            | (self.op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W   ))
         cocotb.log.debug(f"CIFI: {hex(res)}")
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         return res
@@ -166,20 +184,20 @@ class CoreInstItem():
     def _get_utype_machine_code(self) -> int:
         res = 0
         res =  self.imm                                            \
-            | (self.rd_addr        <<  UIMM_W)                     \
-            | (self.op.value       << (UIMM_W + AW))               \
-            | (self.op_type.value  << (UIMM_W + AW + OP_W))
+            | (self.rd_addr        << (UIMM_W                   )) \
+            | (self.op.value       << (UIMM_W + AW              )) \
+            | (self.op_type.value  << (UIMM_W + AW + OP_W       ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CIUI: {hex(res)}")
         return res
 
     def _get_ltype_machine_code(self) -> int:
         res = 0
-        res =  self.imm                                        \
-            | (self.rs1_addr       <<  LIMM_W)                 \
-            | (self.rd_addr        << (LIMM_W + 1 * AW))       \
-            | (self.op.value       << (LIMM_W + 2 * AW))       \
-            | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W))
+        res =  self.imm                                            \
+            | (self.rs1_addr       << (LIMM_W                   )) \
+            | (self.rd_addr        << (LIMM_W + 1 * AW          )) \
+            | (self.op.value       << (LIMM_W + 2 * AW          )) \
+            | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W   ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CILI: {hex(res)}")
         return res

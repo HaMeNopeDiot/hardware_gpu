@@ -11,7 +11,6 @@ region MODULE DEFINITION
 //===================================================================================*/
 module core_arbiter
     import tu_pkg::tu_state_e;
-    import tu_pkg::core_state_e;
     import tu_pkg::TU_STATE_REQUEST;
 #(
     parameter  int unsigned THREAD_CNT       = 4,
@@ -24,6 +23,7 @@ module core_arbiter
     input  tu_state_e                       threads_state [THREAD_CNT],
 
     output logic        [THREAD_W - 1: 0]   thread_sel,
+    output logic                            thread_sel_valid,
     output logic                            no_req_from_threads
     //========================================================================//
 );
@@ -66,7 +66,8 @@ module core_arbiter
     region OUT
     //========================================================================*/
 
-    assign thread_sel = thread_ptr;
+    assign thread_sel       = thread_ptr;
+    assign thread_sel_valid = thread_req;
 
     //========================================================================*/
 endmodule

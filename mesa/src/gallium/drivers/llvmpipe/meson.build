@@ -95,18 +95,41 @@ files_llvmpipe = files(
   'lp_texture_handle.h',
 )
 
+files_verilator_wrapper = files(
+  'verilator/verilator_dpi_wrapper.h',
+  'verilator/verilator_dpi_wrapper.cpp',
+)
+
+inc_verilator_wrapper = include_directories(
+  'verilator',
+  '../../../../../hardware/build',
+  '/usr/share/verilator/include',
+  '/usr/share/verilator/include/vltstd',
+)
+
+objects_verilator = files(
+  meson.project_source_root() + '/../hardware/build/verilated.o',
+  meson.project_source_root() + '/../hardware/build/verilated_threads.o',
+  meson.project_source_root() + '/../hardware/build/verilated_vcd_c.o',
+  meson.project_source_root() + '/../hardware/build/verilated_timing.o',
+  meson.project_source_root() + '/../hardware/build/verilated_dpi.so'
+)
+
+
 libllvmpipe = static_library(
   'llvmpipe',
-  [files_llvmpipe, sha1_h],
+  [files_llvmpipe, files_verilator_wrapper, sha1_h],
   c_args : [c_msvc_compat_args],
+  objects: objects_verilator,
   cpp_args : [cpp_msvc_compat_args],
   gnu_symbol_visibility : 'hidden',
-  include_directories : [inc_gallium, inc_gallium_aux, inc_include, inc_src],
+  include_directories : [inc_gallium, inc_gallium_aux, inc_include, inc_src, inc_verilator_wrapper],
   dependencies : [ dep_llvm, idep_nir_headers, idep_mesautil, dep_libdrm],
 )
 
 driver_llvmpipe = declare_dependency(
   compile_args : '-DGALLIUM_LLVMPIPE',
+  link_args: [meson.project_source_root() + '/../hardware/build/Vtop_env__ALL.a'],
   link_with : libllvmpipe,
   dependencies : [dep_llvm, idep_mesautil],
 )

@@ -22,8 +22,14 @@ def float_to_ieee754(n: int, bits=32) -> str:
         packed = struct.pack('!d', n)
         return bin(struct.unpack('!Q', packed)[0])[2:].zfill(64)
 
-def ieee754_to_float(hex_str, bits=32):
-        # Убираем возможный префикс 0x
+def ieee754_to_float(n: int, bits=32):
+    if n == 0:
+        return 0
+    else:
+        return hex_ieee754_to_float(hex(n), 32)
+
+def hex_ieee754_to_float(hex_str, bits=32):
+    # Убираем возможный префикс 0x
     hex_str = hex_str.replace('0x', '').replace('0X', '')
     binary_data = bytes.fromhex(hex_str)
 
