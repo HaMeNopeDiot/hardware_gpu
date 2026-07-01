@@ -158,8 +158,8 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride
         buffer[gl_Position_W] = 1.0f / buffer[gl_Position_W];
 
         // viewport transform
-        buffer[gl_Position_X] = (buffer[gl_Position_X] + 1.0f) * width / 2.0f;
-        buffer[gl_Position_Y] = (buffer[gl_Position_Y] + 1.0f) * width / 2.0f;
+        buffer[gl_Position_X] = (buffer[gl_Position_X] + 1.0f) * width;
+        buffer[gl_Position_Y] = (buffer[gl_Position_Y] + 1.0f) * height;
     }
 
 

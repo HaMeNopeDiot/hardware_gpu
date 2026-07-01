@@ -746,44 +746,53 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       fetch_info = NULL;
       vert_info = &llvm_vert_info;
 
-      printf("True shader output: \n");
-      for (size_t i = 0; i < vert_info->count; i++) {
-         printf("\tVertex: %d\n", (int)i);
-         float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+      bool print_debug = true;
 
-         for (size_t j = 0; j < 2; j++) {
-            printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+      if (print_debug){
+         printf("True shader output: \n");
+         for (size_t i = 0; i < vert_info->count; i++) {
+            printf("\tVertex: %d\n", (int)i);
+            float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
 
-            for (size_t k = 0; k < 4; k++) {
-               printf("%f ", ptr[j*4 + k]);
+            for (size_t j = 0; j < 2; j++) {
+               printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+
+               for (size_t k = 0; k < 4; k++) {
+                  printf("%f ", ptr[j*4 + k]);
+               }
+               printf("\n");
             }
-            printf("\n");
          }
       }
 
+      // printf("Viewport size: %f %f %f\n", draw->viewports->scale[0], draw->viewports->scale[1], draw->viewports->scale[2]);
+      // exit(0);
 
       MyVtop simulation = verilator_rtl_init();
       verilator_rtl_run(simulation);
-      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4, 768, 1024, 1);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
+         draw->viewports->scale[1], draw->viewports->scale[0], print_debug);
       verilator_rtl_destroy(simulation);
 
 
 
-      printf("Simulation memory footprint, true offsets: \n");
-      for (size_t i = 0; i < vert_info->count; i++) {
-         printf("\tVertex: %d\n", (int)i);
-         float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
+      if (print_debug){
+         printf("As loaded, true offsets: \n");
+         for (size_t i = 0; i < vert_info->count; i++) {
+            printf("\tVertex: %d\n", (int)i);
+            float *ptr = (float *)vert_info->verts->data + i * (vert_info->vertex_size / 4);
 
-         for (size_t j = 0; j < 2; j++) {
-            printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
+            for (size_t j = 0; j < 2; j++) {
+               printf("\t\t[%d + stride * %d = %d] ", (int) j,  (int) i, (int) ((ptr + j * 4) - (float *)vert_info->verts->data));
 
-            for (size_t k = 0; k < 4; k++) {
-               printf("%f ", ptr[j*4 + k]);
+               for (size_t k = 0; k < 4; k++) {
+                  printf("%f ", ptr[j*4 + k]);
+               }
+               printf("\n");
             }
-            printf("\n");
          }
+         exit(0);
       }
-      exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment
