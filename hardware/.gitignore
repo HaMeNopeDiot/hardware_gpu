@@ -8,7 +8,6 @@ util/*
 */sim_build/*
 src/*
 README*.md
-cvfpu/
 *.xml
 *.vcd
 */*/sim_build/*
