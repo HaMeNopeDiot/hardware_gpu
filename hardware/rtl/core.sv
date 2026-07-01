@@ -49,6 +49,7 @@ module core
     parameter  int unsigned TU_LATCH_R_ADDR  = 1,
     parameter  bit          ONLY_LINT        = `ifdef LINT 1 `else 0 `endif,
     parameter  int unsigned THREAD_CNT       = 4,
+    parameter  int unsigned DEBUG_MODE       = 1,
     localparam int unsigned THREAD_W         = $clog2(THREAD_CNT)
 ) (
     /*==========================### COMMON SIGNALS ###========================*/
@@ -303,7 +304,9 @@ core_fetcher #(
 
 // ///////////////////////////////////////////////////////// //
 //                   *** CORE DECODER ***                    //
-core_decoder #() core_decoder_u (
+core_decoder #(
+    .DEBUG_MODE     (DEBUG_MODE)
+) core_decoder_u (
     //================### COMMON SIGNALS ###=================//
     .clk            (clk                ),    // <-
     .rst_n          (rst_n              ),    // <-

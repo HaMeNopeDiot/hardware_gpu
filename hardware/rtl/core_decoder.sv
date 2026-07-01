@@ -23,7 +23,6 @@ module core_decoder
     import fpnew_pkg::DIV;
 
 
-
     import handshake_fpu_pkg::tags_t;
     import tu_pkg::cmd_union_t;
     import tu_pkg::cmd_t;
@@ -75,9 +74,10 @@ module core_decoder
     import tu_pkg::CMD_FSQRT;
     import tu_pkg::CMD_FNEG ;
     import tu_pkg::CMD_FMAX ;
+    import tu_pkg::regfile_addr_t;
 
 #(
-    parameter logic DEBUG_MODE = 1
+    parameter logic DEBUG_MODE = 0
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
@@ -410,6 +410,19 @@ if (DEBUG_MODE) begin: gen_debug_info
             command = '0;
         end
     end
+
+    regfile_addr_t          dbg_rs1a, dbg_rs2a, dbg_rs3a, dbg_rda;
+    logic [U_IMM_W - 1: 0]  dbg_imm;
+    logic [2 : 0]           dbg_extra;
+    cmd_op_t                dbg_op;
+
+    assign dbg_rs1a     = command.rs1_a;
+    assign dbg_rs2a     = command.rs2_a;
+    assign dbg_rs3a     = command.rs3_a;
+    assign dbg_rda      = command.rd_a;
+    assign dbg_op       = command.op;
+    assign dbg_imm      = command.imm;
+    assign dbg_extra    = command.extra;
 end
 
 /*============================================================================//
