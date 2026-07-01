@@ -12,3 +12,5 @@ hardware/tb/flexfloat/
 hardware/CITATION.cff
 *.bkp
 *.pdf
+*.txt
+__pycache__/
