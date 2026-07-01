@@ -67,7 +67,21 @@ void verilator_rtl_run(MyVtop item) {
     }
 }
 
-void verilator_rtl_write_inputs(float *buffer, unsigned int buffer_len){}
+typedef union {
+   int32_t integer;
+   float fp;
+} mem_t;
+void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len){
+   Vtop_env *vtop = (Vtop_env *)item.vtop;
+
+   const int UBO_BASE = 0x00000000;
+
+   for (int i = 0; i < buffer_len; i++) {
+      mem_t value;
+      value.fp = buffer[i];
+      vtop->write_data_mem(UBO_BASE + i, value.integer);
+   }
+}
 
 
 int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
@@ -84,10 +98,6 @@ int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
    return address;
 }
 
-typedef union {
-   int32_t integer;
-   float fp;
-} mem_t;
 void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug){
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 

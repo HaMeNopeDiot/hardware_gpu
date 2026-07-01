@@ -607,6 +607,7 @@ typedef struct {
 MyVtop verilator_rtl_init(void);
 void verilator_rtl_destroy(MyVtop item);
 void verilator_rtl_run(MyVtop item);
+void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len);
 void verilator_rtl_read_outputs(
     MyVtop item,
     float *buffer,
@@ -767,8 +768,12 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
 
       // printf("Viewport size: %f %f %f\n", draw->viewports->scale[0], draw->viewports->scale[1], draw->viewports->scale[2]);
       // exit(0);
+      // // for (size_t i = 0; i < draw->pt.user.vbuffer->size; i++) {
+      //    printf("%x ", ((uint32_t *) draw->pt.user.vbuffer->map)[i]);
+      // }
 
       MyVtop simulation = verilator_rtl_init();
+      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
       verilator_rtl_run(simulation);
       verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
          draw->viewports->scale[1], draw->viewports->scale[0], print_debug);
@@ -791,8 +796,8 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
                printf("\n");
             }
          }
-         exit(0);
       }
+      exit(0);
    }
 
    /* Keep track of the patch lengths if we have a geometry shader, this way we can increment
