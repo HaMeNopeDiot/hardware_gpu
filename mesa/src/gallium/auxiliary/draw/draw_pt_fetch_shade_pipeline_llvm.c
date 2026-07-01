@@ -610,6 +610,7 @@ void verilator_rtl_run(MyVtop item);
 void verilator_rtl_read_outputs(
     MyVtop item,
     float *buffer,
+    size_t vertex_stride,
     size_t height,
     size_t width,
     int print_debug
@@ -763,7 +764,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
 
       MyVtop simulation = verilator_rtl_init();
       verilator_rtl_run(simulation);
-      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, 768, 1024, 1);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4, 768, 1024, 1);
       verilator_rtl_destroy(simulation);
 
 

@@ -24,6 +24,7 @@ EXTERNC void verilator_rtl_write_inputs(
 EXTERNC void verilator_rtl_read_outputs(
     MyVtop item,
     float *buffer,
+    size_t vertex_stride,
     size_t height,
     size_t width,
     int print_debug

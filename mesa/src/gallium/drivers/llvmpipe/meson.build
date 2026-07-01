@@ -103,6 +103,8 @@ files_verilator_wrapper = files(
 inc_verilator_wrapper = include_directories(
   'verilator',
   '../../../../../hardware/build',
+  '/usr/share/verilator/include',
+  '/usr/share/verilator/include/vltstd',
 )
 
 objects_verilator = files(
@@ -113,10 +115,6 @@ objects_verilator = files(
   meson.project_source_root() + '/../hardware/build/verilated_dpi.so'
 )
 
-inc_verilator = include_directories(
-  '/usr/share/verilator/include',
-  '/usr/share/verilator/include/vltstd'
-)
 
 libllvmpipe = static_library(
   'llvmpipe',
@@ -125,7 +123,7 @@ libllvmpipe = static_library(
   objects: objects_verilator,
   cpp_args : [cpp_msvc_compat_args],
   gnu_symbol_visibility : 'hidden',
-  include_directories : [inc_gallium, inc_gallium_aux, inc_include, inc_src, inc_verilator, inc_verilator_wrapper],
+  include_directories : [inc_gallium, inc_gallium_aux, inc_include, inc_src, inc_verilator_wrapper],
   dependencies : [ dep_llvm, idep_nir_headers, idep_mesautil, dep_libdrm],
 )
 

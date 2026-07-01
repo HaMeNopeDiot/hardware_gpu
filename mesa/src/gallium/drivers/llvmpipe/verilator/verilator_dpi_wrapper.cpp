@@ -88,11 +88,11 @@ typedef union {
    int32_t integer;
    float fp;
 } mem_t;
-void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_t width, int print_debug){
+void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug){
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 
     const size_t MESA_VERTEX_BASE = 0u;
-    const size_t MESA_VERTEX_STRIDE = 77u;
+    const size_t MESA_VERTEX_STRIDE = vertex_stride;
     const size_t MESA_ATTRIBUTE_STRIDE = 4u;
     const size_t MESA_COORD_STRIDE = 1u;
 
