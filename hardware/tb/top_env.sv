@@ -115,8 +115,8 @@ endfunction
 
 // save values from memory. Reterns mem_t data
 // DESPAIR!
-parameter int OUTPUT_ATTRIBUTES_BASE   = 'h0000_10C0;
-parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 'h0000_00C0;
+parameter int OUTPUT_ATTRIBUTES_BASE   = 'h0000_1000;
+parameter int OUTPUT_ATTRIBUTES_VERTEX_STRIDE = 'h0000_0100;
 parameter int OUTPUT_ATTRIBUTES_ATTR_STRIDE = 'h0000_0010;
 parameter int OUTPUT_ATTRIBUTES_COORD_STRIDE = 4;
 export "DPI-C" function get_vertex_attribute;
@@ -358,9 +358,11 @@ core #(
 //                  *** AHB LSU MEM ***                      //
 // NOTE: AHB Slave MEMORY
 ahb_mem #(
-    .DEPTH (NUM_REG_MEM),
-    .AW    (RMEM_AW),
-    .DW    (MEM_DW)
+    .DEPTH              (NUM_REG_MEM),
+    .AW                 (RMEM_AW),
+    .DW                 (MEM_DW),
+    .DEBUG_MODE         ('1),
+    .DEBUG_REGS_TRACE   ()
 ) ahb_lsu_mem_u (
     //================### COMMON SIGNALS ###=================//
     .HCLK    (clk                               ), // <-
@@ -378,9 +380,10 @@ ahb_mem #(
 //                  *** AHB FETCHER MEM ***                  //
 // NOTE: AHB Slave MEMORY
 ahb_mem #(
-    .DEPTH (NUM_REG_MEM),
-    .AW    (RMEM_AW),
-    .DW    (MEM_DW)
+    .DEPTH      (NUM_REG_MEM),
+    .AW         (RMEM_AW),
+    .DW         (MEM_DW),
+    .DEBUG_MODE ('1)
 ) ahb_fet_mem_u (
     //================### COMMON SIGNALS ###=================//
     .HCLK    (clk                               ), // <-

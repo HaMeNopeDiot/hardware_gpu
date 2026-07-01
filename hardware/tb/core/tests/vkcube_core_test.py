@@ -107,7 +107,10 @@ class VKCubeTest(BaseCoreTest):
 
         print(f"FLOAT DUMP MEMORY")
         float_dump_mem = []
-        for i in range(0x2000_0000, 0x2000_0320, 0x4):
+
+        POS_BASE_ADDR     = 0x0000_1000 # 0x2000_0000
+        POS_BASE_ADDR_END = POS_BASE_ADDR + 0x320
+        for i in range(POS_BASE_ADDR, POS_BASE_ADDR_END, 0x4):
             data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
             fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
@@ -118,7 +121,7 @@ class VKCubeTest(BaseCoreTest):
 
         print(f"FLOAT DUMP MODEL MEMORY")
         float_dump_model = []
-        for i in range(0x2000_0000, 0x2000_0320, 0x4):
+        for i in range(POS_BASE_ADDR, POS_BASE_ADDR_END, 0x4):
             data = self.core_model.read_memory(i)
             fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
