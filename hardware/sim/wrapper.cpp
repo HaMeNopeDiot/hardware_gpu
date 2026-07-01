@@ -73,9 +73,9 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 
     const size_t MESA_VERTEX_BASE = 0u;
-    const size_t MESA_VERTEX_STRIDE = 192u;
+    const size_t MESA_VERTEX_STRIDE = 77u;
     const size_t MESA_ATTRIBUTE_STRIDE = 4u;
-    const size_t MESA_COORD_STRIDE = 4u;
+    const size_t MESA_COORD_STRIDE = 1u;
 
     const int VERTEX_NUMBER = 4;
     const int ATTRIBUTES_NUMBER = 2;
@@ -102,9 +102,9 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
     if (print_debug != 0) {
         printf("As-read from the simulation\n");
         for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
-            printf("Vertex: %d\n", vertex);
+            printf("\tVertex: %d\n", vertex);
             for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
-                printf("\t%s: ", attributes[attribute]);
+                printf("\t\t%s: ", attributes[attribute]);
                 for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                     size_t address = MESA_VERTEX_BASE;
                     address += MESA_VERTEX_STRIDE * vertex;
@@ -147,9 +147,9 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t height, size_
     if (print_debug != 0) {
         printf("Post-viewport coordinates\n");
         for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
-            printf("Vertex: %d\n", vertex);
+            printf("\tVertex: %d\n", vertex);
             for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
-                printf("\t%s: ", attributes[attribute]);
+                printf("\t\t%s: ", attributes[attribute]);
                 for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                     size_t address = MESA_VERTEX_BASE;
                     address += MESA_VERTEX_STRIDE * vertex;
