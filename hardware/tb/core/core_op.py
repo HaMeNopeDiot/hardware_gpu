@@ -63,14 +63,14 @@ class CoreOperation():
                 assert False, f"Unknown {self.name} operation type"
 
     def set_op_from_instr(self, instr_op: InstTE) -> CoreOp:
-        match type(instr_op):
-            case InstTE.UPP:
-                self.op = self._parse_u_type_op(instr_op)
-            case InstTE.LOAD:
-                self.op = self._parse_l_type_op(instr_op)
-            case InstTE.FPU:
-                self.op = self._parse_f_type_op(instr_op)
-            case InstTE.STORE:
-                self.op = self._parse_s_type_op(instr_op)
-            case _:
-                assert type(instr_op) in {InstTE}, "Unknown instruction type"
+        # print(type(instr_op))
+        if isinstance(instr_op, UPPopTE):
+            self.op = self._parse_u_type_op(instr_op)
+        elif isinstance(instr_op, LoadOpTE):
+            self.op = self._parse_l_type_op(instr_op)
+        elif isinstance(instr_op, FPUopTE):
+            self.op = self._parse_f_type_op(instr_op)
+        elif isinstance(instr_op, StoreOpTE):
+            self.op = self._parse_s_type_op(instr_op)
+        else:
+            assert isinstance(instr_op, (LoadOpTE, StoreOpTE, UPPopTE, FPUopTE)), "Unknown instruction type"

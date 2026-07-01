@@ -53,7 +53,7 @@ assign lsu_ahb_i.hresp  = '0;
 assign fet_ahb_i.hready = '1;
 assign fet_ahb_i.hresp  = '0;
 
-apb4_mports_t   apb_in = '0;
+apb4_mports_t   apb_in;
 apb4_sports_t   apb_out;
 
 logic           active;
@@ -61,6 +61,40 @@ logic           core_busy, core_busy_fe;
 
 /* verilator lint_off UNUSEDSIGNAL */
 thread_info_t   thread_info;
+
+/*============================================================================//
+region STRUCTURE DEBUG INFO FOR GTKW
+//============================================================================*/
+
+// from master
+logic [CSR_AW - 1: 0] csr_x_paddr;
+logic [MEM_DW - 1: 0] csr_x_pwdata;
+logic [STROBE - 1: 0] csr_x_pstrb;
+logic                 csr_x_psel;
+logic                 csr_x_pwrite;
+logic                 csr_x_penable;
+logic                 csr_x_pprot;
+
+always_comb begin
+    apb_in.paddr   = csr_x_paddr   ;
+    apb_in.pwdata  = csr_x_pwdata  ;
+    apb_in.pstrb   = csr_x_pstrb   ;
+    apb_in.psel    = csr_x_psel    ;
+    apb_in.pwrite  = csr_x_pwrite  ;
+    apb_in.penable = csr_x_penable ;
+    apb_in.pprot   = csr_x_pprot   ;
+end
+
+// from slave
+logic [MEM_DW - 1: 0] csr_x_prdata;
+logic                 csr_x_pready;
+logic                 csr_x_pslverr;
+
+always_comb begin
+    csr_x_prdata  = apb_out.prdata ;
+    csr_x_pready  = apb_out.pready ;
+    csr_x_pslverr = apb_out.pslverr;
+end
 
 /*============================================================================//
 region FUNCTIONS
@@ -203,6 +237,8 @@ task start();
         start_pc    <= 32'(0);
         fork
             begin
+                while (rst_n != '1)
+                    @(posedge clk);
                 // set vid to each thread
                 for (int unsigned i = 0; i < THREAD_CNT; i++) begin
                     apb_write((CSR_AW)'(RS_VID_OFS + i * STROBE), (MEM_DW)'(vid[i]));
@@ -236,11 +272,13 @@ region INITIAL
 initial begin
     $dumpfile("top_env.vcd");
     $dumpvars(0, top_env);
-
+    apb_in   = '0;
     clk      = '0;
+    #20;
     rst_n    = '0;
     #3 rst_n = '1;
 
+    #20;
     $readmemh("../hardware/mem/vertex_buffer.mem", ahb_lsu_mem_u.mem);
     $readmemh("../hardware/mem/vertex_shader.mem", ahb_fet_mem_u.mem);
 end
@@ -250,6 +288,11 @@ region LOGIC
 //============================================================================*/
 
 // you can write your code here
+logic  wrng_pprot;
+assign wrng_pprot = (apb_in.pprot[1]) || (apb_in.pprot[2]);
+
+logic  csr_we;
+assign csr_we = (apb_in.psel) && (apb_in.pwrite) && (~wrng_pprot);
 
 /*============================================================================//
 region INSTANCES
