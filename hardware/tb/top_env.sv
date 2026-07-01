@@ -305,7 +305,7 @@ core #(
     .CSR_AW          (CSR_AW                        ),
     .TU_REGILE_SZ    (REGFILE_SZ                    ),
     .TU_LATCH_R_ADDR (1                             ),
-    .ONLY_LINT       (`ifdef LINT 1 `else 0 `endif  ),
+    .ONLY_LINT       (0                             ), // `ifdef LINT 1 `else 0 `endif get fixed later
     .THREAD_CNT      (THREAD_CNT                    )
 ) core_u (
     //================### COMMON SIGNALS ###=================//
@@ -360,7 +360,8 @@ ahb_mem #(
     .AW                 (RMEM_AW),
     .DW                 (MEM_DW),
     .DEBUG_MODE         ('1),
-    .DEBUG_REGS_TRACE   ()
+    .DEBUG_REGS_TRACE   (8),
+    .DEBUG_TRACE_OFS    (32'h1000)
 ) ahb_lsu_mem_u (
     //================### COMMON SIGNALS ###=================//
     .HCLK    (clk                               ), // <-
