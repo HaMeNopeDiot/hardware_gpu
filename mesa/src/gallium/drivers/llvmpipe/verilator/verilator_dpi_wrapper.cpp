@@ -85,10 +85,10 @@ void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_
 
 
 int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
-   const int OUTPUT_BASE = 0x000010C0;
-   const int OUTPUT_VERTEX_STRIDE = 0x000000C0;
-   const int OUTPUT_ATTRIBUTE_STRIDE = 0x00000010;
-   const int OUTPUT_COORD_STRIDE = 0x00000004;
+   const int OUTPUT_BASE = 0x00001000 / 4;
+   const int OUTPUT_VERTEX_STRIDE = 0x00000100 / 4;
+   const int OUTPUT_ATTRIBUTE_STRIDE = 0x00000010 / 4;
+   const int OUTPUT_COORD_STRIDE = 0x00000004 / 4;
 
    int address = OUTPUT_BASE;
    address += OUTPUT_VERTEX_STRIDE * vertex_id;
@@ -117,7 +117,8 @@ void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride
         for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
             for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                 mem_t value;
-                value.integer = vtop->read_data_mem(hw_get_output_offset(vertex, attribute, coord));
+                int hw_address = hw_get_output_offset(vertex, attribute, coord);
+                value.integer = vtop->read_data_mem(hw_address);
 
                 size_t address = MESA_VERTEX_BASE;
                 address += MESA_VERTEX_STRIDE * vertex;

@@ -773,7 +773,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       // }
 
       MyVtop simulation = verilator_rtl_init();
-      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
+      // verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
       verilator_rtl_run(simulation);
       verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
          draw->viewports->scale[1], draw->viewports->scale[0], print_debug);
