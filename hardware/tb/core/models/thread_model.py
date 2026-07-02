@@ -11,11 +11,11 @@ import math
 
 import cocotb
 
-from utility.defines        import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT
+from utility.defines                import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT
 
-from core.core_enums        import CoreOp, FPU_OP
-from core.core_instr_item   import CoreInstItem
-from core.regfile_model     import RegfileModel
+from core.core_enums                import CoreOp, FPU_OP
+from core.core_instr_item           import CoreInstItem
+from core.models.regfile_model      import RegfileModel
 
 from fpu.fppconverter       import hex_ieee754_to_float, ieee754_to_float, float_to_i754
 
@@ -89,7 +89,7 @@ class ThreadModel():
         self.write_regfile(instr.rd_addr, rd_i754)
 
     def handle_op(self, instr: CoreInstItem, data: int = 0) -> int:
-        op = instr.get_op()
+        op = instr.op
 
         rd_addr = instr.rd_addr
         rs1_addr = instr.rs1_addr

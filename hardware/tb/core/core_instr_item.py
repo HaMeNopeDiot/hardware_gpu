@@ -6,7 +6,7 @@
 # Date: 2026/06
 #------------------------------------------------------------------------------#
 
-from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE
+from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE, VOpTE
 import cocotb
 
 from utility.defines import DW, AW, OP_W, OP_T_W
@@ -21,15 +21,13 @@ from core.core_op       import CoreOperation
 
 class CoreInstItem():
     def __init__(self,
-                op_type: InstTE = None,
-                op = None,
+                op      : CoreOperation = None,
                 rs1_addr: int = 0,
                 rs2_addr: int = 0,
                 rs3_addr: int = 0,
-                rd_addr: int = 0,
-                imm: int = 0,
-                extra: int = 0):
-        self.op_type    = op_type
+                rd_addr : int = 0,
+                imm     : int = 0,
+                extra   : int = 0):
         self.op         = op
         self.rs1_addr   = rs1_addr
         self.rs2_addr   = rs2_addr
@@ -39,24 +37,53 @@ class CoreInstItem():
         self.extra      = extra
 
     def set(self,
-            instr: CoreOp,
+            core_op : CoreOp,
             rs1_addr: int = 0,
             rs2_addr: int = 0,
             rs3_addr: int = 0,
-            rd_addr: int = 0,
-            imm: int = 0,
-            extra: int = 0
+            rd_addr : int = 0,
+            imm     : int = 0,
+            extra   : int = 0
             ):
-        pass
+        self.op         = core_op
+        self.rs1_addr   = rs1_addr
+        self.rs2_addr   = rs2_addr
+        self.rs3_addr   = rs3_addr
+        self.rd_addr    = rd_addr
+        self.imm        = imm
+        self.extra      = extra
+
+    def get_operation_fs(self) -> list[VOpTE, InstTE]:
+        op   = self.get_op()
+        op_t = self.get_op_type()
+        return op, op_t
 
     def get_opcode(self) -> int:
-        return (self.op_type.value << OP_W) | self.op.value
+        op, op_t = self.get_operation_fs()
+        return (op_t.value << OP_W) | op.value
 
 
-    def get_op(self) -> CoreOp:
+    def get_core_op(self, inst: InstTE) -> CoreOperation:
         core_op = CoreOperation()
-        core_op.set_op_from_instr(self.op)
+        core_op.set_op_from_instr(inst)
         return core_op.op
+
+    def get_op_type(self) -> InstTE:
+        op = CoreOperation(self.op).get_instr_from_op()
+        match op:
+            case UPPopTE():
+                return InstTE.UPP
+            case StoreOpTE():
+                return InstTE.STORE
+            case LoadOpTE():
+                return InstTE.LOAD
+            case FPUopTE():
+                return InstTE.FPU
+            case _:
+                assert False, f"Fail to recognize type. Op is {self.op}"
+
+    def get_op(self) -> VOpTE:
+        return CoreOperation(self.op).get_instr_from_op()
 
 
     def _get_stype_from_machine_code(self, value):
@@ -73,10 +100,11 @@ class CoreInstItem():
 
         # Восстанавливаем Enum из значения
         op_val = (value >> (SIMM_W + 3 * AW)) & op_mask
-        self.op       = StoreOpTE(op_val)
+        self.op = self.get_core_op(StoreOpTE(op_val))
+        #self.op       = StoreOpTE(op_val)
 
-        op_type_val = (value >> (SIMM_W + 3 * AW + OP_W)) & op_type_mask
-        self.op_type  = InstTE(op_type_val)
+        # op_type_val = (value >> (SIMM_W + 3 * AW + OP_W)) & op_type_mask
+        #self.op_type  = InstTE(op_type_val)
 
         #self.print()
 
@@ -90,10 +118,11 @@ class CoreInstItem():
         self.rd_addr = (value >> UIMM_W) & addr_mask
 
         op_val       = (value >> (UIMM_W + AW)) & op_mask
-        self.op      = UPPopTE(op_val)
+        self.op = self.get_core_op(UPPopTE(op_val))
+        # self.op      = UPPopTE(op_val)
 
-        op_type_val  = (value >> (UIMM_W + AW + OP_W)) & op_type_mask
-        self.op_type = InstTE(op_type_val)
+        # op_type_val  = (value >> (UIMM_W + AW + OP_W)) & op_type_mask
+        # self.op_type = InstTE(op_type_val)
 
         #self.print()
 
@@ -108,10 +137,11 @@ class CoreInstItem():
         self.rd_addr  = (value >> (LIMM_W + AW)) & addr_mask
 
         op_val = (value >> (LIMM_W + 2 * AW)) & op_mask
-        self.op       = LoadOpTE(op_val)
+        self.op = self.get_core_op(LoadOpTE(op_val))
+        # self.op       = LoadOpTE(op_val)
 
-        op_type_val = (value >> (LIMM_W + 2 * AW + OP_W)) & op_type_mask
-        self.op_type  = InstTE(op_type_val)
+        # op_type_val = (value >> (LIMM_W + 2 * AW + OP_W)) & op_type_mask
+        # self.op_type  = InstTE(op_type_val)
 
         #self.print()
 
@@ -131,19 +161,20 @@ class CoreInstItem():
         self.rs1_addr  = (value >> (FIMM_W + 3 + 3 * AW )) & addr_mask
 
         op_val = (value >> (FIMM_W + 3 + 4 * AW)) & op_mask
-        self.op        = FPUopTE(op_val)
+        self.op = self.get_core_op(FPUopTE(op_val))
+        # self.op        = FPUopTE(op_val)
 
-        op_type_val = (value >> (FIMM_W + 3 + 4 * AW + OP_W)) & op_type_mask
-        self.op_type   = InstTE(op_type_val)
+        # op_type_val = (value >> (FIMM_W + 3 + 4 * AW + OP_W)) & op_type_mask
+        # self.op_type   = InstTE(op_type_val)
 
         #self.print()
 
     def set_machine_code(self, value: int):
         op_type_mask    = (1 << OP_T_W) - 1
-        op_type_val = (value >> 30) & op_type_mask
-        self.op_type = InstTE(op_type_val)
+        op_type_val     = (value >> 30) & op_type_mask
+        op_type         = InstTE(op_type_val)
         cocotb.log.debug(f"HEX: {value:08x}; OP_VAL: {op_type_val}")
-        match self.op_type:
+        match op_type:
             case InstTE.UPP:
                 self._get_utype_from_machine_code(value)
             case InstTE.STORE:
@@ -156,18 +187,22 @@ class CoreInstItem():
                 pass
 
     def _get_stype_machine_code(self) -> int:
+        op, op_type = self.get_operation_fs()
+
         res = 0
         res =  self.imm                                             \
             | (self.rs1_addr       << (SIMM_W)                   )  \
             | (self.rs2_addr       << (SIMM_W + AW              ))  \
             | (self.rd_addr        << (SIMM_W + 2 * AW          ))  \
-            | (self.op.value       << (SIMM_W + 3 * AW          ))  \
-            | (self.op_type.value  << (SIMM_W + 3 * AW + OP_W   ))
+            | (     op.value       << (SIMM_W + 3 * AW          ))  \
+            | (     op_type.value  << (SIMM_W + 3 * AW + OP_W   ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CISI: {hex(res)}")
         return res
 
     def _get_ftype_machine_code(self) -> int:
+        op, op_type = self.get_operation_fs()
+
         res = 0
         res =  self.imm                                                \
             | (self.extra          << (FIMM_W                       )) \
@@ -175,35 +210,37 @@ class CoreInstItem():
             | (self.rs3_addr       << (FIMM_W + 3 + 1 * AW          )) \
             | (self.rs2_addr       << (FIMM_W + 3 + 2 * AW          )) \
             | (self.rs1_addr       << (FIMM_W + 3 + 3 * AW          )) \
-            | (self.op.value       << (FIMM_W + 3 + 4 * AW          )) \
-            | (self.op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W   ))
+            | (     op.value       << (FIMM_W + 3 + 4 * AW          )) \
+            | (     op_type.value  << (FIMM_W + 3 + 4 * AW + OP_W   ))
         cocotb.log.debug(f"CIFI: {hex(res)}")
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         return res
 
     def _get_utype_machine_code(self) -> int:
+        op, op_type = self.get_operation_fs()
         res = 0
         res =  self.imm                                            \
             | (self.rd_addr        << (UIMM_W                   )) \
-            | (self.op.value       << (UIMM_W + AW              )) \
-            | (self.op_type.value  << (UIMM_W + AW + OP_W       ))
+            | (     op.value       << (UIMM_W + AW              )) \
+            | (     op_type.value  << (UIMM_W + AW + OP_W       ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CIUI: {hex(res)}")
         return res
 
     def _get_ltype_machine_code(self) -> int:
+        op, op_type = self.get_operation_fs()
         res = 0
         res =  self.imm                                            \
             | (self.rs1_addr       << (LIMM_W                   )) \
             | (self.rd_addr        << (LIMM_W + 1 * AW          )) \
-            | (self.op.value       << (LIMM_W + 2 * AW          )) \
-            | (self.op_type.value  << (LIMM_W + 2 * AW + OP_W   ))
+            | (     op.value       << (LIMM_W + 2 * AW          )) \
+            | (     op_type.value  << (LIMM_W + 2 * AW + OP_W   ))
         assert res <= (1 << DW), f"RESULT MACHINE CODE IS BROKEN: {hex(res)}"
         cocotb.log.debug(f"CILI: {hex(res)}")
         return res
 
     def get_machine_code(self) -> int:
-        match self.op_type:
+        match self.get_op_type():
             case InstTE.UPP:
                 return self._get_utype_machine_code()
             case InstTE.STORE:
@@ -217,15 +254,15 @@ class CoreInstItem():
                 assert False
 
     def print(self):
-        match self.op_type:
+        match self.get_op_type():
             case InstTE.UPP:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.op_type.name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x};")
             case InstTE.STORE:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.op_type.name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
             case InstTE.LOAD:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.op_type.name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
             case InstTE.FPU:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.op_type.name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
             case _:
                 cocotb.log.warning(f"Nothing to print")
 

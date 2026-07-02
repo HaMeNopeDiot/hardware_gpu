@@ -12,22 +12,25 @@ class Primer(IntEnum):
 
 print(Primer.VALUE)
 
+class VOpTE(Enum):
+    pass
+
 class InstTE(Enum):
     UPP   = 0
     LOAD  = 1
     FPU   = 2
     STORE = 3
 
-class LoadOpTE(Enum): # L-type operation type enum
+class LoadOpTE(VOpTE): # L-type operation type enum
     LW      = 0
     ADDI    = 1
 
-class StoreOpTE(Enum): # S-type opertation type enum
+class StoreOpTE(VOpTE): # S-type opertation type enum
     SW      = 0
     ADD     = 1
     MUL     = 2
 
-class FPUopTE(Enum): # F-type operation type enum
+class FPUopTE(VOpTE): # F-type operation type enum
     ADD     = 0b00010
     MUL     = 0b00011
     DIV     = 0b00100
@@ -35,7 +38,7 @@ class FPUopTE(Enum): # F-type operation type enum
     NEG     = 0b00110
     MAX     = 0b00111
 
-class UPPopTE(Enum): # U-type operation type enum
+class UPPopTE(VOpTE): # U-type operation type enum
     LUI     = 0b00000
     RET     = 0b00001
 

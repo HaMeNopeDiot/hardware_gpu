@@ -7,13 +7,13 @@
 #------------------------------------------------------------------------------#
 
 import cocotb
-from cocotb.triggers    import Timer, ClockCycles
+from cocotb.triggers            import Timer, ClockCycles
 
-from core.ahb_slave       import AHBSlaveModel
-from core.ahb_slave       import AHBSize
-from core.apb_master      import APB4Master
-from core.core_model      import CoreModel
-from core.regfile_model   import RegfileModel
+from core.ahb_slave             import AHBSlaveModel
+from core.ahb_slave             import AHBSize
+from core.apb_master            import APB4Master
+from core.models.core_model     import CoreModel
+from core.models.regfile_model  import RegfileModel
 
 from utility.defines    import DW
 
@@ -25,7 +25,9 @@ from utility.defines    import CORES_CNT, THREADS_CNT, HZ, REGFILE_SZ
 
 from core.core_enums      import LoadOpTE, StoreOpTE, UPPopTE
 from core.instr_item      import InstItem
-from core.core_instr_item import CILI, CISI, CIUI
+from core.core_instr_item import CILI, CISI, CIUI, CoreInstItem
+
+from core.core_op   import CoreOp
 
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
     while True:
@@ -126,7 +128,7 @@ class BaseCoreTest:
             cocotb.log.debug(f"Make thread-{thread_idx} instructions with {pc_start_addr:08x} offset")
             for reg_idx in range(REGFILE_SZ):
                 addr_ofs = (thread_ofs + reg_idx) * jcell
-                InstItem(CISI(op=StoreOpTE.SW,
+                InstItem(CoreInstItem(op=CoreOp.SW,
                               imm = addr_ofs,
                               rd_addr = 0,
                               rs1_addr = 0,
@@ -134,7 +136,7 @@ class BaseCoreTest:
                          self.ahb_slave_ftc, addr=iaddr + addr_ofs)
                 cocotb.log.debug(f"Sended instruction for {reg_idx}-reg by {(iaddr + addr_ofs):08x} address")
 
-            InstItem(CIUI(op=UPPopTE.RET,
+            InstItem(CoreInstItem(op=CoreOp.RET,
                           imm = 0x00,
                           rd_addr = 0),
                     self.ahb_slave_ftc, iaddr + addr_ofs + jcell)

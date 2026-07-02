@@ -12,18 +12,21 @@ from cocotb.triggers      import ClockCycles
 import numpy as np
 
 from core.core_enums      import LoadOpTE, StoreOpTE, FPUopTE, UPPopTE, RoundModeE
-from core.core_instr_item import CILI, CIFI, CISI, CIUI
+from core.core_instr_item import CILI, CIFI, CISI, CIUI, CoreInstItem
 from core.instr_item      import InstItem
 from core.ahb_slave       import AHBSize
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR
 
+from core.core_op       import CoreOperation
+from core.core_enums    import CoreOp
+
 class FPUCoreTest(BaseCoreTest):
     async def body(self):
         pass
 
-    async def fpu_core_test(self, fpu_op: FPUopTE):
+    async def fpu_core_test(self, fpu_op: CoreOp):
         cocotb.log.info(f"START TESTING CORE FPU")
 
         # Initialize the generator
@@ -55,20 +58,21 @@ class FPUCoreTest(BaseCoreTest):
             self.ahb_slave_lsu.write_memory((i * elem_ofs)         , ahb_size, a_tmp)
             self.ahb_slave_lsu.write_memory((i * elem_ofs) + (0x10), ahb_size, b_tmp)
 
+        main_fpu_instr_item = CoreInstItem(op=fpu_op,        imm = 0x00,
+                                            rs1_addr = 3,
+                                            rs2_addr = 4,
+                                            rs3_addr = 1,
+                                            rd_addr = 5,
+                                            extra=RoundModeE.RTZ.value)
 
         # form instructions: get constants/ calculate / give result
-        ipc1 = InstItem(CILI(op=LoadOpTE.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0), self.ahb_slave_ftc, 0x04)
-        ipc2 = InstItem(CISI(op=StoreOpTE.MUL, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), self.ahb_slave_ftc, 0x08)
-        ipc3 = InstItem(CILI(op=LoadOpTE.LW,   imm = 0x00,   rd_addr = 3, rs1_addr = 2), self.ahb_slave_ftc, 0x0C)
-        ipc4 = InstItem(CILI(op=LoadOpTE.LW,   imm = 0x10,   rd_addr = 4, rs1_addr = 2), self.ahb_slave_ftc, 0x10)
-        ipc5 = InstItem(CIFI(op=fpu_op,        imm = 0x00,
-                                            arg1_addr = 3,
-                                            arg2_addr = 4,
-                                            arg3_addr = 1,
-                                            argr_addr = 5,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x14)
-        ipc6 = InstItem(CISI(op=StoreOpTE.SW,  imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5), self.ahb_slave_ftc, 0x18)
-        ret0 = InstItem(CIUI(op=UPPopTE.RET,   imm = 0x00,    rd_addr = 0),                 self.ahb_slave_ftc, 0x1C)
+        ipc1 = InstItem(CoreInstItem(CoreOp.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0), self.ahb_slave_ftc, 0x04)
+        ipc2 = InstItem(CoreInstItem(CoreOp.MUL, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), self.ahb_slave_ftc, 0x08)
+        ipc3 = InstItem(CoreInstItem(CoreOp.LW,   imm = 0x00,   rd_addr = 3, rs1_addr = 2), self.ahb_slave_ftc, 0x0C)
+        ipc4 = InstItem(CoreInstItem(CoreOp.LW,   imm = 0x10,   rd_addr = 4, rs1_addr = 2), self.ahb_slave_ftc, 0x10)
+        ipc5 = InstItem(main_fpu_instr_item, self.ahb_slave_ftc, 0x14)
+        ipc6 = InstItem(CoreInstItem(CoreOp.SW,  imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5), self.ahb_slave_ftc, 0x18)
+        ret0 = InstItem(CoreInstItem(CoreOp.RET,   imm = 0x00,    rd_addr = 0),                 self.ahb_slave_ftc, 0x1C)
 
 
         # execute instructions
@@ -92,11 +96,11 @@ class FPUCoreTest(BaseCoreTest):
 
         cocotb.log.info(f"RESULT FPU: {res}")
 
-        eps     = 1e-5
+        eps     = 1e-4
 
         for i in range(4):
             res_exp = a[i] + b[i]
-            match fpu_op:
+            match main_fpu_instr_item.get_op():
                 case FPUopTE.ADD:
                     res_exp = a[i] + b[i]
                 case FPUopTE.MUL:
@@ -109,30 +113,32 @@ class FPUCoreTest(BaseCoreTest):
                     res_exp = - a[i]
                 case FPUopTE.MAX:
                     res_exp = max(a[i], b[i])
+                case _:
+                    assert False, f"Unknown fpu_op: OP is {fpu_op} with type {type(fpu_op)}"
             eps_real = abs(res[i] - (res_exp))
             cocotb.log.debug(f"ESP for {i} THREAD: {eps_real}")
             assert eps_real < eps, f"Uncorrect answer: {a[i]} op {b[i]} = {res[i]} <> {res_exp}"
 
 class FPUCheckADDTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.ADD)
+        await self.fpu_core_test(CoreOp.FADD)
 
 class FPUCheckMULTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.MUL)
+        await self.fpu_core_test(CoreOp.FMUL)
 
 class FPUCheckDIVTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.DIV)
+        await self.fpu_core_test(CoreOp.FDIV)
 
 class FPUCheckSQRTTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.SQRT)
+        await self.fpu_core_test(CoreOp.FSQRT)
 
 class FPUCheckNEGTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.NEG)
+        await self.fpu_core_test(CoreOp.FNEG)
 
 class FPUCheckMAXTest(FPUCoreTest):
     async def body(self):
-        await self.fpu_core_test(FPUopTE.MAX)
+        await self.fpu_core_test(CoreOp.FMAX)

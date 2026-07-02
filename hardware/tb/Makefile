@@ -19,7 +19,6 @@ COMPILE_ARGS += -Wno-WIDTHTRUNC \
 				-j 5 --timing \
 				--timescale 1ns/1ps \
 				-DTAG_TYPE="logic[3:0]" \
-				--threads 4
 
 ifeq (SIM, iverilog)
 	COMPILE_ARGS += -DNO_IF_SUPPORT=1

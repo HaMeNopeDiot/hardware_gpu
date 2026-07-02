@@ -12,9 +12,9 @@ from collections import defaultdict
 
 from utility.defines    import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT, BYTES_CNT
 
-from core.thread_model  import ThreadModel
-from core.core_enums    import CoreOp
-from core.core_instr_item   import CoreInstItem
+from core.models.thread_model   import ThreadModel
+from core.core_enums            import CoreOp
+from core.core_instr_item       import CoreInstItem
 
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 
@@ -87,7 +87,7 @@ class CoreModel():
 
 
     def handle_op(self, instr: CoreInstItem):
-        op = instr.get_op()
+        op = instr.op
         imm = instr.imm
         for thread in self._threads:
             if op == CoreOp.SW:

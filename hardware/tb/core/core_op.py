@@ -6,7 +6,7 @@
 # Date: 2026/06
 #------------------------------------------------------------------------------#
 
-from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE
+from core.core_enums import InstTE, LoadOpTE, FPUopTE, UPPopTE, StoreOpTE, VOpTE
 from core.core_enums import CoreOp
 import cocotb
 
@@ -74,3 +74,32 @@ class CoreOperation():
             self.op = self._parse_s_type_op(instr_op)
         else:
             assert isinstance(instr_op, (LoadOpTE, StoreOpTE, UPPopTE, FPUopTE)), "Unknown instruction type"
+
+    def get_instr_from_op(self) -> VOpTE:
+        match self.op:
+            case CoreOp.LW:
+                return LoadOpTE.LW
+            case CoreOp.SW:
+                return StoreOpTE.SW
+            case CoreOp.LUI:
+                return UPPopTE.LUI
+            case CoreOp.ADDI:
+                return LoadOpTE.ADDI
+            case CoreOp.FADD:
+                return FPUopTE.ADD
+            case CoreOp.FMUL:
+                return FPUopTE.MUL
+            case CoreOp.FDIV:
+                return FPUopTE.DIV
+            case CoreOp.FSQRT:
+                return FPUopTE.SQRT
+            case CoreOp.FNEG:
+                return FPUopTE.NEG
+            case CoreOp.FMAX:
+                return FPUopTE.MAX
+            case CoreOp.ADD:
+                return StoreOpTE.ADD
+            case CoreOp.MUL:
+                return StoreOpTE.MUL
+            case CoreOp.RET:
+                return UPPopTE.RET

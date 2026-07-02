@@ -14,14 +14,14 @@ from cocotb.triggers      import ClockCycles
 from core.tests.base_itest  import BaseCoreTest
 from core.core_instr_item   import CoreInstItem
 from core.ahb_slave         import AHBSize
-from core.core_model        import CoreModel
+from core.models.core_model import CoreModel
 from core.instr_item        import InstItem
 from core.core_enums        import RoundModeE
 
 from fpu.fppconverter     import float_to_i754, ieee754_to_float
 
 from utility.bin_unpack   import unpack_bin_file, read_vbuffer
-from utility.addresess    import CSRAddr
+from utility.addresess    import CSRAddr, POSITION_BASE_ADDR
 
 
 class VKCubeTest(BaseCoreTest):
@@ -42,7 +42,6 @@ class VKCubeTest(BaseCoreTest):
         # set instr to mem
         idx = 0
         for instr in i_arr:
-            #assert instr.get_machine_code() == words[idx], f"instruction decode don't match"
             InstItem(instr, self.ahb_slave_ftc, 4 + idx * 4)
             idx += 1
 
@@ -108,9 +107,9 @@ class VKCubeTest(BaseCoreTest):
         print(f"FLOAT DUMP MEMORY")
         float_dump_mem = []
 
-        POS_BASE_ADDR     = 0x0000_1000 # 0x2000_0000
-        POS_BASE_ADDR_END = POS_BASE_ADDR + 0x320
-        for i in range(POS_BASE_ADDR, POS_BASE_ADDR_END, 0x4):
+        pos_base_addr     = POSITION_BASE_ADDR      # 0x2000_0000
+        pos_base_addr_end = pos_base_addr + 0x320
+        for i in range(pos_base_addr, pos_base_addr_end, 0x4):
             data = self.ahb_slave_lsu.read_memory(i, AHBSize.WORD.value)
             fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
@@ -121,7 +120,7 @@ class VKCubeTest(BaseCoreTest):
 
         print(f"FLOAT DUMP MODEL MEMORY")
         float_dump_model = []
-        for i in range(POS_BASE_ADDR, POS_BASE_ADDR_END, 0x4):
+        for i in range(pos_base_addr, pos_base_addr_end, 0x4):
             data = self.core_model.read_memory(i)
             fdata = ieee754_to_float(data, 32)
             if ((i+0x4) % 0x20) == 0:
