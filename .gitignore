@@ -14,3 +14,4 @@ hardware/CITATION.cff
 *.pdf
 *.txt
 __pycache__/
+hardware/build/
