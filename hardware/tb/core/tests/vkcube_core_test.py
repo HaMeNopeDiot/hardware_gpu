@@ -14,7 +14,6 @@ from cocotb.triggers      import ClockCycles
 from core.tests.base_itest  import BaseCoreTest
 from core.core_instr_item   import CoreInstItem
 from core.ahb_slave         import AHBSize
-from core.models.core_model import CoreModel
 from core.instr_item        import InstItem
 from core.core_enums        import RoundModeE
 

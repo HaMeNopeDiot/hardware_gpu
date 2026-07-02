@@ -14,16 +14,13 @@ from cocotb.triggers      import ClockCycles
 from core.tests.base_itest  import BaseCoreTest
 from core.core_instr_item   import CoreInstItem
 from core.ahb_slave         import AHBSize
-from core.models.core_model import CoreModel
 from core.instr_item        import InstItem
-from core.core_enums        import RoundModeE
 
 from core.core_op           import CoreOp
 
 from fpu.fppconverter     import float_to_i754, ieee754_to_float
 
-from utility.bin_unpack   import unpack_bin_file, read_vbuffer
-from utility.addresess    import CSRAddr, POSITION_BASE_ADDR
+from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR, THREADS_CNT
 
 import numpy as np

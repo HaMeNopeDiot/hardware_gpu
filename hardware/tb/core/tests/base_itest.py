@@ -23,9 +23,8 @@ from utility.addresess import CSRAddr
 
 from utility.defines    import CORES_CNT, THREADS_CNT, HZ, REGFILE_SZ
 
-from core.core_enums      import LoadOpTE, StoreOpTE, UPPopTE
 from core.instr_item      import InstItem
-from core.core_instr_item import CILI, CISI, CIUI, CoreInstItem
+from core.core_instr_item import CoreInstItem
 
 from core.core_op   import CoreOp
 

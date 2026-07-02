@@ -11,15 +11,14 @@ import cocotb
 from cocotb.triggers      import ClockCycles
 import numpy as np
 
-from core.core_enums      import LoadOpTE, StoreOpTE, FPUopTE, UPPopTE, RoundModeE
-from core.core_instr_item import CILI, CIFI, CISI, CIUI, CoreInstItem
+from core.core_enums      import FPUopTE, RoundModeE
+from core.core_instr_item import CoreInstItem
 from core.instr_item      import InstItem
 from core.ahb_slave       import AHBSize
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR
 
-from core.core_op       import CoreOperation
 from core.core_enums    import CoreOp
 
 class FPUCoreTest(BaseCoreTest):
