@@ -8,15 +8,12 @@
 
 from core.tests.base_itest  import BaseCoreTest
 import cocotb
-from cocotb.triggers      import ClockCycles
 import numpy as np
 
 from core.core_enums      import FPUopTE, RoundModeE
 from core.core_instr_item import CII
-from core.instr_item      import InstItem
 from core.ahb_slave       import AHBSize
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
-from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR
 
 from core.core_enums    import CoreOp

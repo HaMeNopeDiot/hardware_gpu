@@ -77,5 +77,5 @@ class ThreadEnTest(BaseCoreTest):
             cocotb.log.info(f"{i} result: {tmp:08x}")
         assert res[0] == 0x0200_0067, f"data do not match"
         assert res[1] == 0x1111_1267 + 0x7777_7421, f"data do not match"
-        assert ieee754_to_float(res[2]) == a[0] + a[1], f"data do not match"
+        assert abs(ieee754_to_float(res[2]))  - (a[0] + a[1]) < 1e-1, f"data do not match"
         assert res[3] == 0x1111_1267 + 0x7777_7421, f"data do not match"

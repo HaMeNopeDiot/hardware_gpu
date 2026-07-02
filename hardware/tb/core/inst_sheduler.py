@@ -86,5 +86,5 @@ class InstSheduler():
             cocotb.log.info(f"- {qe.op.name}")
 
     def get_start_pc(self):
-        print(f"ninnerne {self.cur_start_pc}")
+        # print(f"ninnerne {self.cur_start_pc}")
         return self.cur_start_pc

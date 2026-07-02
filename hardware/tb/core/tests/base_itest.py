@@ -23,9 +23,6 @@ from utility.addresess import CSRAddr
 
 from utility.defines    import CORES_CNT, THREADS_CNT, HZ, REGFILE_SZ
 
-from core.instr_item      import InstItem
-from core.core_instr_item import CII
-
 from core.core_op   import CoreOp
 from core.inst_sheduler     import InstSheduler
 
@@ -125,35 +122,23 @@ class BaseCoreTest:
     async def unload_all_regfiles(self, iaddr):
         # dump from regfiles to memory
         jcell = (1 << AHBSize.WORD.value)
+        self.inst_sheduler.cur_start_pc = iaddr
         for thread_idx in range(THREADS_CNT):
             thread_ofs = thread_idx * (REGFILE_SZ + 1)
             pc_start_addr = iaddr + thread_ofs * jcell
             cocotb.log.debug(f"Make thread-{thread_idx} instructions with {pc_start_addr:08x} offset")
             for reg_idx in range(REGFILE_SZ):
                 addr_ofs = (thread_ofs + reg_idx) * jcell
-                InstItem(CII(op=CoreOp.SW,
-                              imm = addr_ofs,
-                              rd_addr = 0,
-                              rs1_addr = 0,
-                              rs2_addr = reg_idx),
-                         self.ahb_slave_ftc, addr=iaddr + addr_ofs)
+                self.inst_sheduler.load_i(op=CoreOp.SW, imm = addr_ofs, rs2_addr = reg_idx)
                 cocotb.log.debug(f"Sended instruction for {reg_idx}-reg by {(iaddr + addr_ofs):08x} address")
 
-            InstItem(CII(op=CoreOp.RET,
-                          imm = 0x00,
-                          rd_addr = 0),
-                    self.ahb_slave_ftc, iaddr + addr_ofs + jcell)
+            self.inst_sheduler.load_i(op=CoreOp.RET)
             cocotb.log.debug(f"Sended instruction EoP by {(iaddr + addr_ofs + jcell):08x} address")
 
-            cocotb.start_soon(self.cnt_busy_cycles(REGFILE_SZ + 1))
             thread_en_mask = 1 << thread_idx
             cocotb.log.debug(f"thread_en_mask: {thread_en_mask}")
-            await self.apb_master_csr.write(CSRAddr.TU_EN.value    , thread_en_mask,    0b1111)
-            await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , pc_start_addr ,    0b1111)
-            await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1           ,    0b1111)
-
-            while (self.dut.busy_o.value == 1):
-                await ClockCycles(self.clk, 1)
+            await self.launch_programm(thread_en_mask)
+            await self.wait_until_done()
 
         # load dump from memory
         regfiles: list[RegfileModel] = []
@@ -184,8 +169,11 @@ class BaseCoreTest:
                 if not is_equal:
                     cocotb.log.warning(f"Error on {j} index in {i} thread index. {rfdata:08x} <> {tdata:08x}")
 
-    async def launch_programm(self, thread_en_mask: int = (1 << THREADS_CNT) - 1):
-        pc       = self.inst_sheduler.get_start_pc()
+    async def launch_programm(self, thread_en_mask: int = (1 << THREADS_CNT) - 1, custom_pc: int = -1):
+        if custom_pc < 0:
+            pc = self.inst_sheduler.get_start_pc()
+        else:
+            pc = custom_pc
         len_inst = self.inst_sheduler.get_prog_len()
         cocotb.start_soon(self.cnt_busy_cycles(len_inst))
         await self.apb_master_csr.write(CSRAddr.TU_EN.value    , thread_en_mask)
