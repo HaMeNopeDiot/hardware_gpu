@@ -9,18 +9,16 @@
 import struct
 
 import cocotb
-from cocotb.triggers      import ClockCycles
 
 from core.tests.base_itest  import BaseCoreTest
-from core.core_instr_item   import CoreInstItem
+from core.core_instr_item   import CII
 from core.ahb_slave         import AHBSize
-from core.instr_item        import InstItem
 from core.core_enums        import RoundModeE
 
 from fpu.fppconverter     import float_to_i754, ieee754_to_float
 
 from utility.bin_unpack   import unpack_bin_file, read_vbuffer
-from utility.addresess    import CSRAddr, POSITION_BASE_ADDR
+from utility.addresess    import POSITION_BASE_ADDR
 
 
 class VKCubeTest(BaseCoreTest):
@@ -32,7 +30,7 @@ class VKCubeTest(BaseCoreTest):
         i_arr = []
         for word in words:
             # print(f"idx: {idx} : 0x{word:08x}")
-            i = CoreInstItem()
+            i = CII()
             i.set_machine_code(word)
             i.extra = RoundModeE.RNE.value
             idx += 1
@@ -41,7 +39,7 @@ class VKCubeTest(BaseCoreTest):
         # set instr to mem
         idx = 0
         for instr in i_arr:
-            InstItem(instr, self.ahb_slave_ftc, 4 + idx * 4)
+            self.inst_sheduler.load_cii_i(instr)
             idx += 1
 
         cocotb.log.info(f"INSTRUCTION QUEUE")
@@ -145,13 +143,9 @@ class VKCubeTest(BaseCoreTest):
     async def body(self):
         self.prepare()
         # nucelar launch ready
-        cocotb.start_soon(self.cnt_busy_cycles(213))
-        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
-
+        await self.launch_programm()
         # wait
-        while (self.dut.busy_o.value == 1):
-           await ClockCycles(self.clk, 1)
+        await self.wait_until_done()
         self.dump()
         #await ClockCycles(self.clk, 2000)
         await self.unload_all_regfiles(0x1000)

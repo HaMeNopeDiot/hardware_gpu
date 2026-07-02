@@ -14,7 +14,7 @@ from utility.defines    import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT, BYTES_CNT
 
 from core.models.thread_model   import ThreadModel
 from core.core_enums            import CoreOp
-from core.core_instr_item       import CoreInstItem
+from core.core_instr_item       import CII
 
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 
@@ -86,7 +86,7 @@ class CoreModel():
         return value
 
 
-    def handle_op(self, instr: CoreInstItem):
+    def handle_op(self, instr: CII):
         op = instr.op
         imm = instr.imm
         for thread in self._threads:

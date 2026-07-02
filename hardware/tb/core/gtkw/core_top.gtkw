@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Wed Jul  1 12:27:35 2026
+[*] Thu Jul  2 13:09:11 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Wed Jul  1 08:27:16 2026"
-[dumpfile_size] 41228391
+[dumpfile_mtime] "Thu Jul  2 13:07:30 2026"
+[dumpfile_size] 54108964
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 447300
+[timestart] 67333000
 [size] 1920 1116
-[pos] -46 -46
-*-17.351603 811000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-17.651602 67857000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
@@ -257,7 +257,7 @@ core.core_lsu_u.ahb_master_u.hrdata[31:0]
 -LSU
 @200
 -FETCHER
-@c00201
+@c00200
 -FETCHER
 @28
 core.core_fetcher_u.inst_q_empty
@@ -285,7 +285,6 @@ core.core_fetcher_u.ahb_master_u.state[2:0]
 core.core_fetcher_u.ahb_master_u.next_state[2:0]
 @1401200
 -AHB
-@1401201
 -FETCHER
 @200
 -CMD

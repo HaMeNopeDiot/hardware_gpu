@@ -13,7 +13,7 @@ from core.tests.base_itest  import BaseCoreTest
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
 
 from core.core_enums      import RoundModeE
-from core.core_instr_item import CoreInstItem
+from core.core_instr_item import CII
 from core.instr_item      import InstItem
 from utility.addresess    import CSRAddr
 from utility.defines      import VID_ADDR
@@ -37,78 +37,68 @@ class ISACheckTest(BaseCoreTest):
 
 
         # form inst
-        ilc0 = InstItem(CoreInstItem(op=CoreOp.ADDI, imm = 0x004  , rd_addr = 30, rs1_addr = 30), self.ahb_slave_ftc, 0x04)
-        iuc1 = InstItem(CoreInstItem(op=CoreOp.LUI , imm = 0x00001, rd_addr = 1), self.ahb_slave_ftc, 0x08)
-        ilc1 = InstItem(CoreInstItem(op=CoreOp.ADDI, imm = 0x020  , rd_addr = 1, rs1_addr = 1), self.ahb_slave_ftc, 0x0C)
-        isc2 = InstItem(CoreInstItem(op=CoreOp.MUL , imm = 0x0D   , rd_addr = 9,  rs1_addr = 30, rs2_addr = VID_ADDR), self.ahb_slave_ftc, 0x10)
-        isc1 = InstItem(CoreInstItem(op=CoreOp.ADD , imm = 0x0D   , rd_addr = 10, rs1_addr = 9,  rs2_addr = 1), self.ahb_slave_ftc, 0x14)
-        ilc2 = InstItem(CoreInstItem(op=CoreOp.LW  , imm = 0x00   , rd_addr = 2, rs1_addr = 10), self.ahb_slave_ftc, 0x18)
-        ifc1 = InstItem(CoreInstItem(op=CoreOp.FADD, imm = 0x00   ,
+        self.inst_sheduler.load_i(op=CoreOp.ADDI, imm = 0x004  , rd_addr = 30, rs1_addr = 30                     )
+        self.inst_sheduler.load_i(op=CoreOp.LUI , imm = 0x00001, rd_addr = 1                                     )
+        self.inst_sheduler.load_i(op=CoreOp.ADDI, imm = 0x020  , rd_addr = 1,  rs1_addr = 1                      )
+        self.inst_sheduler.load_i(op=CoreOp.MUL , imm = 0x0D   , rd_addr = 9,  rs1_addr = 30, rs2_addr = VID_ADDR)
+        self.inst_sheduler.load_i(op=CoreOp.ADD , imm = 0x0D   , rd_addr = 10, rs1_addr = 9,  rs2_addr = 1       )
+        self.inst_sheduler.load_i(op=CoreOp.LW  , imm = 0x00   , rd_addr = 2,  rs1_addr = 10                     )
+        self.inst_sheduler.load_i(op=CoreOp.FADD, imm = 0x00   ,
                                             rs1_addr = 2,
                                             rs2_addr = 0,
                                             rs3_addr = 0,
                                             rd_addr  = 3,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x1C)
-        ifc2 = InstItem(CoreInstItem(CoreOp.FMUL,   imm = 0x00,
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.FMUL, imm = 0x00,
                                             rs1_addr = 2,
                                             rs2_addr = 3,
                                             rs3_addr = 0,
                                             rd_addr = 4,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x20)
-        ifc3 = InstItem(CoreInstItem(CoreOp.FDIV,   imm = 0x00,
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.FDIV,   imm = 0x00,
                                             rs1_addr = 4,
                                             rs2_addr = 3,
                                             rs3_addr = 0,
                                             rd_addr  = 5,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x24)
-        ifc4 = InstItem(CoreInstItem(CoreOp.FSQRT,  imm = 0x00,
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.FSQRT,  imm = 0x00,
                                             rs1_addr = 2,
                                             rs2_addr = 1,
                                             rs3_addr = 4,
                                             rd_addr  = 6,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x28)
-        ifc5 = InstItem(CoreInstItem(CoreOp.FNEG,   imm = 0x00,
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.FNEG,   imm = 0x00,
                                             rs1_addr = 6,
                                             rs2_addr = 1,
                                             rs3_addr = 1,
                                             rd_addr  = 7,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x2C)
-        ifc6 = InstItem(CoreInstItem(CoreOp.FMAX,   imm = 0x00,
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.FMAX,   imm = 0x00,
                                             rs1_addr = 5,
                                             rs2_addr = 6,
                                             rs3_addr = 0,
                                             rd_addr  = 8,
-                                            extra=RoundModeE.RTZ.value), self.ahb_slave_ftc, 0x30)
-        isc3 = InstItem(CoreInstItem(CoreOp.SW,  imm = 0x40,   rd_addr = 0,  rs1_addr = 10, rs2_addr = 6), self.ahb_slave_ftc, 0x34)
-        ret0 = InstItem(CoreInstItem(CoreOp.RET,   imm = 0x00,    rd_addr = 0), self.ahb_slave_ftc, 0x38)
+                                            extra=RoundModeE.RTZ.value)
+        self.inst_sheduler.load_i(CoreOp.SW,  imm = 0x40,   rd_addr = 0,  rs1_addr = 10, rs2_addr = 6)
+        self.inst_sheduler.load_i(CoreOp.RET, imm = 0x00,   rd_addr = 0)
+
+        # do
+        await self.launch_programm()
+        await self.wait_until_done()
 
         ifpu = []
         for i in range(6):
-            itmp = InstItem(CoreInstItem(CoreOp.SW,
+            itmp = self.inst_sheduler.load_i(CoreOp.SW,
                                 imm = 0x60 + i * 16, # 4 threads with WORD Size of offset (4 * 4)
                                 rd_addr = 0, # not used
                                 rs1_addr = 10,
-                                rs2_addr = 3 + i),
-                                self.ahb_slave_ftc, 0x40 + i * 4)
+                                rs2_addr = 3 + i)
             ifpu.append(itmp)
-        ret0 = InstItem(CoreInstItem(CoreOp.RET,   imm = 0x00,    rd_addr = 0), self.ahb_slave_ftc, 0x58)
-
-        # do
-        cocotb.start_soon(self.cnt_busy_cycles(14))
-        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4,       0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,       0b1111)
-
-        while (self.dut.busy_o.value == 1):
-            await ClockCycles(self.clk, 1)
+        self.inst_sheduler.load_i(CoreOp.RET,   imm = 0x00,    rd_addr = 0)
 
 
-        cocotb.start_soon(self.cnt_busy_cycles(7))
-        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x40, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1,  0b1111)
-
-
-        while (self.dut.busy_o.value == 1):
-            await ClockCycles(self.clk, 1)
+        await self.launch_programm()
+        await self.wait_until_done()
 
         r_fpu_res = []
         for i in range(6):

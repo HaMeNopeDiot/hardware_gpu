@@ -10,14 +10,14 @@ import cocotb
 
 from cocotb.triggers    import Timer, ClockCycles
 
-from core.core_instr_item   import CoreInstItem
+from core.core_instr_item   import CII
 from core.ahb_slave         import AHBSlaveModel, AHBSize
 
 DEF_AHB_SZ = AHBSize.WORD
 
 class InstItem():
     def __init__(self,
-                 instr: CoreInstItem,
+                 instr: CII,
                  ahb_slave_model: AHBSlaveModel,
                  addr: int):
         self.addr = addr

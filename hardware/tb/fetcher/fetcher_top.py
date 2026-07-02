@@ -12,7 +12,7 @@ from core.ahb_slave       import AHBSlaveModel
 
 from core.core_instr_item import VID_ADDR, DW
 
-from core.core_instr_item import CILI, CIFI, CISI, CIUI, CoreInstItem
+from core.core_instr_item import CILI, CIFI, CISI, CIUI, CII
 from core.core_enums      import LoadOpTE, InstTE, StoreOpTE, FPUopTE, UPPopTE
 
 

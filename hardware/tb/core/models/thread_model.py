@@ -14,7 +14,7 @@ import cocotb
 from utility.defines                import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT
 
 from core.core_enums                import CoreOp, FPU_OP
-from core.core_instr_item           import CoreInstItem
+from core.core_instr_item           import CII
 from core.models.regfile_model      import RegfileModel
 
 from fpu.fppconverter       import hex_ieee754_to_float, ieee754_to_float, float_to_i754
@@ -71,7 +71,7 @@ class ThreadModel():
                 assert False, f"Unknown Core Op in fpu calc: {op}"
         return rd
 
-    def _fpu_calc(self, instr: CoreInstItem, op: CoreOp):
+    def _fpu_calc(self, instr: CII, op: CoreOp):
         rs1_addr = instr.rs1_addr
         rs2_addr = instr.rs2_addr
         # read registers from setted address
@@ -88,7 +88,7 @@ class ThreadModel():
         # Write result in regfile
         self.write_regfile(instr.rd_addr, rd_i754)
 
-    def handle_op(self, instr: CoreInstItem, data: int = 0) -> int:
+    def handle_op(self, instr: CII, data: int = 0) -> int:
         op = instr.op
 
         rd_addr = instr.rd_addr

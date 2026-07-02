@@ -19,9 +19,10 @@ SIMM_W = DW - (AW * 3 + OP_W + OP_T_W)
 from core.core_enums    import CoreOp
 from core.core_op       import CoreOperation
 
-class CoreInstItem():
+# Core instruction item
+class CII():
     def __init__(self,
-                op      : CoreOperation = None,
+                op      : CoreOp = None,
                 rs1_addr: int = 0,
                 rs2_addr: int = 0,
                 rs3_addr: int = 0,
@@ -63,7 +64,7 @@ class CoreInstItem():
         return (op_t.value << OP_W) | op.value
 
 
-    def get_core_op(self, inst: InstTE) -> CoreOperation:
+    def get_core_op(self, inst: InstTE) -> CoreOp:
         core_op = CoreOperation()
         core_op.set_op_from_instr(inst)
         return core_op.op
@@ -91,7 +92,7 @@ class CoreInstItem():
         imm_mask        = (1 << SIMM_W  ) - 1
         addr_mask       = (1 << AW      ) - 1
         op_mask         = (1 << OP_W    ) - 1
-        op_type_mask    = (1 << OP_T_W  ) - 1
+        # op_type_mask    = (1 << OP_T_W  ) - 1
 
         self.imm      = (value                      )  & imm_mask
         self.rs1_addr = (value >> SIMM_W            )  & addr_mask
@@ -258,70 +259,10 @@ class CoreInstItem():
             case InstTE.UPP:
                 cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x};")
             case InstTE.STORE:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
             case InstTE.LOAD:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
             case InstTE.FPU:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:03x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
             case _:
                 cocotb.log.warning(f"Nothing to print")
-
-class CISI(CoreInstItem):
-    def __init__(self,
-                 op: StoreOpTE,
-                 rs1_addr: int,
-                 rs2_addr: int,
-                 rd_addr: int,
-                 imm: int, # Исправлено: imm: int
-                 op_type = InstTE.STORE,
-                 ):
-        super().__init__(op_type=op_type,
-                         op=op,
-                         rs1_addr=rs1_addr,
-                         rs2_addr=rs2_addr,
-                         rd_addr=rd_addr,
-                         imm=imm)
-
-class CIFI(CoreInstItem):
-    def __init__(self,
-                 op: FPUopTE,
-                 arg1_addr: int,
-                 arg2_addr: int,
-                 arg3_addr: int,
-                 argr_addr: int,
-                 extra: int,
-                 imm: int,
-                 op_type=InstTE.FPU):
-        super().__init__(op_type=op_type,
-                         op=op,
-                         rs1_addr=arg1_addr,
-                         rs2_addr=arg2_addr,
-                         rs3_addr=arg3_addr,
-                         rd_addr=argr_addr,
-                         extra=extra,
-                         imm=imm)
-
-class CIUI(CoreInstItem):
-    def __init__(self,
-                 op: UPPopTE,
-                 imm: int,
-                 rd_addr: int,
-                 op_type=InstTE.UPP):
-        super().__init__(op_type=op_type,
-                         imm=imm,
-                         rd_addr=rd_addr,
-                         op=op)
-
-class CILI(CoreInstItem):
-    def __init__(self,
-                 op: LoadOpTE,
-                 rs1_addr: int,
-                 rd_addr: int,
-                 imm: int, # Исправлено: imm: int
-                 op_type = InstTE.LOAD,
-                 ):
-        super().__init__(op_type=op_type,
-                         rs1_addr=rs1_addr,
-                         rd_addr=rd_addr,
-                         imm=imm,
-                         op=op)

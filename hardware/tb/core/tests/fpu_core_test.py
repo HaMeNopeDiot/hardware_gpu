@@ -12,7 +12,7 @@ from cocotb.triggers      import ClockCycles
 import numpy as np
 
 from core.core_enums      import FPUopTE, RoundModeE
-from core.core_instr_item import CoreInstItem
+from core.core_instr_item import CII
 from core.instr_item      import InstItem
 from core.ahb_slave       import AHBSize
 from fpu.fppconverter import hex_ieee754_to_float, float_to_i754
@@ -57,7 +57,7 @@ class FPUCoreTest(BaseCoreTest):
             self.ahb_slave_lsu.write_memory((i * elem_ofs)         , ahb_size, a_tmp)
             self.ahb_slave_lsu.write_memory((i * elem_ofs) + (0x10), ahb_size, b_tmp)
 
-        main_fpu_instr_item = CoreInstItem(op=fpu_op,        imm = 0x00,
+        main_fpu_instr_item = CII(op=fpu_op,        imm = 0x00,
                                             rs1_addr = 3,
                                             rs2_addr = 4,
                                             rs3_addr = 1,
@@ -65,23 +65,19 @@ class FPUCoreTest(BaseCoreTest):
                                             extra=RoundModeE.RTZ.value)
 
         # form instructions: get constants/ calculate / give result
-        ipc1 = InstItem(CoreInstItem(CoreOp.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0), self.ahb_slave_ftc, 0x04)
-        ipc2 = InstItem(CoreInstItem(CoreOp.MUL, imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR), self.ahb_slave_ftc, 0x08)
-        ipc3 = InstItem(CoreInstItem(CoreOp.LW,   imm = 0x00,   rd_addr = 3, rs1_addr = 2), self.ahb_slave_ftc, 0x0C)
-        ipc4 = InstItem(CoreInstItem(CoreOp.LW,   imm = 0x10,   rd_addr = 4, rs1_addr = 2), self.ahb_slave_ftc, 0x10)
-        ipc5 = InstItem(main_fpu_instr_item, self.ahb_slave_ftc, 0x14)
-        ipc6 = InstItem(CoreInstItem(CoreOp.SW,  imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5), self.ahb_slave_ftc, 0x18)
-        ret0 = InstItem(CoreInstItem(CoreOp.RET,   imm = 0x00,    rd_addr = 0),                 self.ahb_slave_ftc, 0x1C)
+        self.inst_sheduler.load_i(CoreOp.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0                                                          )
+        self.inst_sheduler.load_i(CoreOp.MUL , imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR                                     )
+        self.inst_sheduler.load_i(CoreOp.LW  , imm = 0x00,   rd_addr = 3, rs1_addr = 2                                                          )
+        self.inst_sheduler.load_i(CoreOp.LW  , imm = 0x10,   rd_addr = 4, rs1_addr = 2                                                          )
+        self.inst_sheduler.load_i(fpu_op     , imm = 0x00,   rs1_addr= 3, rs2_addr = 4, rs3_addr = 1, rd_addr= 5, extra = RoundModeE.RTZ.value  )
+        self.inst_sheduler.load_i(CoreOp.SW  , imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5                                            )
+        self.inst_sheduler.load_i(CoreOp.RET , imm = 0x00,   rd_addr = 0                                                                        )
 
 
         # execute instructions
-        cocotb.start_soon(self.cnt_busy_cycles(7))
-        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , 0x4, 0b1111)
-        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1, 0b1111)
+        await self.launch_programm()
+        await self.wait_until_done()
 
-
-        while (self.dut.busy_o.value == 1):
-            await ClockCycles(self.clk, 1)
         # get values
         res = []
         cocotb.log.info(f"READ MEM")

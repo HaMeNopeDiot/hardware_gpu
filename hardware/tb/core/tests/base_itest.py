@@ -24,9 +24,10 @@ from utility.addresess import CSRAddr
 from utility.defines    import CORES_CNT, THREADS_CNT, HZ, REGFILE_SZ
 
 from core.instr_item      import InstItem
-from core.core_instr_item import CoreInstItem
+from core.core_instr_item import CII
 
 from core.core_op   import CoreOp
+from core.inst_sheduler     import InstSheduler
 
 async def clock_generator(clk, time: Real | Decimal, unit: str = "step"):
     while True:
@@ -51,6 +52,7 @@ class BaseCoreTest:
         self.ahb_slave_lsu  = None
         self.ahb_slave_ftc  = None
         self.apb_master_csr = None
+        self.inst_sheduler  = InstSheduler(name="sheduler")
         self.core_model     = CoreModel(name="core")
 
     async def prebody(self):
@@ -75,6 +77,8 @@ class BaseCoreTest:
                                     prefix = "csr",
                                     clock = dut.clk,
                                     reset = dut.rst_n)
+
+        self.inst_sheduler.if_slave_model = self.ahb_slave_ftc
 
         await self.apb_master_csr.write(CSRAddr.TU_EN.value             , 0b1111, 0b1111)
         await self.apb_master_csr.write(CSRAddr.CORE_VID.value          , 0x0   , 0b1111)
@@ -127,7 +131,7 @@ class BaseCoreTest:
             cocotb.log.debug(f"Make thread-{thread_idx} instructions with {pc_start_addr:08x} offset")
             for reg_idx in range(REGFILE_SZ):
                 addr_ofs = (thread_ofs + reg_idx) * jcell
-                InstItem(CoreInstItem(op=CoreOp.SW,
+                InstItem(CII(op=CoreOp.SW,
                               imm = addr_ofs,
                               rd_addr = 0,
                               rs1_addr = 0,
@@ -135,7 +139,7 @@ class BaseCoreTest:
                          self.ahb_slave_ftc, addr=iaddr + addr_ofs)
                 cocotb.log.debug(f"Sended instruction for {reg_idx}-reg by {(iaddr + addr_ofs):08x} address")
 
-            InstItem(CoreInstItem(op=CoreOp.RET,
+            InstItem(CII(op=CoreOp.RET,
                           imm = 0x00,
                           rd_addr = 0),
                     self.ahb_slave_ftc, iaddr + addr_ofs + jcell)
@@ -179,3 +183,18 @@ class BaseCoreTest:
                 is_equal = tdata == rfdata
                 if not is_equal:
                     cocotb.log.warning(f"Error on {j} index in {i} thread index. {rfdata:08x} <> {tdata:08x}")
+
+    async def launch_programm(self, thread_en_mask: int = (1 << THREADS_CNT) - 1):
+        pc       = self.inst_sheduler.get_start_pc()
+        len_inst = self.inst_sheduler.get_prog_len()
+        cocotb.start_soon(self.cnt_busy_cycles(len_inst))
+        await self.apb_master_csr.write(CSRAddr.TU_EN.value    , thread_en_mask)
+        await self.apb_master_csr.write(CSRAddr.CORE_PC.value  , pc             )
+        await self.apb_master_csr.write(CSRAddr.CORE_CTRL.value, 0x1            )
+
+    async def wait_until_done(self):
+        # wait
+        cocotb.log.info(f"Start to capture end of programm")
+        while (self.dut.busy_o.value == 1):
+           await ClockCycles(self.clk, 1)
+        cocotb.log.info(f"Stop to capture end of programm")
