@@ -42,6 +42,24 @@ region MODULE DEFINITION
     output logic                            thread_en_o [THREAD_CNT]
     //==========================================================================//
 );
+/*==============================================================================//
+region TEST ZONE
+//==============================================================================*/
+
+typedef core_csrm_pkg::core_csrm_pkg#(
+    .DW(DW),
+    .THREAD_CNT(THREAD_CNT)) spec_csrm_t;
+
+spec_csrm_t::csrm_sig_out_t csrm_o;
+spec_csrm_t::csrm_req_sig_t csrm_i;
+
+assign csrm_i.ret_i         = ret_i;
+assign csrm_i.pc_readed_i   = pc_readed_i;
+
+assign csrm_o.en_o          = en_o;
+assign csrm_o.vid_o         = vid_o;
+assign csrm_o.cur_pc_o      = cur_pc_o;
+assign csrm_o.thread_en_o   = thread_en_o;
 
 /*==============================================================================//
 region LOGIC VARIABLE DEFINITION
