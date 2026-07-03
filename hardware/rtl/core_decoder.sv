@@ -28,8 +28,6 @@ module core_decoder
     import tu_pkg::cmd_t;
     import tu_pkg::dec_op_type_e;
     import tu_pkg::thread_command_t;
-    import tu_pkg::tags_t;
-
 
     import tu_pkg::SOP_SW;
     import tu_pkg::SOP_ADD;

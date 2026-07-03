@@ -20,6 +20,7 @@ rtl/core_decoder.sv
 rtl/core_lsu_fsm_pkg.sv
 rtl/core_lsu.sv
 rtl/core_arbiter.sv
+rtl/utils/queue_blk.sv
 rtl/core_fetcher.sv
 rtl/utils/apb_pkg.sv
 rtl/utils/apb_slave.sv

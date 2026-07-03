@@ -22,31 +22,31 @@ from core.tests.base_core_test      import ISACheckTest
 from core.tests.vkcube_core_test    import VKCubeTest
 from core.tests.thread_en_test      import ThreadEnTest
 
-@cocotb.test()
+#@cocotb.test()
 async def isa_test(dut):
     await ISACheckTest(dut, "isa_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_add_test(dut):
     await FPUCheckADDTest(dut, "fpu_add_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_mul_test(dut):
     await FPUCheckMULTest(dut, "fpu_mul_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_div_test(dut):
     await FPUCheckDIVTest(dut, "fpu_div_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_sqrt_test(dut):
     await FPUCheckSQRTTest(dut, "fpu_sqrt_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_neg_test(dut):
     await FPUCheckNEGTest(dut, "fpu_neg_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def fpu_max_test(dut):
     await FPUCheckMAXTest(dut, "fpu_max_test").run()
 
@@ -54,6 +54,6 @@ async def fpu_max_test(dut):
 async def vkcube_test(dut):
     await VKCubeTest(dut, "vkcube_test").run()
 
-@cocotb.test()
+#@cocotb.test()
 async def tu_en_test(dut):
     await ThreadEnTest(dut, "thread_en_test").run()

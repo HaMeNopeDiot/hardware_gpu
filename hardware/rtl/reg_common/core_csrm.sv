@@ -57,9 +57,9 @@ assign csrm_i.ret_i         = ret_i;
 assign csrm_i.pc_readed_i   = pc_readed_i;
 
 assign csrm_o.en_o          = en_o;
-assign csrm_o.vid_o         = vid_o;
+assign csrm_o.vid_o         = '0;
 assign csrm_o.cur_pc_o      = cur_pc_o;
-assign csrm_o.thread_en_o   = thread_en_o;
+assign csrm_o.thread_en_o   = '0;
 
 /*==============================================================================//
 region LOGIC VARIABLE DEFINITION

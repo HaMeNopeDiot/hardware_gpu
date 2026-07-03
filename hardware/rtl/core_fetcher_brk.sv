@@ -54,8 +54,7 @@ module core_fetcher
 
     localparam  int unsigned TW           = $clog2(THREAD_CNT),
 
-    parameter   int unsigned INST_Q_SZ    = 8,
-    localparam  int unsigned INST_Q_W     = $clog2(INST_Q_SZ)
+    parameter   int unsigned INST_Q_SZ    = 8
 ) (
     /*=======================### COMMON SIGNALS ###===========================*/
     input  logic                clk,
@@ -121,38 +120,18 @@ region ASSIGNES
     end
 `endif
 
-
 //============================================================================*/
-// QUEUE
+// region FROM INSTANCES
 //============================================================================*/
-
-logic [INST_Q_W     : 0]    free_buf_space;
-assign free_buf_space = (INST_Q_W + 1)'(INST_Q_SZ) - inst_buf_len;
-
-
-logic  stop_load_pc;
-assign stop_load_pc = free_buf_space <= (INST_Q_W + 1)'(2);
-// need 2 cycles to determine what happenin`
-
-logic  stop_load_pc_ff;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        stop_load_pc_ff <= '0;
-    else
-        stop_load_pc_ff <= stop_load_pc;
-end
-
 logic [DW - 1: 0] getted_data;
-logic gdata_valid;  //, gdata_valid_prev;
+logic             gdata_valid;
 
-logic  fetcher_ready;
-assign fetcher_ready = ~stop_load_pc_ff;
+logic             allow_load_pc;
 
-logic  q_data_get;
-assign q_data_get  = gdata_valid && fetcher_ready;
+//============================================================================*/
+// region QUEUE LOGIC
+//============================================================================*/
 
-logic  q_data_give;
-assign q_data_give = instr_valid_o && dec_ready_i;
 
 
 logic [DW - 1: 0] pc_i_ff;
@@ -165,14 +144,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         pc_i_ff <= pc_i_ff;
 end
 
-logic [DW - 1: 0] ahb_addr;
-always_comb begin
-    if (ahb_i.hready)
-        ahb_addr = pc_i;
-    else
-        ahb_addr = pc_i_ff;
-end
-
 logic  make_it_done;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -182,10 +153,6 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (make_it_done && ~en_i && (ahb_i.hready))
         make_it_done <= '0;
 end
-
-logic  ahb_rq;
-assign ahb_rq = (en_i || make_it_done) && ~stop_load_pc;
-
 
 logic en_i_prev;
 always_ff @(posedge clk or negedge rst_n) begin
@@ -198,93 +165,71 @@ end
 logic  start;
 assign start = ~en_i_prev && en_i;
 
-// write q_data_get
 
-logic [DW - 1       : 0]    inst_q [INST_Q_SZ];
-logic [INST_Q_W - 1 : 0]    inst_ptr_q;
-logic [INST_Q_W - 1 : 0]    next_inst_ptr_q;
-logic [INST_Q_W     : 0]    inst_buf_len;
+//============================================================================*/
+// region FETCH LOGIC
+//============================================================================*/
 
+assign pc_readed_o      = (start || (ahb_i.hready)) && allow_load_pc;
 
-logic  inst_q_empty;
-logic  inst_q_full;
+//============================================================================*/
+// region TO INSTANCES
+//============================================================================*/
 
+logic  ahb_rq;
+assign ahb_rq = (en_i || make_it_done) && allow_load_pc;
 
-assign inst_q_empty = inst_buf_len   == '0;
-assign inst_q_full  = free_buf_space == '0;
-
-logic  store_inst;
-assign store_inst = q_data_get && ~inst_q_full;
-
-logic  deploy_inst;
-assign deploy_inst = q_data_give && ~inst_q_empty;
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        inst_ptr_q <= '0;
-    else if (store_inst)
-        if (inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
-            inst_ptr_q <= '0;
-        else
-            inst_ptr_q <= inst_ptr_q + (INST_Q_W)'(1);
-end
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        next_inst_ptr_q <= '0;
-    else if (~en_i)
-        next_inst_ptr_q <= inst_ptr_q;
-    else if (deploy_inst)
-        if (next_inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
-            next_inst_ptr_q <= '0;
-        else
-            next_inst_ptr_q <= next_inst_ptr_q + (INST_Q_W)'(1);
-end
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        inst_buf_len <= '0;
-    else if (~en_i)
-        inst_buf_len <= '0;
-    else if (store_inst && deploy_inst)
-        inst_buf_len <= inst_buf_len;
-    else if (store_inst)
-        inst_buf_len <= inst_buf_len + (INST_Q_W + 1)'(1);
-    else if (deploy_inst)
-        inst_buf_len <= inst_buf_len - (INST_Q_W + 1)'(1);
-end
-
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        for (int unsigned i = 0; i < INST_Q_SZ; i++) begin: gen_reset_inst_q
-            inst_q[i] <= '0;
-        end
-    else if (store_inst)
-        inst_q[inst_ptr_q] <= getted_data;
-
+// when hready is low we can't change pc_i, so we use latch pc_i to pc_i_ff
+logic [DW - 1: 0] ahb_addr;
+always_comb begin
+    if (ahb_i.hready)
+        ahb_addr = pc_i;
+    else
+        ahb_addr = pc_i_ff;
 end
 
 //============================================================================*/
-// FETCH LOGIC
+// region INSTANCES
 //============================================================================*/
 
-assign instr_valid_o = ~inst_q_empty;
+// ///////////////////////////////////////////////////////// //
+//                     *** QUEUE BLK ***                     //
+// NOTE: Here contains instructions
+queue_blk #(
+    .DW           (DW           ),
+    .INST_Q_SZ    (INST_Q_SZ    ),
+    // need 2 cycles to determine what happenin`
+    // Why it's writed like this: when this Fetcher send address to read from
+    // memory (for get instruction), fetcher need 1 cycle to send address to AHB
+    // Master and AHB Master need 1 cycle to send transaction and get data. In
+    // future need to change AHB Master to AXI Master and try to economy extra
+    // cycles in fetcher
+    .LD_DELAY     (2            )  // Do not change when set AHB Master as IF
+) queue_blk_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk          (clk          ), // <-
+    .rst_n        (rst_n        ), // <-
+    .clr          (~en_i        ), // <-
+    //================### IN DATA SIGNALS ###================//
+    .data_i       (getted_data  ), // <-
+    .data_valid_i (gdata_valid  ), // <-
+    .data_ready_o (allow_load_pc), // ->
+    //===============### OUT DATA SIGNALS ###================//
+    .data_o       (instr_o      ), // ->
+    .data_valid_o (instr_valid_o), // ->
+    .data_ready_i (dec_ready_i  )  // <-
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
 
-assign instr_o = inst_q[next_inst_ptr_q];
-
-assign pc_readed_o = (start || (ahb_i.hready)) && ~stop_load_pc;
-
-//============================================================================*/
-// INSTANCES
-//============================================================================*/
 
 // ///////////////////////////////////////////////////////// //
 //                    *** AHB MASTER ***                     //
 // NOTE: Master AHB to memory for Fetcher
 ahb_master #(
-    .DW (DW),
-    .AW (AW),
-    .TW (TW)
+    .DW           (DW           ),
+    .AW           (AW           ),
+    .TW           (TW           )
 ) ahb_master_u (
     //================### COMMON SIGNALS ###=================//
     .clk          (clk          ),  // <-

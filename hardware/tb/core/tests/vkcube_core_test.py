@@ -134,6 +134,7 @@ class VKCubeTest(BaseCoreTest):
             prox = abs(model_data - real_data)
             is_equal = prox <= eps
             if not is_equal:
+                cocotb.log.warning(f"{i}: {model_data} vs {real_data}")
                 cocotb.log.error(f"Model not equal real core. REAL: {real_data:08x} vs MODEL: {model_data:08x} (prox is {prox} > eps)")
                 assert is_equal, f"Model not equal real core."
             if model_data != real_data:

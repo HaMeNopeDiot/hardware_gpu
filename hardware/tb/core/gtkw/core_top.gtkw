@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Thu Jul  2 13:09:11 2026
+[*] Fri Jul  3 13:30:27 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Thu Jul  2 13:07:30 2026"
-[dumpfile_size] 54108964
+[dumpfile_mtime] "Fri Jul  3 13:30:15 2026"
+[dumpfile_size] 41362745
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
-[timestart] 67333000
+[timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-17.651602 67857000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-24.851603 48700000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
@@ -228,70 +228,5 @@ core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[8][31:0]
 -THREADS
 @200
 -Arbiter
-@c00200
--Arbiter
-@28
-core.core_arbitrage_u.thread_ptr[1:0]
-core.core_arbitrage_u.thread_req
-core.core_arbitrage_u.is_sel_last_thread
-@c00028
-core.core_arbitrage_u.thread_sel[1:0]
-@28
-(0)core.core_arbitrage_u.thread_sel[1:0]
-(1)core.core_arbitrage_u.thread_sel[1:0]
-@1401200
--group_end
-@28
-core.core_arbitrage_u.no_req_from_threads
-@1401200
--Arbiter
-@200
--LSU
-@c00200
--LSU
-@22
-core.core_lsu_u.ahb_master_u.haddr[31:0]
-core.core_lsu_u.ahb_master_u.hwdata[31:0]
-core.core_lsu_u.ahb_master_u.hrdata[31:0]
-@1401200
--LSU
-@200
--FETCHER
-@c00200
--FETCHER
-@28
-core.core_fetcher_u.inst_q_empty
-core.core_fetcher_u.store_inst
-core.core_fetcher_u.q_data_give
-@22
-core.core_fetcher_u.getted_data[31:0]
-@28
-core.core_fetcher_u.q_data_get
-@c00200
--AHB
-@22
-core.core_fetcher_u.ahb_master_u.haddr[31:0]
-core.core_fetcher_u.ahb_master_u.hwdata[31:0]
-core.core_fetcher_u.ahb_master_u.hrdata[31:0]
-@28
-core.core_fetcher_u.ahb_master_u.hready
-core.core_fetcher_u.ahb_master_u.data_valid_o
-@22
-core.core_fetcher_u.ahb_master_u.data_o[31:0]
-@2024
-^3 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
-core.core_fetcher_u.ahb_master_u.state[2:0]
-^3 /home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw_alias/ahb_fsm_t.txt
-core.core_fetcher_u.ahb_master_u.next_state[2:0]
-@1401200
--AHB
--FETCHER
-@200
--CMD
--DEBUG
-@28
-core.core_fetcher_u.instr_o.op_type[1:0]
-core.core_fetcher_u.next_inst_ptr_q[2:0]
-core.core_fetcher_u.inst_ptr_q[2:0]
 [pattern_trace] 1
 [pattern_trace] 0

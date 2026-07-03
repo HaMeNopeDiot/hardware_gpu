@@ -89,7 +89,7 @@ module core
     output  logic                       csr_pslverr,
     // input  apb4_mports_t                csr_apb_o
     input   logic [CSR_AW - 1: 0]       csr_paddr,
-    input   logic [DW - 1: 0]           csr_pwdata,
+    input   logic [DW     - 1: 0]       csr_pwdata,
     input   logic [STROBE - 1: 0]       csr_pstrb,
     input   logic                       csr_psel,
     input   logic                       csr_pwrite,

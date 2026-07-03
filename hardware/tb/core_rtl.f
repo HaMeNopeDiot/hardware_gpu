@@ -2,6 +2,7 @@
 ../cvfpu/src/fpnew_pkg.sv
 ../cvfpu/src/fpnew_top.sv
 ../rtl/utils/base_pkg.sv
+../rtl/reg_common/core_csrm_pkg.sv
 ../rtl/utils/lsu_pkg.sv
 ../rtl/fpu_dummy.sv
 ../rtl/handshake_fpu_pkg.sv
@@ -21,11 +22,12 @@
 ../rtl/core_lsu_fsm_pkg.sv
 ../rtl/core_lsu.sv
 ../rtl/core_arbiter.sv
+../rtl/utils/queue_blk.sv
 ../rtl/core_fetcher.sv
 ../rtl/utils/apb_pkg.sv
 ../rtl/utils/apb_slave.sv
-../rtl/reg_common/core_reg_structure_pkg.sv
 ../rtl/reg_common/core_regblk_pkg.sv
+../rtl/reg_common/core_reg_structure_pkg.sv
 ../rtl/reg_common/prim_bit.sv
 ../rtl/reg_common/prim_field.sv
 ../rtl/reg_common/prim_register.sv
