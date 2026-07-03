@@ -29,4 +29,5 @@ rtl/reg_common/prim_field.sv
 rtl/reg_common/prim_register.sv
 rtl/reg_common/core_csrm.sv
 rtl/core_csrm_hndl.sv
+rtl/core_interconnect.sv
 rtl/core.sv

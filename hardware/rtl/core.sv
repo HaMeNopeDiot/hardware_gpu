@@ -3,7 +3,7 @@
 // Author's e-mail:       sniperusus2002@gmail.com
 // ---------------------------------------------------------------------------//
 // Purpose: GPU Core
-// Date: 2026/06
+// Date: 2026/07
 //----------------------------------------------------------------------------//
 
 /*============================================================================//
@@ -49,8 +49,7 @@ module core
     parameter  int unsigned TU_LATCH_R_ADDR  = 1,
     parameter  bit          ONLY_LINT        = `ifdef LINT 1 `else 0 `endif,
     parameter  int unsigned THREAD_CNT       = 4,
-    parameter  int unsigned DEBUG_MODE       = 1,
-    localparam int unsigned THREAD_W         = $clog2(THREAD_CNT)
+    parameter  int unsigned DEBUG_MODE       = 1
 ) (
     /*==========================### COMMON SIGNALS ###========================*/
     input    logic                      clk,
@@ -177,15 +176,9 @@ logic               fpu_cmd_valid;
 lsu_cmd_e           lsu_cmd;
 logic               lsu_cmd_valid;
 
-logic               no_req_from_threads;
-
 cmd_t               ftc_instr;
 logic               ftc_instr_valid;
 logic               dec_ready;
-
-logic               thread_en [THREAD_CNT];
-logic               thread_sel_valid;
-
 
 // CSR <-> CORE
 logic               fetcher_read_pc;
@@ -197,57 +190,22 @@ logic               ret_inst;
 region THREAD INTERCONNECT
 //============================================================================*/
 
-logic [THREAD_W - 1: 0]      thread_sel, thread_sel_d1;
+reg_if              rt_if [THREAD_CNT](); // registers thread interface
+reg_if              rl_if ();             // registers lsu interface
 
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        thread_sel_d1 <= '0;
-    else
-        thread_sel_d1 <= thread_sel;
-end
+logic               thread_en [THREAD_CNT];
+logic               thread_sel_valid;
 
+thread_info_t       thread_unit_info   [THREAD_CNT];
+tu_state_e          thread_states      [THREAD_CNT];
+logic               no_req_from_threads;
 
-reg_if               rt_if [THREAD_CNT](); // registers thread interface
-reg_if               rl_if ();             // registers lsu interface
+// lsu ready signal for each thread. LSU must signal READY only to sel thread
+logic               lsu_r2_thread [THREAD_CNT];
 
-dw_value_t           rs1_arr[THREAD_CNT];
-dw_value_t           rs2_arr[THREAD_CNT];
-
-thread_info_t        thread_unit_info   [THREAD_CNT];
-tu_state_e           thread_states      [THREAD_CNT];
-assign thread_info = thread_unit_info   [thread_sel];
-
-
-// lsu ready signal for each thread. LSU must signal READY only to selected thread
-logic lsu_r2_thread [THREAD_CNT];
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_lsu_ready_demux
-    assign lsu_r2_thread[i] = lsu_done && (i == thread_sel);
-end
-
-logic  thread_req, lsu_done;
-assign thread_req = thread_states[thread_sel] != TU_STATE_REQUEST;
-
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_if_interpretator
-    assign rs1_arr[i] = rt_if[i].rs1;
-    assign rs2_arr[i] = rt_if[i].rs2;
-end
-
-always_comb begin
-    rl_if.rs1 = rs1_arr[thread_sel];
-    rl_if.rs2 = rs2_arr[thread_sel];
-end
-
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_rd_demux
-    assign rt_if[i].rd = (THREAD_W)'(i) == thread_sel? rl_if.rd: '0;
-end
-
-logic [THREAD_CNT - 1: 0] is_busy_tu;
-for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_status_tu_req
-    assign is_busy_tu[i] = thread_states[i] == TU_STATE_BUSY;
-end
-
-logic  tus_ready_get_cmd;
-assign tus_ready_get_cmd = (is_busy_tu == '0) && no_req_from_threads;
+logic               tus_ready_get_cmd;
+logic               lsu_done;
+logic               thread_req;
 
 /*============================================================================//
 region OUT
@@ -260,29 +218,39 @@ region INSTANCES
 //============================================================================*/
 
 // ///////////////////////////////////////////////////////// //
-//                  *** CORE ARBITRAGE ***                   //
-core_arbiter #(
-    .THREAD_CNT (THREAD_CNT)
-) core_arbitrage_u (
+//                 *** CORE INTERCONNECT ***                 //
+// NOTE: write a purpose here
+core_interconnect #(
+    .THREAD_CNT             (THREAD_CNT         )
+) core_interconnect_u (
     //================### COMMON SIGNALS ###=================//
-    .clk                    (clk                ),    // <-
-    .rst_n                  (rst_n              ),    // <-
-    .threads_state          (thread_states      ),    // <-
-    .thread_sel             (thread_sel         ),    // ->
-    .no_req_from_threads    (no_req_from_threads),    // ->
-    .thread_sel_valid       (thread_sel_valid   )     // ->
+    .clk                    (clk                ), // <-
+    .rst_n                  (rst_n              ), // <-
+    .lsu_done               (lsu_done           ), // <-
+    .thread_sel_info        (thread_unit_info   ), // <-
+    .thread_states          (thread_states      ), // <-
+    .thread_info            (thread_info        ), // ->
+    .next_cmd_ready         (tus_ready_get_cmd  ), // ->
+    .lsu_ready_mask         (lsu_r2_thread      ), // ->
+    .thread_sel_valid       (thread_sel_valid   ), // ->
+    .no_req_from_threads    (no_req_from_threads), // ->
+    .thread_req             (thread_req         ), // ->
+    //=======================================================//
+    .rt_if                  (rt_if              ), // if
+    .rl_if                  (rl_if              )  // if
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
+
 
 // ///////////////////////////////////////////////////////// //
 //                   *** CORE FETCHER ***                    //
 // NOTE: write a purpose here
 core_fetcher #(
-    .DW         (DW         ),
-    .AW         (MEM_AW     ),
-    .THREAD_CNT (THREAD_CNT ),
-    .INST_Q_SZ  (8          )
+    .DW             (DW             ),
+    .AW             (MEM_AW         ),
+    .THREAD_CNT     (THREAD_CNT     ),
+    .INST_Q_SZ      (8              )
 ) core_fetcher_u (
     //================### COMMON SIGNALS ###=================//
     .clk           (clk             ), // <-
@@ -305,7 +273,7 @@ core_fetcher #(
 // ///////////////////////////////////////////////////////// //
 //                   *** CORE DECODER ***                    //
 core_decoder #(
-    .DEBUG_MODE     (DEBUG_MODE)
+    .DEBUG_MODE     (DEBUG_MODE         )
 ) core_decoder_u (
     //================### COMMON SIGNALS ###=================//
     .clk            (clk                ),    // <-
@@ -334,27 +302,27 @@ core_decoder #(
 // ///////////////////////////////////////////////////////// //
 //                     *** CORE LSU ***                      //
 core_lsu #(
-    .DW         (DW         ),
-    .MEM_AW     (MEM_AW     ),
-    .THREAD_CNT (THREAD_CNT )
+    .DW                 (DW                 ),
+    .MEM_AW             (MEM_AW             ),
+    .THREAD_CNT         (THREAD_CNT         )
 ) core_lsu_u (
     //================### COMMON SIGNALS ###=================//
-    .clk               (clk                ),   // <-
-    .rst_n             (rst_n              ),   // <-
-    .en_i              (csr_en             ),   // <-
+    .clk               (clk                 ),   // <-
+    .rst_n             (rst_n               ),   // <-
+    .en_i              (csr_en              ),   // <-
     //=============### SIGNALS FROM DECODER ###==============//
-    .lsu_op            (lsu_cmd            ),   // <-
-    .lsu_op_valid      (lsu_cmd_valid      ),   // <-
-    .thread_req_start  (thread_sel_valid   ),   // <-
-    .threads_req_done  (no_req_from_threads),   // <-
+    .lsu_op            (lsu_cmd             ),   // <-
+    .lsu_op_valid      (lsu_cmd_valid       ),   // <-
+    .thread_req_start  (thread_sel_valid    ),   // <-
+    .threads_req_done  (no_req_from_threads ),   // <-
     //===========### SIGNALS FROM THREAD UNIT ###============//
-    .r_if              (rl_if.lsu          ),   // <->
+    .r_if              (rl_if.lsu           ),   // <->
     //============### SIGNALS FROM MEMORY BUS ###============//
-    .ahb_i             (lsu_ahb_i          ),   // <-
-    .ahb_o             (lsu_ahb_o          ),   // ->
+    .ahb_i             (lsu_ahb_i           ),   // <-
+    .ahb_o             (lsu_ahb_o           ),   // ->
     //================### HANDSHAKE SIGNALS ###==============//
-    .lsu_ready_o       (lsu_done           ),   // ->
-    .lsu_valid_i       (thread_req         )    // <-
+    .lsu_ready_o       (lsu_done            ),   // ->
+    .lsu_valid_i       (thread_req          )    // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -363,9 +331,9 @@ core_lsu #(
 //                  *** CORE CSRM HNDL ***                   //
 // NOTE: write a purpose here
 core_csrm_hndl #(
-    .DW         (DW         ),
-    .AW         (CSR_AW     ),
-    .THREAD_CNT (THREAD_CNT )
+    .DW          (DW                ),
+    .AW          (CSR_AW            ),
+    .THREAD_CNT  (THREAD_CNT        )
 ) core_csrm_hndl_u (
     //================### COMMON SIGNALS ###=================//
     .clk         (clk               ), // <-
@@ -388,10 +356,10 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
     // ///////////////////////////////////////////////////////// //
     //                    *** THREAD UNIT ***                    //
     thread_unit #(
-        .DW           (DW               ),
-        .REGFILE_SIZE (TU_REGILE_SZ     ),
-        .LATCH_R_ADDR (TU_LATCH_R_ADDR  ),
-        .ONLY_LINT    (ONLY_LINT        )
+        .DW             (DW                 ),
+        .REGFILE_SIZE   (TU_REGILE_SZ       ),
+        .LATCH_R_ADDR   (TU_LATCH_R_ADDR    ),
+        .ONLY_LINT      (ONLY_LINT          )
     ) thread_unit_u (
         //================### COMMON SIGNALS ###=================//
         .clk            (clk                ),  // <-

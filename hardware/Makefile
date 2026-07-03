@@ -4,7 +4,7 @@ RTL_NAME_FILE = rtl
 LINT_DEFINES = -DLINT=1
 
 lint:
-	verilator --lint-only -Wall -f $(RTL_NAME_FILE).f $(IGNORE_WARNINGS)
+	verilator --lint-only -Wall -f $(RTL_NAME_FILE).f $(IGNORE_WARNINGS) $(LINT_DEFINES)
 
 .PHONY: lint
 
