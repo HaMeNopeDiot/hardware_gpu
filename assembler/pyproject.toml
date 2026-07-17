@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project]
+name = "nyass"
+version = "0.0.1"
+authors = [
+    { name = "cherkasov.v", email="cherkasov.v@milandr.ru" }
+]
+description = "No-branches assembler for the simplified NYA GPU"
+readme = "README.md"
+requires-python = ">=3.6"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+dependencies = [
+    "lark"
+]
+
+packages = [
+    "src/nyass"
+]
+
+[project.scripts]
+nyass = "nyass.nyass:main"
