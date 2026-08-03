@@ -73,6 +73,11 @@ logic [DW - 1: 0] core_ctrl_wedata;
 logic [DW - 1: 0] pc_wedata;
 logic [DW - 1: 0] vid_wedata        [THREAD_CNT];
 logic [DW - 1: 0] tu_en_wedata;
+
+logic [DW - 1: 0] core_ctrl_wdata;
+logic [DW - 1: 0] pc_wdata;
+logic [DW - 1: 0] tu_en_wdata;
+logic [DW - 1: 0] vid_wdata;
 /*==============================================================================//
 region ASSIGNES
 //==============================================================================*/
@@ -132,7 +137,6 @@ region WDATA LOGIC
 logic [DW - 1: 0] wdata_masked;
 assign            wdata_masked = wdata & wedata;
 
-logic [DW - 1: 0] core_ctrl_wdata;
 always_comb begin
     if (ret_i)
         core_ctrl_wdata[F_CORE_EN_OFS] = '0;
@@ -142,11 +146,10 @@ always_comb begin
         core_ctrl_wdata = '0;
 end
 
-logic [DW - 1: 0] pc_wdata;
-assign pc_wdata = pc_readed_i && en_o? pc_rdata + (DW)'(STRB_W): wdata_masked;
+assign pc_wdata     = pc_readed_i && en_o? pc_rdata + (DW)'(STRB_W): wdata_masked;
 
-logic [DW - 1: 0] tu_en_wdata;
-assign tu_en_wdata = wdata_masked;
+assign tu_en_wdata  = wdata_masked;
+assign vid_wdata    = wdata;
 
 /*==============================================================================//
 region RDATA LOGIC
@@ -185,95 +188,98 @@ assign en_o     = core_ctrl_rdata[0];
 
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_thread_en_signals
     assign thread_en_o[i] = tu_en_rdata[i];
+    assign vid_o[i]       = vid_rdata[i];
 end
-
-/*==============================================================================//
+/*============================================================================//
 region INSTANCES
-//==============================================================================*/
+//============================================================================*/
 
-// [CORE CTRL REG]
+// [CORE CTRL]
 prim_register #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
-    .DW(DW),
+    .DW     (DW),
     // ----------------- FIELDS PARAMETERS ----------------- //
     .F_NUM  (CORE_CTRL_F_NUM),
-    .F_W    (CORE_CTRL_F_W),
+    .F_W    (CORE_CTRL_F_W  ),
     .F_OFS  (CORE_CTRL_F_OFS)
     // ----------------------------------------------------- //
 ) core_ctrl_reg (
     /*================### COMMON SIGNALS ###=================*/
-    .clk    (clk),                       // <-
-    .rst_n  (rst_n),                     // <-
+    .clk    (clk  ),                    // <-
+    .rst_n  (rst_n),                    // <-
     /*================### PACKET SIGNALS ###=================*/
-    .wdata  (core_ctrl_wdata),           // <-
-    .wedata (core_ctrl_wedata),          // <-
-    .rdata  (core_ctrl_rdata)            // ->
+    .wdata  (core_ctrl_wdata ),         // <-
+    .wedata (core_ctrl_wedata),         // <-
+    .rdata  (core_ctrl_rdata )          // ->
     //=======================================================//
+
 );
 
 // [PC]
 prim_register #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
-    .DW(DW),
+    .DW     (DW),
     // ----------------- FIELDS PARAMETERS ----------------- //
     .F_NUM  (PC_F_NUM),
-    .F_W    (PC_F_W),
+    .F_W    (PC_F_W  ),
     .F_OFS  (PC_F_OFS)
     // ----------------------------------------------------- //
 ) pc_reg (
     /*================### COMMON SIGNALS ###=================*/
-    .clk    (clk),                       // <-
-    .rst_n  (rst_n),                     // <-
+    .clk    (clk  ),                    // <-
+    .rst_n  (rst_n),                    // <-
     /*================### PACKET SIGNALS ###=================*/
-    .wdata  (pc_wdata),                  // <-
-    .wedata (pc_wedata),                 // <-
-    .rdata  (pc_rdata)                   // ->
+    .wdata  (pc_wdata ),                // <-
+    .wedata (pc_wedata),                // <-
+    .rdata  (pc_rdata )                 // ->
     //=======================================================//
+
 );
 
-// [THREAD EN]
+// [TU EN]
 prim_register #(
     // ----------------- GLOBAL PARAMETERS ----------------- //
-    .DW(DW),
+    .DW     (DW),
     // ----------------- FIELDS PARAMETERS ----------------- //
     .F_NUM  (TU_EN_F_NUM),
-    .F_W    (TU_EN_F_W),
+    .F_W    (TU_EN_F_W  ),
     .F_OFS  (TU_EN_F_OFS)
     // ----------------------------------------------------- //
 ) tu_en_reg (
     /*================### COMMON SIGNALS ###=================*/
-    .clk    (clk),                       // <-
-    .rst_n  (rst_n),                     // <-
+    .clk    (clk  ),                    // <-
+    .rst_n  (rst_n),                    // <-
     /*================### PACKET SIGNALS ###=================*/
-    .wdata  (tu_en_wdata),               // <-
-    .wedata (tu_en_wedata),              // <-
-    .rdata  (tu_en_rdata)                // ->
+    .wdata  (tu_en_wdata ),             // <-
+    .wedata (tu_en_wedata),             // <-
+    .rdata  (tu_en_rdata )              // ->
     //=======================================================//
+
 );
 
-// [VID DATA]
 for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_vid_regs
+    // [VID]
     prim_register #(
         // ----------------- GLOBAL PARAMETERS ----------------- //
-        .DW(DW),
+        .DW     (DW),
         // ----------------- FIELDS PARAMETERS ----------------- //
         .F_NUM  (VID_F_NUM),
-        .F_W    (VID_F_W),
+        .F_W    (VID_F_W  ),
         .F_OFS  (VID_F_OFS)
         // ----------------------------------------------------- //
     ) vid_reg (
         /*================### COMMON SIGNALS ###=================*/
-        .clk    (clk),                      // <-
+        .clk    (clk  ),                    // <-
         .rst_n  (rst_n),                    // <-
         /*================### PACKET SIGNALS ###=================*/
-        .wdata  (wdata),                    // <-
+        .wdata  (vid_wdata    ),            // <-
         .wedata (vid_wedata[i]),            // <-
-        .rdata  (vid_rdata[i])              // ->
+        .rdata  (vid_rdata[i] )             // ->
         //=======================================================//
-    );
 
-    assign vid_o[i] = vid_rdata[i];
+    );
 end
 
-//==============================================================================//
+//============================================================================//
+
 endmodule

@@ -1,0 +1,63 @@
+{# templates/reg_instance_template.txt #}
+//------------------------------------------------------------------------------//
+// Author:                Starukhin Danila M.
+// Author's e-mail:       sniperusus2002@gmail.com
+// -----------------------------------------------------------------------------//
+// Purpose: Core Control Status Register Map (Core CSRM)
+// Date: 2026/08
+//------------------------------------------------------------------------------//
+
+module core_csrm
+    import core_regblk_pkg::*;
+    import core_reg_structure_pkg::*;
+
+/*============================================================================//
+region INSTANCES
+//============================================================================*/
+{% for reg in regs %} {% if reg.cnt > 1 %}
+for (genvar i = 0; i < {{reg.cnt_name}}; i++) begin: gen_{{reg.reg_var_lc}}_regs
+    // [{{ reg.reg_name_uc }}]
+    prim_register #(
+        // ----------------- GLOBAL PARAMETERS ----------------- //
+        .DW     (DW),
+        // ----------------- FIELDS PARAMETERS ----------------- //
+        .F_NUM  ({{reg.reg_var_uc}}_F_NUM),
+        .F_W    ({{reg.reg_var_uc}}_F_W  ),
+        .F_OFS  ({{reg.reg_var_uc}}_F_OFS)
+        // ----------------------------------------------------- //
+    ) {{reg.reg_var_lc}}_reg (
+        /*================### COMMON SIGNALS ###=================*/
+        .clk    (clk  ),{{free_common_space}}// <-
+        .rst_n  (rst_n),{{free_common_space}}// <-
+        /*================### PACKET SIGNALS ###=================*/
+        .wdata  ({{reg.reg_var_lc}}_wdata    ),{{reg.free_space_packet}}// <-
+        .wedata ({{reg.reg_var_lc}}_wedata[i]),{{reg.free_space_packet}}// <-
+        .rdata  ({{reg.reg_var_lc}}_rdata[i] ) {{reg.free_space_packet}}// ->
+        //=======================================================//
+
+    );
+end
+{% else %}
+// [{{ reg.reg_name_uc }}]
+prim_register #(
+    // ----------------- GLOBAL PARAMETERS ----------------- //
+    .DW     (DW),
+    // ----------------- FIELDS PARAMETERS ----------------- //
+    .F_NUM  ({{reg.reg_var_uc}}_F_NUM),
+    .F_W    ({{reg.reg_var_uc}}_F_W  ),
+    .F_OFS  ({{reg.reg_var_uc}}_F_OFS)
+    // ----------------------------------------------------- //
+) {{reg.reg_var_lc}}_reg (
+    /*================### COMMON SIGNALS ###=================*/
+    .clk    (clk  ),{{free_common_space}}// <-
+    .rst_n  (rst_n),{{free_common_space}}// <-
+    /*================### PACKET SIGNALS ###=================*/
+    .wdata  ({{reg.reg_var_lc}}_wdata ),{{reg.free_space_packet}}// <-
+    .wedata ({{reg.reg_var_lc}}_wedata),{{reg.free_space_packet}}// <-
+    .rdata  ({{reg.reg_var_lc}}_rdata ) {{reg.free_space_packet}}// ->
+    //=======================================================//
+
+);
+{% endif %} {% endfor %}
+//============================================================================//
+endmodule

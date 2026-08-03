@@ -60,15 +60,15 @@ another field), the module will not work correctly. The behavior of such a modul
 module prim_register
 #(
     /*==========================### COMMON SIGNALS ###==========================*/
-    parameter  int unsigned                 DW = 32,                // DATA WIDTH
-    parameter  int unsigned                 F_NUM = 1,              // FIELDS NUM
+    parameter  int unsigned                 DW              = 32,               // DATA WIDTH
+    parameter  int unsigned                 F_NUM           = 1,                // FIELDS NUM
 
-    localparam int unsigned                 F_PARAM_W = $clog2(DW) + 1, // FIELDS PARAM WIDTH
-    localparam int unsigned                 STRUCT_PARAM_W = F_NUM * F_PARAM_W,
+    localparam int unsigned                 F_PARAM_W       = $clog2(DW) + 1,   // FIELDS PARAM WIDTH
+    localparam int unsigned                 STRUCT_PARAM_W  = F_NUM * F_PARAM_W,
 
-    parameter logic [STRUCT_PARAM_W - 1:0]  F_W = {(F_PARAM_W)'(32)},
+    parameter logic [STRUCT_PARAM_W - 1:0]  F_W             = {(F_PARAM_W)'(32)},
 
-    parameter logic [STRUCT_PARAM_W - 1:0]  F_OFS = {(F_PARAM_W)'(0)}
+    parameter logic [STRUCT_PARAM_W - 1:0]  F_OFS           = {(F_PARAM_W)'(0)}
 
 ) (
     /*==========================### COMMON SIGNALS ###==========================*/

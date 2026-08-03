@@ -6,19 +6,24 @@
 # Date: 2026/06
 #------------------------------------------------------------------------------#
 
-
+# common imports
 import math
-
 import cocotb
 
+# utility imports
 from utility.defines                import DW, VID_ADDR, ZERO_ADDR, THREADS_CNT
 
+# core imports
 from core.core_enums                import CoreOp, FPU_OP
 from core.core_instr_item           import CII
 from core.models.regfile_model      import RegfileModel
 
-from fpu.fppconverter       import hex_ieee754_to_float, ieee754_to_float, float_to_i754
+# fpu import
+from fpu.fppconverter               import ieee754_to_float, float_to_i754
 
+
+# Body
+# ---------------------------------------------------------------------------- #
 class ThreadModel():
     def __init__(self,
                  name: str = "",
