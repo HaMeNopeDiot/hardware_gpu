@@ -3,21 +3,39 @@
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
 // -----------------------------------------------------------------------------//
-// Purpose: Core Control Status Register Map (Core CSRM)
-// Date: 2026/08
+// Purpose: {{desc}}
+// Date: {{datetime}}
 //------------------------------------------------------------------------------//
 
-module core_csrm
+module {{module_name}}
     import core_regblk_pkg::*;
     import core_reg_structure_pkg::*;
-#()();
+#(
+    // Parameters{% for param in parameters %}
+    parameter {{param.type}} {{param.name}} = {{param.value}}{% if not loop.last %},{% endif %}{% endfor %}
+
+    // Write here localparams
+) (
+    /*==========================### COMMON SIGNALS ###==========================*/
+    input  logic                            clk,
+    input  logic                            rst_n,
+
+    input  logic [AW - 1: 0]                addr,
+    input  logic [DW - 1: 0]                wdata,
+    input  logic [DW - 1: 0]                wedata,
+
+    output logic [DW - 1: 0]                rdata
+    /*========================### ADDITIONAL SIGNALS ###========================*/
+
+    // write here additional parameters
+);
 /*==============================================================================//
 region LOGIC VARIABLE DEFINITION
 //==============================================================================*/
 {% for reg in regs %}
 // {{reg.reg_name_uc}}
-logic [DW - 1: 0] {{reg.reg_var_lc}}_rdata{% if reg.cnt > 1%} [{{reg.cnt_name}}]{% endif %};
-logic [DW - 1: 0] {{reg.reg_var_lc}}_wedata{% if reg.cnt > 1%} [{{reg.cnt_name}}]{% endif %};
+logic [DW - 1: 0] {{reg.reg_var_lc}}_rdata{% if reg.cnt > 1 %}  [{{reg.cnt_name}}]{% endif %};
+logic [DW - 1: 0] {{reg.reg_var_lc}}_wedata{% if reg.cnt > 1 %} [{{reg.cnt_name}}]{% endif %};
 logic [DW - 1: 0] {{reg.reg_var_lc}}_wdata;
 {% endfor %}
 /*============================================================================//

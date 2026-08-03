@@ -1,12 +1,13 @@
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
 THREAD_CNT  = 4
 FREESPACE   = 20
 
 reg_names = [
-    {"name": "CORE CTRL", "cnt" : 1, "cnt_name": None        },
-    {"name": "PC"       , "cnt" : 1, "cnt_name": None        },
-    {"name": "TU EN"    , "cnt" : 1, "cnt_name": None        },
+    {"name": "CORE CTRL", "cnt" : 1},
+    {"name": "PC"       , "cnt" : 1},
+    {"name": "TU EN"    , "cnt" : 1},
     {"name": "VID"      , "cnt" : 4, "cnt_name": "THREAD_CNT"}
 ]
 
@@ -17,7 +18,7 @@ for r in reg_names:
     var_uc = var_name.upper()
     var_lc = var_name.lower()
 
-    if r.get("cnt") > 1:
+    if "cnt" in r and r.get("cnt") > 1:
         space_pocket_len = (FREESPACE - 5 - len(var_name))
     else:
         space_pocket_len = (FREESPACE - 2 - len(var_name))
@@ -36,10 +37,22 @@ template = env.get_template("reg_inst_template.template")
 # for r in regs:
 #     print(template.render(r))
 
-res_filename = "csrm_result.sv"
-res_context = {"regs": regs, "free_common_space": FREESPACE * " "}
+parameters = [
+    {"name": "AW"       , "type": "int unsigned", "value": 32},
+    {"name": "DW"       , "type": "int unsigned", "value": 32},
+    {"name": "THREADS"  , "type": "int unsigned", "value": 4}
+]
+
+cur_datetime = f"{datetime.today():%Y/%m}"
+res_filename = "csrm_result"
+res_context  = {"module_name"        : res_filename,
+                "desc"               : "Core Control Status Register Map (Core CSRM)",
+                "regs"               : regs,
+                "free_common_space"  : FREESPACE * " ",
+                "parameters"         : parameters,
+                "datetime"           : cur_datetime}
 
 
-with open(res_filename, mode="w", encoding="utf-8") as results:
+with open(res_filename + ".sv", mode="w", encoding="utf-8") as results:
     results.write(template.render(res_context))
-    print(f"... wrote {res_filename}")
+    print(f"... wrote {res_filename + ".sv"}")
