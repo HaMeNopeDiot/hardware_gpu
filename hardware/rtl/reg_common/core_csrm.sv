@@ -64,20 +64,27 @@ assign csrm_o.thread_en_o   = '0;
 /*==============================================================================//
 region LOGIC VARIABLE DEFINITION
 //==============================================================================*/
+
+// CORE CTRL
 logic [DW - 1: 0] core_ctrl_rdata;
-logic [DW - 1: 0] pc_rdata;
-logic [DW - 1: 0] vid_rdata         [THREAD_CNT];
-logic [DW - 1: 0] tu_en_rdata;
-
 logic [DW - 1: 0] core_ctrl_wedata;
-logic [DW - 1: 0] pc_wedata;
-logic [DW - 1: 0] vid_wedata        [THREAD_CNT];
-logic [DW - 1: 0] tu_en_wedata;
-
 logic [DW - 1: 0] core_ctrl_wdata;
+
+// PC
+logic [DW - 1: 0] pc_rdata;
+logic [DW - 1: 0] pc_wedata;
 logic [DW - 1: 0] pc_wdata;
+
+// TU EN
+logic [DW - 1: 0] tu_en_rdata;
+logic [DW - 1: 0] tu_en_wedata;
 logic [DW - 1: 0] tu_en_wdata;
+
+// VID
+logic [DW - 1: 0] vid_rdata [THREAD_CNT];
+logic [DW - 1: 0] vid_wedata [THREAD_CNT];
 logic [DW - 1: 0] vid_wdata;
+
 /*==============================================================================//
 region ASSIGNES
 //==============================================================================*/

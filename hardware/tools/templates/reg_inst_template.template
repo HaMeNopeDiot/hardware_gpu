@@ -10,11 +10,20 @@
 module core_csrm
     import core_regblk_pkg::*;
     import core_reg_structure_pkg::*;
-
+#()();
+/*==============================================================================//
+region LOGIC VARIABLE DEFINITION
+//==============================================================================*/
+{% for reg in regs %}
+// {{reg.reg_name_uc}}
+logic [DW - 1: 0] {{reg.reg_var_lc}}_rdata{% if reg.cnt > 1%} [{{reg.cnt_name}}]{% endif %};
+logic [DW - 1: 0] {{reg.reg_var_lc}}_wedata{% if reg.cnt > 1%} [{{reg.cnt_name}}]{% endif %};
+logic [DW - 1: 0] {{reg.reg_var_lc}}_wdata;
+{% endfor %}
 /*============================================================================//
 region INSTANCES
 //============================================================================*/
-{% for reg in regs %} {% if reg.cnt > 1 %}
+{% for reg in regs %}{% if reg.cnt > 1 %}
 for (genvar i = 0; i < {{reg.cnt_name}}; i++) begin: gen_{{reg.reg_var_lc}}_regs
     // [{{ reg.reg_name_uc }}]
     prim_register #(
@@ -58,6 +67,7 @@ prim_register #(
     //=======================================================//
 
 );
-{% endif %} {% endfor %}
+{% endif %}{% endfor %}
 //============================================================================//
 endmodule
+
