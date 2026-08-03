@@ -67,7 +67,8 @@ package tu_pkg;
     parameter int unsigned LSU_OP_W = 4 + 1;
     typedef enum logic[LSU_OP_W - 1: 0] {
         LOP_LW     = 0, // rd = M[rs1 + imm]
-        LOP_ADDI   = 1  // rd = r1 + imm
+        LOP_ADDI   = 1, // rd = r1 + imm
+        LOP_JALR   = 2  // rd = PC + 4; PC += rs1 + imm
     } l_op_e;
 
     /*==========================================================================//
@@ -77,7 +78,8 @@ package tu_pkg;
     parameter int unsigned U_OP_W = 4 + 1;
     typedef enum logic[U_OP_W - 1: 0] {
         UOP_IMM = 0,    // rd = rs1 << 20
-        UOP_RET = 1     // End of program
+        UOP_RET = 1,    // End of program
+        UOP_JAL = 2     // rd = PC + 4; PC += imm
     } u_op_e;
 
     /*==========================================================================//
@@ -227,7 +229,9 @@ package tu_pkg;
         CMD_FDIV    = 10,
         CMD_FSQRT   = 11,
         CMD_FNEG    = 12,
-        CMD_FMAX    = 13
+        CMD_FMAX    = 13,
+        CMD_JAL     = 14,
+        CMD_JALR    = 15
     } cmd_op_t;
 
     typedef struct packed {

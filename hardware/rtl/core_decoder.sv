@@ -35,9 +35,11 @@ module core_decoder
 
     import tu_pkg::LOP_LW;
     import tu_pkg::LOP_ADDI;
+    import tu_pkg::LOP_JALR;
 
     import tu_pkg::UOP_IMM;
     import tu_pkg::UOP_RET;
+    import tu_pkg::UOP_JAL;
 
     import tu_pkg::U_IMM_W;
     // type cmd
@@ -72,6 +74,8 @@ module core_decoder
     import tu_pkg::CMD_FSQRT;
     import tu_pkg::CMD_FNEG ;
     import tu_pkg::CMD_FMAX ;
+    import tu_pkg::CMD_JAL  ;
+    import tu_pkg::CMD_JALR ;
     import tu_pkg::regfile_addr_t;
 
 #(
@@ -361,6 +365,7 @@ if (DEBUG_MODE) begin: gen_debug_info
                         case (cmd.u.operand)
                             UOP_IMM: command.op = CMD_LUI;
                             UOP_RET: command.op = CMD_RET;
+                            UOP_JAL: command.op = CMD_JAL;
                             default: command.op = CMD_UNKN;
                         endcase
                         command.rs1_a   = '0;
@@ -374,6 +379,7 @@ if (DEBUG_MODE) begin: gen_debug_info
                         case (cmd.l.operand)
                             LOP_LW:     command.op = CMD_LW;
                             LOP_ADDI:   command.op = CMD_ADDI;
+                            LOP_JALR:   command.op = CMD_JALR;
                             default:    command.op = CMD_UNKN;
                         endcase
                         command.rs1_a   = cmd.l.rs1_addr;

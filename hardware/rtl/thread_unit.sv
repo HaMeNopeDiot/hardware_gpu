@@ -68,7 +68,8 @@ module thread_unit
     import tu_pkg::s_cmd_t;
 
 
-    import tu_pkg::LOP_LW, tu_pkg::LOP_ADDI;
+    import tu_pkg::UOP_IMM;
+    import tu_pkg::LOP_LW, tu_pkg::LOP_ADDI, tu_pkg::LOP_JALR;
     import tu_pkg::SOP_SW, tu_pkg::SOP_ADD, tu_pkg::SOP_MUL;
     import tu_pkg::AOP_ADD, tu_pkg::AOP_MUL;
 
@@ -76,6 +77,7 @@ module thread_unit
     import tu_pkg::dw_value_t;
 #(
     parameter  int unsigned     DW                  = 64,
+    localparam int unsigned     STRB_W              = int'(DW / 8),
     parameter  int unsigned     REGFILE_SIZE        = 8,
     localparam int unsigned     AW                  = $clog2(REGFILE_SIZE),
     parameter  bit              LATCH_R_ADDR        = 1,
@@ -102,6 +104,7 @@ module thread_unit
     input  logic                dec_cmd_valid,  // fpu valid
 
     /*===========================### VID SIGNALS ###==========================*/
+    input logic [DW - 1: 0]     csr_pc_i,
     input logic [DW - 1: 0]     vid_i,
     /*===========================### OUT SIGNALS ###==========================*/
     output thread_info_t        thread_info,
@@ -321,10 +324,16 @@ always_comb begin
         data_w = fpu_result.result_data[DW - 1: 0];
         wr_en = '1;
     end
-    else if (u_cmd_valid && u_cmd.operand == '0 && thread_state != TU_STATE_REQUEST) begin
+    else if (u_cmd_valid && u_cmd.operand != UOP_RET && thread_state != TU_STATE_REQUEST) begin
         addr_w = u_cmd.rd_addr;
-        data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
-        wr_en  = '1;
+        if (u_cmd.operand == UOP_IMM) begin
+            data_w = (DW)'(u_cmd.imm << U_OFS_IMM_W);
+            wr_en  = '1;
+        end
+        else begin
+            data_w = alu_or;
+            wr_en  = alu_rr;
+        end
     end
     else begin
         addr_w = '0;
@@ -370,6 +379,12 @@ always_comb begin
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
+                LOP_JALR: begin
+                    alu_struct.o1       = csr_pc_i;
+                    alu_struct.o2       = STRB_W;
+                    alu_struct.op       = AOP_ADD;
+                    alu_struct.valid    = '1;
+                end
                 default: begin
                     alu_struct = '0;
                 end
@@ -393,6 +408,19 @@ always_comb begin
                     alu_struct.o1       = data_rs1;
                     alu_struct.o2       = data_rs2;
                     alu_struct.op       = AOP_MUL;
+                    alu_struct.valid    = '1;
+                end
+                default: begin
+                    alu_struct = '0;
+                end
+            endcase
+        end
+        U_CMD: begin
+            case (u_cmd.operand)
+                UOP_JAL: begin
+                    alu_struct.o1       = csr_pc_i;
+                    alu_struct.o2       = STRB_W;
+                    alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
                 default: begin

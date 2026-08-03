@@ -376,6 +376,7 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
         //==================### VID SIGNALS ###==================//
         .vid_i          (vid_arr[i]         ),  // <-
+        .csr_pc_i       (csr_pc             ),  // <-
         //==================### OUT SIGNALS ###==================//
         .thread_info    (thread_unit_info[i]),  // ->
         .thread_state   (thread_states[i]   )   // ->
