@@ -1,11 +1,11 @@
 {# templates/reg_instance_template.txt #}
-//------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // Author:                Starukhin Danila M.
 // Author's e-mail:       sniperusus2002@gmail.com
-// -----------------------------------------------------------------------------//
+// ---------------------------------------------------------------------------//
 // Purpose: {{desc}}
 // Date: {{datetime}}
-//------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 module {{module_name}}
     import core_regblk_pkg::*;
@@ -16,7 +16,7 @@ module {{module_name}}
 
     // Write here localparams
 ) (
-    /*==========================### COMMON SIGNALS ###==========================*/
+    /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                            clk,
     input  logic                            rst_n,
 
@@ -25,19 +25,29 @@ module {{module_name}}
     input  logic [DW - 1: 0]                wedata,
 
     output logic [DW - 1: 0]                rdata
-    /*========================### ADDITIONAL SIGNALS ###========================*/
+    /*=======================### ADDITIONAL SIGNALS ###=======================*/
 
     // write here additional parameters
 );
-/*==============================================================================//
+/*============================================================================//
 region LOGIC VARIABLE DEFINITION
-//==============================================================================*/
+//============================================================================*/
 {% for reg in regs %}
 // {{reg.reg_name_uc}}
 logic [DW - 1: 0] {{reg.reg_var_lc}}_rdata{% if reg.cnt > 1 %}  [{{reg.cnt_name}}]{% endif %};
 logic [DW - 1: 0] {{reg.reg_var_lc}}_wedata{% if reg.cnt > 1 %} [{{reg.cnt_name}}]{% endif %};
 logic [DW - 1: 0] {{reg.reg_var_lc}}_wdata;
 {% endfor %}
+/*============================================================================//
+region ADDR ASSIGNES
+//============================================================================*/
+{% for reg in regs %}{% if reg.cnt > 1 %}
+logic  addr_in_{{reg.reg_var_lc}}_range;
+assign addr_in_{{reg.reg_var_lc}}_range = addr >= (AW)'(RS_{{reg.reg_var_uc}}_OFS) && addr <= (AW)'(RS_{{reg.reg_var_uc}}_END_OFS);
+{% else %}
+logic  is_{{reg.reg_var_lc}}_addr;
+assign is_{{reg.reg_var_lc}}_addr = addr == (AW)'(R_{{reg.reg_var_uc}}_OFS);
+{% endif %}{% endfor %}
 /*============================================================================//
 region INSTANCES
 //============================================================================*/
