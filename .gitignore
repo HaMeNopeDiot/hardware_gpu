@@ -15,3 +15,5 @@ hardware/CITATION.cff
 *.txt
 __pycache__/
 hardware/build/
+*.zip
+*.dtmp
