@@ -1,20 +1,20 @@
 <mxfile host="Electron">
   <diagram name="Страница-1" id="N7qoqBXY2l-3Wx46wxiI">
-    <mxGraphModel dx="1414" dy="968" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1768" dy="1210" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-39" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
-          <mxGeometry height="230" width="610" x="60" y="780" as="geometry" />
+          <mxGeometry height="230" width="680" x="60" y="780" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
-          <mxGeometry height="150" width="610" x="60" y="620" as="geometry" />
+          <mxGeometry height="150" width="680" x="60" y="620" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-36" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
-          <mxGeometry height="150" width="610" x="60" y="460" as="geometry" />
+          <mxGeometry height="150" width="680" x="60" y="460" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-35" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" value="" vertex="1">
-          <mxGeometry height="310" width="610" x="60" y="140" as="geometry" />
+          <mxGeometry height="310" width="680" x="60" y="140" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-3" edge="1" parent="1" source="uQ56KDJhuRLrYl7C2u5H-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="uQ56KDJhuRLrYl7C2u5H-2" value="">
           <mxGeometry relative="1" as="geometry" />
@@ -119,7 +119,7 @@
           <mxGeometry height="150" width="100" x="150" y="460" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-40" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=default;" value="&lt;font style=&quot;font-size: 33px;&quot;&gt;Branch block diagram&lt;/font&gt;" vertex="1">
-          <mxGeometry height="95" width="610" x="60" y="40" as="geometry" />
+          <mxGeometry height="95" width="680" x="60" y="40" as="geometry" />
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-41" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=-90;fontColor=light-dark(#CCCCCC,#E6E6E6);fontSize=30;" value="PREPARE SECTION" vertex="1">
           <mxGeometry height="40" width="300" x="-60" y="280" as="geometry" />
@@ -132,6 +132,18 @@
         </mxCell>
         <mxCell id="uQ56KDJhuRLrYl7C2u5H-44" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=-90;fontColor=light-dark(#CCCCCC,#E6E6E6);fontSize=30;" value="COMPLETION SECTION" vertex="1">
           <mxGeometry height="37.5" width="223.75" x="-8.75" y="881.25" as="geometry" />
+        </mxCell>
+        <mxCell id="uQ56KDJhuRLrYl7C2u5H-49" edge="1" parent="1" source="uQ56KDJhuRLrYl7C2u5H-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;curved=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="uQ56KDJhuRLrYl7C2u5H-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uQ56KDJhuRLrYl7C2u5H-46" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="This steps can be recursive and contain another branch" vertex="1">
+          <mxGeometry height="70" width="80" x="650" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="uQ56KDJhuRLrYl7C2u5H-47" edge="1" parent="1" source="uQ56KDJhuRLrYl7C2u5H-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;curved=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="uQ56KDJhuRLrYl7C2u5H-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uQ56KDJhuRLrYl7C2u5H-50" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="size of nesting branches depends on stack size in core" vertex="1">
+          <mxGeometry height="70" width="80" x="640" y="490" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
