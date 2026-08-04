@@ -144,7 +144,7 @@ class VKCubeTest(BaseCoreTest):
     async def body(self):
         self.prepare()
         # nucelar launch ready
-        await self.launch_programm()
+        await self.launch_program()
         # wait
         await self.wait_until_done()
         self.dump()

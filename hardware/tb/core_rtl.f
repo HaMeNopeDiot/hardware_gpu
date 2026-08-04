@@ -1,6 +1,7 @@
 ../cvfpu/src/common_cells/src/cf_math_pkg.sv
 ../cvfpu/src/fpnew_pkg.sv
 ../cvfpu/src/fpnew_top.sv
+../rtl/utils/adder_pow2.sv
 ../rtl/utils/base_pkg.sv
 ../rtl/reg_common/core_csrm_pkg.sv
 ../rtl/utils/lsu_pkg.sv

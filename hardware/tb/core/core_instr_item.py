@@ -102,36 +102,22 @@ class CII():
         # Восстанавливаем Enum из значения
         op_val = (value >> (SIMM_W + 3 * AW)) & op_mask
         self.op = self.get_core_op(StoreOpTE(op_val))
-        #self.op       = StoreOpTE(op_val)
-
-        # op_type_val = (value >> (SIMM_W + 3 * AW + OP_W)) & op_type_mask
-        #self.op_type  = InstTE(op_type_val)
-
-        #self.print()
 
     def _get_utype_from_machine_code(self, value):
         imm_mask        = (1 << UIMM_W  ) - 1
         addr_mask       = (1 << AW      ) - 1
         op_mask         = (1 << OP_W    ) - 1
-        op_type_mask    = (1 << OP_T_W  ) - 1
 
         self.imm     = value & imm_mask
         self.rd_addr = (value >> UIMM_W) & addr_mask
 
         op_val       = (value >> (UIMM_W + AW)) & op_mask
         self.op = self.get_core_op(UPPopTE(op_val))
-        # self.op      = UPPopTE(op_val)
-
-        # op_type_val  = (value >> (UIMM_W + AW + OP_W)) & op_type_mask
-        # self.op_type = InstTE(op_type_val)
-
-        #self.print()
 
     def _get_ltype_from_machine_code(self, value):
         imm_mask        = (1 << LIMM_W  ) - 1
         addr_mask       = (1 << AW      ) - 1
         op_mask         = (1 << OP_W    ) - 1
-        op_type_mask    = (1 << OP_T_W  ) - 1
 
         self.imm      = value & imm_mask
         self.rs1_addr = (value >> (LIMM_W)) & addr_mask
@@ -139,12 +125,6 @@ class CII():
 
         op_val = (value >> (LIMM_W + 2 * AW)) & op_mask
         self.op = self.get_core_op(LoadOpTE(op_val))
-        # self.op       = LoadOpTE(op_val)
-
-        # op_type_val = (value >> (LIMM_W + 2 * AW + OP_W)) & op_type_mask
-        # self.op_type  = InstTE(op_type_val)
-
-        #self.print()
 
     def _get_ftype_from_machine_code(self, value):
         # extra занимает 3 бита (так как argr_addr сдвинут на FIMM_W + 3)
@@ -152,7 +132,6 @@ class CII():
         extra_mask   = (1 << 3      ) - 1
         addr_mask    = (1 << AW     ) - 1
         op_mask      = (1 << OP_W   ) - 1
-        op_type_mask = (1 << OP_T_W ) - 1
 
         self.imm       = (value                         )  & imm_mask
         self.extra     = (value >> FIMM_W               )  & extra_mask
@@ -163,12 +142,6 @@ class CII():
 
         op_val = (value >> (FIMM_W + 3 + 4 * AW)) & op_mask
         self.op = self.get_core_op(FPUopTE(op_val))
-        # self.op        = FPUopTE(op_val)
-
-        # op_type_val = (value >> (FIMM_W + 3 + 4 * AW + OP_W)) & op_type_mask
-        # self.op_type   = InstTE(op_type_val)
-
-        #self.print()
 
     def set_machine_code(self, value: int):
         op_type_mask    = (1 << OP_T_W) - 1
@@ -254,15 +227,18 @@ class CII():
                 cocotb.log.error("None type in instruction")
                 assert False
 
-    def print(self):
+    def print(self, pc: int = -1):
+        pc_str = ""
+        if pc >= 0:
+            pc_str = f": {pc:4x} : "
         match self.get_op_type():
             case InstTE.UPP:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} {pc_str}::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x};")
             case InstTE.STORE:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} {pc_str}::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x};")
             case InstTE.LOAD:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} {pc_str}::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x};")
             case InstTE.FPU:
-                cocotb.log.info(f"{self.get_machine_code():08x} ::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
+                cocotb.log.info(f"{self.get_machine_code():08x} {pc_str}::: I: {self.get_op_type().name:6} :: op: {self.op.name:8}; imm: 0x{self.imm:06x}; rd: {self.rd_addr:02x}; rs1: {self.rs1_addr:02x}; rs2: {self.rs2_addr:02x}; rs3: {self.rs3_addr:02x}; extra: {self.extra:01x};")
             case _:
                 cocotb.log.warning(f"Nothing to print")

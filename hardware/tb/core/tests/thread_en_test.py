@@ -23,11 +23,11 @@ import numpy as np
 class ThreadEnTest(BaseCoreTest):
     async def body(self):
         # First thread
-        self.inst_sheduler.load_i(CoreOp.LUI , rd_addr=4, imm=0x2000           )
-        self.inst_sheduler.load_i(CoreOp.ADDI, rd_addr=4, rs1_addr=4, imm=0x067)
-        self.inst_sheduler.load_i(CoreOp.RET                                   )
+        self.load_i(CoreOp.LUI , rd_addr=4, imm=0x2000           )
+        self.load_i(CoreOp.ADDI, rd_addr=4, rs1_addr=4, imm=0x067)
+        self.load_i(CoreOp.RET                                   )
 
-        await self.launch_programm(thread_en_mask=0b0001)
+        await self.launch_program(thread_en_mask=0b0001)
         await self.wait_until_done()
 
         # Second thread we will skip
@@ -40,34 +40,34 @@ class ThreadEnTest(BaseCoreTest):
             a.append(random_float)
             self.ahb_slave_lsu.write_word(0x1000 + i * reg_byte_num, float_to_i754(a[i], 32))
 
-        self.inst_sheduler.load_i(CoreOp.LUI , rd_addr = 1, imm=0x0000_1            )
-        self.inst_sheduler.load_i(CoreOp.LW  , rs1_addr= 1, rd_addr = 2             )
-        self.inst_sheduler.load_i(CoreOp.LW  , rs1_addr= 1, rd_addr = 3, imm = 0x4  )
-        self.inst_sheduler.load_i(CoreOp.FADD, rs1_addr= 2, rs2_addr= 3, rd_addr = 4)
-        self.inst_sheduler.load_i(CoreOp.RET                                        )
+        self.load_i(CoreOp.LUI , rd_addr = 1, imm=0x0000_1            )
+        self.load_i(CoreOp.LW  , rs1_addr= 1, rd_addr = 2             )
+        self.load_i(CoreOp.LW  , rs1_addr= 1, rd_addr = 3, imm = 0x4  )
+        self.load_i(CoreOp.FADD, rs1_addr= 2, rs2_addr= 3, rd_addr = 4)
+        self.load_i(CoreOp.RET                                        )
 
-        await self.launch_programm(thread_en_mask=0b0100)
+        await self.launch_program(thread_en_mask=0b0100)
         await self.wait_until_done()
 
         # Fourth + Second thread
-        self.inst_sheduler.load_i(CoreOp.LUI , rd_addr  = 1, imm      = 0x11111              )
-        self.inst_sheduler.load_i(CoreOp.ADDI, rd_addr  = 1, rs1_addr = 1       , imm=0x267  )
-        self.inst_sheduler.load_i(CoreOp.LUI , rd_addr  = 2, imm      = 0x77777              )
-        self.inst_sheduler.load_i(CoreOp.ADDI, rd_addr  = 2, rs1_addr = 2       , imm=0x421  )
-        self.inst_sheduler.load_i(CoreOp.ADD,  rs1_addr = 1, rs2_addr = 2       , rd_addr=4  )
-        self.inst_sheduler.load_i(CoreOp.RET                                                 )
+        self.load_i(CoreOp.LUI , rd_addr  = 1, imm      = 0x11111              )
+        self.load_i(CoreOp.ADDI, rd_addr  = 1, rs1_addr = 1       , imm=0x267  )
+        self.load_i(CoreOp.LUI , rd_addr  = 2, imm      = 0x77777              )
+        self.load_i(CoreOp.ADDI, rd_addr  = 2, rs1_addr = 2       , imm=0x421  )
+        self.load_i(CoreOp.ADD,  rs1_addr = 1, rs2_addr = 2       , rd_addr=4  )
+        self.load_i(CoreOp.RET                                                 )
 
-        await self.launch_programm(thread_en_mask=0b1010)
+        await self.launch_program(thread_en_mask=0b1010)
         await self.wait_until_done()
 
         # unload
-        self.inst_sheduler.load_i(CoreOp.LUI , rd_addr = 5,         imm= 0x00000             )
-        self.inst_sheduler.load_i(CoreOp.ADDI, rs1_addr= 5,         imm=4       , rd_addr=5  )
-        self.inst_sheduler.load_i(CoreOp.MUL , rs1_addr= VID_ADDR,  rs2_addr=5  , rd_addr=6  )
-        self.inst_sheduler.load_i(CoreOp.SW  , rs1_addr= 6,         imm=0x10    , rs2_addr=4 )
-        self.inst_sheduler.load_i(CoreOp.RET                                                 )
+        self.load_i(CoreOp.LUI , rd_addr = 5,         imm= 0x00000             )
+        self.load_i(CoreOp.ADDI, rs1_addr= 5,         imm=4       , rd_addr=5  )
+        self.load_i(CoreOp.MUL , rs1_addr= VID_ADDR,  rs2_addr=5  , rd_addr=6  )
+        self.load_i(CoreOp.SW  , rs1_addr= 6,         imm=0x10    , rs2_addr=4 )
+        self.load_i(CoreOp.RET                                                 )
 
-        await self.launch_programm()
+        await self.launch_program()
         await self.wait_until_done()
 
         res = []

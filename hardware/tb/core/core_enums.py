@@ -24,6 +24,7 @@ class InstTE(Enum):
 class LoadOpTE(VOpTE): # L-type operation type enum
     LW      = 0
     ADDI    = 1
+    JALR    = 2
 
 class StoreOpTE(VOpTE): # S-type opertation type enum
     SW      = 0
@@ -41,6 +42,7 @@ class FPUopTE(VOpTE): # F-type operation type enum
 class UPPopTE(VOpTE): # U-type operation type enum
     LUI     = 0b00000
     RET     = 0b00001
+    JAL     = 0b00010
 
 class RoundModeE(Enum):
     RNE = 0b000 # to nearest, tie to even (default)
@@ -65,5 +67,7 @@ class CoreOp(Enum):
     ADD     = 10
     MUL     = 11
     RET     = 12
+    JAL     = 13
+    JALR    = 14
 
 FPU_OP = {CoreOp.FADD, CoreOp.FMUL, CoreOp.FDIV, CoreOp.FSQRT, CoreOp.FNEG, CoreOp.FMAX}

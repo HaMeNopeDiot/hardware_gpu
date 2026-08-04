@@ -129,15 +129,15 @@ class BaseCoreTest:
             cocotb.log.debug(f"Make thread-{thread_idx} instructions with {pc_start_addr:08x} offset")
             for reg_idx in range(REGFILE_SZ):
                 addr_ofs = (thread_ofs + reg_idx) * jcell
-                self.inst_sheduler.load_i(op=CoreOp.SW, imm = addr_ofs, rs2_addr = reg_idx)
+                self.load_i(op=CoreOp.SW, imm = addr_ofs, rs2_addr = reg_idx)
                 cocotb.log.debug(f"Sended instruction for {reg_idx}-reg by {(iaddr + addr_ofs):08x} address")
 
-            self.inst_sheduler.load_i(op=CoreOp.RET)
+            self.load_i(op=CoreOp.RET)
             cocotb.log.debug(f"Sended instruction EoP by {(iaddr + addr_ofs + jcell):08x} address")
 
             thread_en_mask = 1 << thread_idx
             cocotb.log.debug(f"thread_en_mask: {thread_en_mask}")
-            await self.launch_programm(thread_en_mask)
+            await self.launch_program(thread_en_mask)
             await self.wait_until_done()
 
         # load dump from memory
@@ -169,7 +169,7 @@ class BaseCoreTest:
                 if not is_equal:
                     cocotb.log.warning(f"Error on {j} index in {i} thread index. {rfdata:08x} <> {tdata:08x}")
 
-    async def launch_programm(self, thread_en_mask: int = (1 << THREADS_CNT) - 1, custom_pc: int = -1):
+    async def launch_program(self, thread_en_mask: int = (1 << THREADS_CNT) - 1, custom_pc: int = -1):
         if custom_pc < 0:
             pc = self.inst_sheduler.get_start_pc()
         else:
@@ -186,3 +186,21 @@ class BaseCoreTest:
         while (self.dut.busy_o.value == 1):
            await ClockCycles(self.clk, 1)
         cocotb.log.info(f"Stop to capture end of programm")
+
+    def load_i(self,
+                     op            : CoreOp = None,
+                     rs1_addr      : int = 0,
+                     rs2_addr      : int = 0,
+                     rs3_addr      : int = 0,
+                     rd_addr       : int = 0,
+                     imm           : int = 0,
+                     extra         : int = 0,
+                     auto_load_prog: bool = True):
+        self.inst_sheduler.load_i (op = op,
+                                   rs1_addr = rs1_addr,
+                                   rs2_addr = rs2_addr,
+                                   rs3_addr = rs3_addr,
+                                   rd_addr  = rd_addr,
+                                   imm = imm,
+                                   extra = extra,
+                                   auto_load_prog = auto_load_prog)

@@ -1,20 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.127 (w)1999-2026 BSI
-[*] Fri Jul  3 13:30:27 2026
+[*] Tue Aug  4 12:28:38 2026
 [*]
 [dumpfile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/dump.vcd"
-[dumpfile_mtime] "Fri Jul  3 13:30:15 2026"
-[dumpfile_size] 41362745
+[dumpfile_mtime] "Tue Aug  4 12:24:56 2026"
+[dumpfile_size] 4364979
 [savefile] "/home/starukhin.d/projects/education/diploma/hardware_gpu/hardware/tb/core/gtkw/core_top.gtkw"
 [timestart] 0
 [size] 1920 1116
 [pos] -1 -1
-*-24.851603 48700000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.351603 567400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] core.
 [treeopen] core.cmd.u.
 [treeopen] core.core_decoder_u.cmd_ff.f.
 [treeopen] core.core_decoder_u.instr_i.cmd.f.
 [treeopen] core.core_fetcher_u.
+[treeopen] core.core_fetcher_u.ahb_master_u.
+[treeopen] core.core_fetcher_u.ahb_master_u.ahb_o.
 [treeopen] core.core_fetcher_u.instr_o.cmd.
 [treeopen] core.gen_threads[0].thread_unit_u.cmd.
 [treeopen] core.gen_threads[1].thread_unit_u.
@@ -228,5 +230,16 @@ core.gen_threads[3].thread_unit_u.tu_regfile_u.rf[8][31:0]
 -THREADS
 @200
 -Arbiter
+@22
+core.csr_pc[31:0]
+@28
+core.core_fetcher_u.ahb_rq
+@22
+core.core_fetcher_u.getted_data[31:0]
+core.core_fetcher_u.ahb_master_u.haddr[31:0]
+@28
+core.core_fetcher_u.ahb_master_u.ahb_o.htrans[1:0]
+@29
+core.ret_inst
 [pattern_trace] 1
 [pattern_trace] 0

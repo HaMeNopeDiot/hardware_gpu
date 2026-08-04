@@ -12,6 +12,8 @@ from core.core_instr_item   import CII
 from core.core_enums        import CoreOp
 from core.ahb_slave         import AHBSlaveModel, AHBSize
 
+from core.models.regfile_model  import RegfileModel
+
 class InstSheduler():
     def __init__(self,
                  name: str = "sheduler",
@@ -25,6 +27,8 @@ class InstSheduler():
         self.cur_start_pc: int = 0
         self.cur_pc: int = 0
         self.last_prog_len: int = 0
+
+        self._local_rf = RegfileModel("l_is_regfile")
 
     def load_cii_i(self, instr: CII, auto_load_prog: bool = True):
         self._inst_q.append(instr)
@@ -54,10 +58,19 @@ class InstSheduler():
         self.cur_start_pc = self.cur_pc
         while(not ret_instr_cptr and prog_len < len(self._inst_q)):
             instr = self.get_inst_by_idx(prog_len)
-            instr.print()
+            instr.print(self.cur_pc)
             mc_instr = instr.get_machine_code()
             self.if_slave_model.write_word(self.cur_pc, mc_instr)
-            self.cur_pc += (1 << AHBSize.WORD)
+            # update pc
+            if instr.op == CoreOp.JAL:
+                self._local_rf.write(instr.rd_addr, self.cur_pc + 4)
+                self.cur_pc += instr.imm
+            elif instr.op == CoreOp.JALR:
+                self._local_rf.write(instr.rd_addr, self.cur_pc + 4)
+                self.cur_pc = instr.imm + self._local_rf.read(instr.rs1_addr)
+            else:
+                self.cur_pc += (1 << AHBSize.WORD)
+            # ret case
             if instr.op == CoreOp.RET:
                 ret_instr_cptr = True
             prog_len += 1

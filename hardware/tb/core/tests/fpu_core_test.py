@@ -62,17 +62,17 @@ class FPUCoreTest(BaseCoreTest):
                                             extra=RoundModeE.RTZ.value)
 
         # form instructions: get constants/ calculate / give result
-        self.inst_sheduler.load_i(CoreOp.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0                                                          )
-        self.inst_sheduler.load_i(CoreOp.MUL , imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR                                     )
-        self.inst_sheduler.load_i(CoreOp.LW  , imm = 0x00,   rd_addr = 3, rs1_addr = 2                                                          )
-        self.inst_sheduler.load_i(CoreOp.LW  , imm = 0x10,   rd_addr = 4, rs1_addr = 2                                                          )
-        self.inst_sheduler.load_i(fpu_op     , imm = 0x00,   rs1_addr= 3, rs2_addr = 4, rs3_addr = 1, rd_addr= 5, extra = RoundModeE.RTZ.value  )
-        self.inst_sheduler.load_i(CoreOp.SW  , imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5                                            )
-        self.inst_sheduler.load_i(CoreOp.RET , imm = 0x00,   rd_addr = 0                                                                        )
+        self.load_i(CoreOp.ADDI, imm = 0x04,   rd_addr = 1, rs1_addr = 0                                                          )
+        self.load_i(CoreOp.MUL , imm = 0x0D,   rd_addr = 2, rs1_addr = 1, rs2_addr=  VID_ADDR                                     )
+        self.load_i(CoreOp.LW  , imm = 0x00,   rd_addr = 3, rs1_addr = 2                                                          )
+        self.load_i(CoreOp.LW  , imm = 0x10,   rd_addr = 4, rs1_addr = 2                                                          )
+        self.load_i(fpu_op     , imm = 0x00,   rs1_addr= 3, rs2_addr = 4, rs3_addr = 1, rd_addr= 5, extra = RoundModeE.RTZ.value  )
+        self.load_i(CoreOp.SW  , imm = 0x20,   rd_addr = 1, rs1_addr = 2, rs2_addr = 5                                            )
+        self.load_i(CoreOp.RET , imm = 0x00,   rd_addr = 0                                                                        )
 
 
         # execute instructions
-        await self.launch_programm()
+        await self.launch_program()
         await self.wait_until_done()
 
         # get values

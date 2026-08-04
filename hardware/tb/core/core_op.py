@@ -22,6 +22,8 @@ class CoreOperation():
                 return CoreOp.LUI
             case UPPopTE.RET:
                 return CoreOp.RET
+            case UPPopTE.JAL:
+                return CoreOp.JAL
             case _:
                 assert False, f"Unknown {self.name} operation type"
 
@@ -31,6 +33,8 @@ class CoreOperation():
                 return CoreOp.LW
             case LoadOpTE.ADDI:
                 return CoreOp.ADDI
+            case LoadOpTE.JALR:
+                return CoreOp.JALR
             case _:
                 assert False, f"Unknown {self.name} operation type"
 
@@ -103,3 +107,7 @@ class CoreOperation():
                 return StoreOpTE.MUL
             case CoreOp.RET:
                 return UPPopTE.RET
+            case CoreOp.JAL:
+                return UPPopTE.JAL
+            case CoreOp.JALR:
+                return LoadOpTE.JALR
