@@ -77,15 +77,15 @@ module thread_unit
     import tu_pkg::dw_value_t;
 #(
     parameter  int unsigned     DW                  = 64,
-    localparam int unsigned     STRB_W              = int'(DW / 8),
     parameter  int unsigned     REGFILE_SIZE        = 8,
     localparam int unsigned     AW                  = $clog2(REGFILE_SIZE),
     parameter  bit              LATCH_R_ADDR        = 1,
     parameter  bit              ONLY_LINT           = `ifdef LINT 1 `else 0 `endif,
 
     parameter  fpu_features_t   FPU_CONFIGURATION   = RV32F_Xsflt, // RV32F_Xsflt or RV64D_Xsflt
-    parameter  int unsigned     FDW                 = FPU_CONFIGURATION == RV64D_Xsflt? 64: 32
+    parameter  int unsigned     FDW                 = FPU_CONFIGURATION == RV64D_Xsflt? 64: 32,
 
+    localparam int unsigned     PC_BACK_OFFSET      = 16
 ) (
     /*=========================### COMMON SIGNALS ###=========================*/
     input  logic                clk,
@@ -97,18 +97,22 @@ module thread_unit
 
     /*======================### REGISTER SIGNALS (LSU) ###====================*/
     reg_if.tu                   r_if,
-    input logic                 lsu_ready_i,
+    input  logic                lsu_ready_i,
 
     /*===========================### DEC SIGNALS ###==========================*/
     input  thread_command_t     dec_cmd,        // fpu
     input  logic                dec_cmd_valid,  // fpu valid
 
     /*===========================### VID SIGNALS ###==========================*/
-    input logic [DW - 1: 0]     csr_pc_i,
-    input logic [DW - 1: 0]     vid_i,
+    input  logic [DW - 1: 0]    pc_i,
+    input  logic [DW - 1: 0]    next_pc_i,
+    input  logic [DW - 1: 0]    vid_i,
     /*===========================### OUT SIGNALS ###==========================*/
     output thread_info_t        thread_info,
-    output tu_state_e           thread_state
+    output tu_state_e           thread_state,
+
+    output logic [DW - 1: 0]    new_pc_o,
+    output logic                new_pc_valid_o
     //========================================================================//
 );
 
@@ -331,8 +335,8 @@ always_comb begin
             wr_en  = '1;
         end
         else begin
-            data_w = alu_or;
-            wr_en  = alu_rr;
+            data_w = next_pc_i - (DW)'(PC_BACK_OFFSET);
+            wr_en  = '1;
         end
     end
     else begin
@@ -364,6 +368,12 @@ logic in_ready_o;
 
 logic [DW - 1: 0] data_rs1, data_rs2;
 
+assign new_pc_valid_o = ((u_cmd_valid && u_cmd.operand == UOP_JAL )
+                      || (l_cmd_valid && l_cmd.operand == LOP_JALR))
+                      && alu_rr;
+
+assign new_pc_o = new_pc_valid_o? alu_or: '0;
+
 /*============================================================================//
 region ALU
 //============================================================================*/
@@ -373,15 +383,9 @@ always_comb begin
     case (cmd_op_type)
         L_CMD: begin
             case (l_cmd.operand)
-                LOP_LW, LOP_ADDI: begin
+                LOP_LW, LOP_ADDI, LOP_JALR: begin
                     alu_struct.o1       = data_rs1;
                     alu_struct.o2       = (DW)'(l_cmd.imm);
-                    alu_struct.op       = AOP_ADD;
-                    alu_struct.valid    = '1;
-                end
-                LOP_JALR: begin
-                    alu_struct.o1       = csr_pc_i;
-                    alu_struct.o2       = STRB_W;
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
@@ -418,8 +422,8 @@ always_comb begin
         U_CMD: begin
             case (u_cmd.operand)
                 UOP_JAL: begin
-                    alu_struct.o1       = csr_pc_i;
-                    alu_struct.o2       = STRB_W;
+                    alu_struct.o1       = pc_i - (DW)'(PC_BACK_OFFSET); // ah, em, fixme?
+                    alu_struct.o2       = (DW)'(u_cmd.imm);
                     alu_struct.op       = AOP_ADD;
                     alu_struct.valid    = '1;
                 end
@@ -432,7 +436,6 @@ always_comb begin
             alu_struct = '0;
     endcase
 end
-
 
 /*============================================================================//
 region OUT

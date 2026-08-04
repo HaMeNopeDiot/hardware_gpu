@@ -39,7 +39,11 @@ region MODULE DEFINITION
 
     output logic [DW - 1: 0]                cur_pc_o,
     input  logic                            pc_readed_i,
-    output logic                            thread_en_o [THREAD_CNT]
+    output logic                            thread_en_o [THREAD_CNT],
+
+    input  logic [DW - 1: 0]                next_pc_i,
+    input  logic [DW - 1: 0]                new_pc_i,
+    input  logic                            new_pc_valid_i
     //==========================================================================//
 );
 /*==============================================================================//
@@ -107,9 +111,19 @@ region WRITE ENABLE LOGIC
 //==============================================================================*/
 
 assign core_ctrl_wedata = ret_i                 ? (DW)'(1)  : (is_core_ctrl_addr? wedata: '0);
-assign pc_wedata        = pc_readed_i && en_o   ? (DW)'('1) : (is_pc_addr       ? wedata: '0);
 assign tu_en_wedata     = is_tu_addr            ? wedata: '0;
 
+//assign pc_wedata        = pc_readed_i && en_o   ? (DW)'('1) : (is_pc_addr       ? wedata: '0);
+always_comb begin
+    if (new_pc_valid_i)
+        pc_wedata = '1;
+    else if (pc_readed_i && en_o)
+        pc_wedata = '1;
+    else if (is_pc_addr)
+        pc_wedata = wedata;
+    else
+        pc_wedata = '0;
+end
 /*==============================================================================//
 region VID DATA LOGIC
 //==============================================================================*/
@@ -154,7 +168,14 @@ always_comb begin
         core_ctrl_wdata = '0;
 end
 
-assign pc_wdata     = pc_readed_i && en_o? pc_rdata + (DW)'(STRB_W): wdata_masked;
+always_comb begin
+    if (new_pc_valid_i)
+        pc_wdata = new_pc_i;
+    else if (pc_readed_i && en_o)
+        pc_wdata = next_pc_i;
+    else
+        pc_wdata = wdata_masked;
+end
 
 assign tu_en_wdata  = wdata_masked;
 assign vid_wdata    = wdata;

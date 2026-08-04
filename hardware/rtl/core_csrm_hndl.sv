@@ -36,7 +36,11 @@ module core_csrm_hndl
     output logic [DW - 1: 0]        vid_o           [THREAD_CNT],
     input  logic                    pc_readed_i,
     output logic [DW - 1: 0]        cur_pc_o,
-    output logic                    thread_en_o     [THREAD_CNT]
+    output logic                    thread_en_o     [THREAD_CNT],
+
+    input  logic [DW - 1: 0]        next_pc_i,
+    input  logic [DW - 1: 0]        new_pc_i,
+    input  logic                    new_pc_valid_i
     //========================================================================//
 );
 
@@ -93,19 +97,22 @@ core_csrm #(
     .THREAD_CNT  (THREAD_CNT)
 ) core_csrm_u (
     //================### COMMON SIGNALS ###=================//
-    .clk        (clk        ),  // <-
-    .rst_n      (rst_n      ),  // <-
-    .addr       (paddr      ),  // <-
-    .wdata      (pwdata     ),  // <-
-    .wedata     (csrm_wedata),  // <-
-    .rdata      (csrm_rdata ),  // ->
+    .clk            (clk            ),  // <-
+    .rst_n          (rst_n          ),  // <-
+    .addr           (paddr          ),  // <-
+    .wdata          (pwdata         ),  // <-
+    .wedata         (csrm_wedata    ),  // <-
+    .rdata          (csrm_rdata     ),  // ->
     //==============### ADDITIONAL SIGNALS ###===============//
-    .ret_i      (ret_i      ),  // <-
-    .en_o       (en_o       ),  // ->
-    .vid_o      (vid_o      ),  // ->
-    .cur_pc_o   (cur_pc_o   ),  // ->
-    .pc_readed_i(pc_readed_i),  // <-
-    .thread_en_o(thread_en_o)   // ->
+    .ret_i          (ret_i          ),  // <-
+    .en_o           (en_o           ),  // ->
+    .vid_o          (vid_o          ),  // ->
+    .cur_pc_o       (cur_pc_o       ),  // ->
+    .pc_readed_i    (pc_readed_i    ),  // <-
+    .thread_en_o    (thread_en_o    ),  // ->
+    .next_pc_i      (next_pc_i      ),  // <-
+    .new_pc_i       (new_pc_i       ),  // <-
+    .new_pc_valid_i (new_pc_valid_i )   // <-
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //

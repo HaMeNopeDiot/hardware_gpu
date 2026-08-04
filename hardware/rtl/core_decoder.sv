@@ -105,6 +105,7 @@ module core_decoder
     input  logic                threads_valid_i,
     output logic                decoder_ready_o,
     output logic                ret_inst_o,
+    output logic                jal_inst_o,
     input  logic                en_i
     //========================================================================//
 );
@@ -147,7 +148,7 @@ logic  threads_free;
 assign threads_free = (~(i_with_delay && ~tu_valid_re)) && threads_valid_i;
 
 logic  decoder_activate;
-assign decoder_activate = en_i && (~ret_inst_o);
+assign decoder_activate = en_i && (~ret_inst_o) && (~jal_inst_o);
 
 /*============================================================================//
 region FSM
@@ -449,6 +450,10 @@ assign fpu_cmd_valid    = give_rn? fpu_cmd_valid_ff    : '0;
 assign ret_inst_o       =   give_rn
                         && (cmd_op_type_ff == U_CMD)
                         && (cmd_ff.u.operand == UOP_RET)? 1: '0;
+
+assign jal_inst_o       =   give_rn && (
+        ((cmd_op_type_ff == U_CMD) && (cmd_ff.u.operand == UOP_JAL))
+    ||  ((cmd_op_type_ff == L_CMD) && (cmd_ff.l.operand == LOP_JALR)));
 
 //============================================================================*/
 endmodule

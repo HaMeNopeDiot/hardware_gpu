@@ -186,6 +186,7 @@ logic [DW - 1: 0]   vid_arr [THREAD_CNT];
 logic               csr_en;
 logic [DW - 1: 0]   csr_pc;
 logic               ret_inst;
+logic               jal_inst;
 /*============================================================================//
 region THREAD INTERCONNECT
 //============================================================================*/
@@ -206,6 +207,32 @@ logic               lsu_r2_thread [THREAD_CNT];
 logic               tus_ready_get_cmd;
 logic               lsu_done;
 logic               thread_req;
+
+/*============================================================================//
+region PC
+//============================================================================*/
+
+logic [DW - 1: 0]   next_pc;
+logic [DW - 1: 0]   new_pc;
+logic               new_pc_valid;
+
+logic [DW - 1: 0]   threads_pc       [THREAD_CNT];
+logic               threads_pc_valid [THREAD_CNT];
+
+assign new_pc       = threads_pc[0];
+assign new_pc_valid = threads_pc_valid[0];
+
+// logic thread_pc_asyn_err;
+// logic thread_pc_valid_asyn_err;
+
+// assign thread_pc_valid_asyn_err = threads_pc_valid == '1 || threads_pc_valid == '0;
+
+// TODO: In the future, we can add a check here to ensure that all new thread
+// program counters are identical during calculation and that their validity is
+// reached at the same moment. In general, I do not like using extra bits and
+// registers from the threads; perhaps there is a way to move the calculation of
+// new program counters out of the threads, but I do not yet know how to do that.
+
 
 /*============================================================================//
 region OUT
@@ -253,19 +280,19 @@ core_fetcher #(
     .INST_Q_SZ      (8              )
 ) core_fetcher_u (
     //================### COMMON SIGNALS ###=================//
-    .clk           (clk             ), // <-
-    .rst_n         (rst_n           ), // <-
+    .clk           (clk                 ), // <-
+    .rst_n         (rst_n               ), // <-
     //==================### AHB SIGNALS ###==================//
-    .ahb_i         (ftc_ahb_i       ), // <-
-    .ahb_o         (ftc_ahb_o       ), // ->
+    .ahb_i         (ftc_ahb_i           ), // <-
+    .ahb_o         (ftc_ahb_o           ), // ->
     //==============### SIGNALS TO DECODER ###===============//
-    .instr_o       (ftc_instr       ), // ->
-    .instr_valid_o (ftc_instr_valid ), // ->
-    .dec_ready_i   (dec_ready       ), // <-
+    .instr_o       (ftc_instr           ), // ->
+    .instr_valid_o (ftc_instr_valid     ), // ->
+    .dec_ready_i   (dec_ready           ), // <-
     //===============### SIGNALS FROM CORE ###===============//
-    .pc_i          (csr_pc          ), // <-
-    .en_i          (csr_en          ), // <-
-    .pc_readed_o   (fetcher_read_pc )  // ->
+    .pc_i          (csr_pc              ), // <-
+    .en_i          (csr_en && ~jal_inst ), // <-
+    .pc_readed_o   (fetcher_read_pc     )  // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -294,6 +321,7 @@ core_decoder #(
     .threads_valid_i(tus_ready_get_cmd  ),    // <-
     .decoder_ready_o(dec_ready          ),    // ->
     .ret_inst_o     (ret_inst           ),    // ->
+    .jal_inst_o     (jal_inst           ),    // ->
     .en_i           (csr_en             )     // <-
     //=======================================================//
 );
@@ -336,18 +364,34 @@ core_csrm_hndl #(
     .THREAD_CNT  (THREAD_CNT        )
 ) core_csrm_hndl_u (
     //================### COMMON SIGNALS ###=================//
-    .clk         (clk               ), // <-
-    .rst_n       (rst_n             ), // <-
+    .clk            (clk               ), // <-
+    .rst_n          (rst_n             ), // <-
     //==================### APB SIGNALS ###==================//
-    .apb4_i      (csr_apb_i         ), // <-
-    .apb4_o      (csr_apb_o         ), // ->
+    .apb4_i         (csr_apb_i         ), // <-
+    .apb4_o         (csr_apb_o         ), // ->
     //==================### OUT SIGNALS ###==================//
-    .ret_i       (ret_inst          ), // <-
-    .en_o        (csr_en            ), // ->
-    .vid_o       (vid_arr           ), // ->
-    .pc_readed_i (fetcher_read_pc   ), // <-
-    .cur_pc_o    (csr_pc            ), // ->
-    .thread_en_o (thread_en         )  // ->
+    .ret_i          (ret_inst          ), // <-
+    .en_o           (csr_en            ), // ->
+    .vid_o          (vid_arr           ), // ->
+    .pc_readed_i    (fetcher_read_pc   ), // <-
+    .cur_pc_o       (csr_pc            ), // ->
+    .thread_en_o    (thread_en         ), // ->
+    .next_pc_i      (next_pc           ), // <-
+    .new_pc_i       (new_pc            ), // <-
+    .new_pc_valid_i (new_pc_valid      )  // <-
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
+
+// ///////////////////////////////////////////////////////// //
+//                      *** ADDER4 ***                       //
+// NOTE: ADDER 4 FOR PC
+adder_pow2 #(
+    .DW      (DW        )
+) adder4_u (
+    //================### COMMON SIGNALS ###=================//
+    .operand (csr_pc    ), // <-
+    .result  (next_pc   )  // ->
     //=======================================================//
 );
 // ///////////////////////////////////////////////////////// //
@@ -376,10 +420,14 @@ for (genvar i = 0; i < THREAD_CNT; i++) begin: gen_threads
         .dec_cmd_valid  (fpu_cmd_valid      ),  // <-
         //==================### VID SIGNALS ###==================//
         .vid_i          (vid_arr[i]         ),  // <-
-        .csr_pc_i       (csr_pc             ),  // <-
+        .pc_i           (csr_pc             ),  // <-
+        .next_pc_i      (next_pc            ),  // <-
         //==================### OUT SIGNALS ###==================//
         .thread_info    (thread_unit_info[i]),  // ->
-        .thread_state   (thread_states[i]   )   // ->
+        .thread_state   (thread_states[i]   ),  // ->
+
+        .new_pc_o       (threads_pc[i]      ),  // ->
+        .new_pc_valid_o (threads_pc_valid[i])   // ->
         //=======================================================//
     );
     // ///////////////////////////////////////////////////////// //
