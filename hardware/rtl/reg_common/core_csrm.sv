@@ -46,20 +46,20 @@ region MODULE DEFINITION
 region TEST ZONE
 //==============================================================================*/
 
-typedef core_csrm_pkg::core_csrm_pkg#(
-    .DW(DW),
-    .THREAD_CNT(THREAD_CNT)) spec_csrm_t;
+// typedef core_csrm_pkg::core_csrm_pkg#(
+//     .DW(DW),
+//     .THREAD_CNT(THREAD_CNT)) spec_csrm_t;
 
-spec_csrm_t::csrm_sig_out_t csrm_o;
-spec_csrm_t::csrm_req_sig_t csrm_i;
+// spec_csrm_t::csrm_sig_out_t csrm_o;
+// spec_csrm_t::csrm_req_sig_t csrm_i;
 
-assign csrm_i.ret_i         = ret_i;
-assign csrm_i.pc_readed_i   = pc_readed_i;
+// assign csrm_i.ret_i         = ret_i;
+// assign csrm_i.pc_readed_i   = pc_readed_i;
 
-assign csrm_o.en_o          = en_o;
-assign csrm_o.vid_o         = '0;
-assign csrm_o.cur_pc_o      = cur_pc_o;
-assign csrm_o.thread_en_o   = '0;
+// assign csrm_o.en_o          = en_o;
+// assign csrm_o.vid_o         = '0;
+// assign csrm_o.cur_pc_o      = cur_pc_o;
+// assign csrm_o.thread_en_o   = '0;
 
 /*==============================================================================//
 region LOGIC VARIABLE DEFINITION
@@ -98,6 +98,10 @@ assign is_pc_addr           = addr == (AW)'(R_PC_OFS);
 logic  is_tu_addr;
 assign is_tu_addr           = addr == (AW)'(R_TU_EN_OFS);
 
+logic  addr_in_vid_range;
+assign addr_in_vid_range    = addr >= (AW)'(RS_VID_OFS) && addr <= (AW)'(RS_VID_END_OFS);
+
+
 /*==============================================================================//
 region WRITE ENABLE LOGIC
 //==============================================================================*/
@@ -109,9 +113,6 @@ assign tu_en_wedata     = is_tu_addr            ? wedata: '0;
 /*==============================================================================//
 region VID DATA LOGIC
 //==============================================================================*/
-logic  addr_in_vid_range;
-assign addr_in_vid_range = addr >= (AW)'(RS_VID_OFS) && addr <= (AW)'(RS_VID_END_OFS);
-
 
 logic [DW - 1: 0] cur_vid;
 if (THREAD_CNT > 1) begin: g_logic_many_threads

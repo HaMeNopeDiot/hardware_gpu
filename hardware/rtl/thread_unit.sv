@@ -68,9 +68,9 @@ module thread_unit
     import tu_pkg::s_cmd_t;
 
 
-    import tu_pkg::UOP_IMM;
-    import tu_pkg::LOP_LW, tu_pkg::LOP_ADDI, tu_pkg::LOP_JALR;
-    import tu_pkg::SOP_SW, tu_pkg::SOP_ADD, tu_pkg::SOP_MUL;
+    import tu_pkg::UOP_IMM, tu_pkg::UOP_RET,  tu_pkg:: UOP_JAL;
+    import tu_pkg::LOP_LW,  tu_pkg::LOP_ADDI, tu_pkg::LOP_JALR;
+    import tu_pkg::SOP_SW,  tu_pkg::SOP_ADD,  tu_pkg::SOP_MUL;
     import tu_pkg::AOP_ADD, tu_pkg::AOP_MUL;
 
 
