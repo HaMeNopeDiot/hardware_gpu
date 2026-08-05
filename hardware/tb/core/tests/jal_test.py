@@ -32,6 +32,7 @@ class JalTest(BaseCoreTest):
         self.load_i(CoreOp.ADDI, rd_addr = 4,  rs1_addr=4, imm=0x1             )
         self.load_i(CoreOp.ADDI, rd_addr = 4,  rs1_addr=4, imm=0x2             )
         self.load_i(CoreOp.JALR, rd_addr = 6,  rs1_addr=5, imm=0x0             )
+        self.load_i(CoreOp.LUI , rd_addr = 7,  rs1_addr=7, imm=0x0             )
         self.load_i(CoreOp.ADDI, rd_addr = 7,  rs1_addr=7, imm=0x3             )
         self.load_i(CoreOp.ADDI, rd_addr = 7,  rs1_addr=7, imm=0x4             )
         self.load_i(CoreOp.SW  , rs1_addr = 2, imm=0x80, rs2_addr=7            )
@@ -53,3 +54,7 @@ class JalTest(BaseCoreTest):
             tmp = self.ahb_slave_lsu.read_word(0x90 + i * reg_byte_num)
             res.append(tmp)
             cocotb.log.info(f"{i} result: {tmp:08x}")
+
+        for i in range(THREADS_CNT):
+            assert res[i                ] == 0x3 + 0x4            , f"Core wrong count"
+            assert res[i + THREADS_CNT  ] == 0x2000067 + 0x1 + 0x2, f"Core wrong count"

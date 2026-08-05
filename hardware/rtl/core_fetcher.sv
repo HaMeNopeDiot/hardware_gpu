@@ -3,7 +3,7 @@
 // Author's e-mail:       sniperusus2002@gmail.com
 // ------------------------------------------------------------------------------//
 // Purpose: GPU Core fetcher
-// Date: 2026/06
+// Date: 2026/08
 //-------------------------------------------------------------------------------//
 
 /*===================================================================================//
@@ -47,6 +47,9 @@ module core_fetcher
     // AHB
     import ahb_pkg::ahb_mports_t;
     import ahb_pkg::ahb_sports_t;
+
+    // ED
+    import edge_detector_pkg::EDGE_CATCH_T_RE;
 #(
     parameter   int unsigned DW           = 32,
     parameter   int unsigned AW           = 32,
@@ -173,6 +176,10 @@ always_comb begin
         ahb_addr = pc_i_ff;
 end
 
+// When the Fetcher shuts down, all active transactions on the AHB bus must be
+// properly completed. For example, if a slave holds HREADY low, the signal
+// activating the master will allow it to continue interacting with the slave
+// until the transaction concludes.
 logic  make_it_done;
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -183,20 +190,11 @@ always_ff @(posedge clk or negedge rst_n) begin
         make_it_done <= '0;
 end
 
+// Simply say that activate master and it need to hold.
 logic  ahb_rq;
 assign ahb_rq = (en_i || make_it_done) && ~stop_load_pc;
 
-
-logic en_i_prev;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n)
-        en_i_prev <= '0;
-    else
-        en_i_prev <= en_i;
-end
-
 logic  start;
-assign start = ~en_i_prev && en_i;
 
 // write q_data_get
 
@@ -219,6 +217,8 @@ assign store_inst = q_data_get && ~inst_q_full;
 logic  deploy_inst;
 assign deploy_inst = q_data_give && ~inst_q_empty;
 
+
+// Points to a cell in the buffer where an instruction can be placed.
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         inst_ptr_q <= '0;
@@ -229,10 +229,11 @@ always_ff @(posedge clk or negedge rst_n) begin
             inst_ptr_q <= inst_ptr_q + (INST_Q_W)'(1);
 end
 
+// Specifies the instruction to be sent to the decoder.
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
         next_inst_ptr_q <= '0;
-    else if (~en_i)
+    else if (~en_i || start) // Note *
         next_inst_ptr_q <= inst_ptr_q;
     else if (deploy_inst)
         if (next_inst_ptr_q == (INST_Q_W)'(INST_Q_SZ - 1))
@@ -240,6 +241,10 @@ always_ff @(posedge clk or negedge rst_n) begin
         else
             next_inst_ptr_q <= next_inst_ptr_q + (INST_Q_W)'(1);
 end
+// Note *: If the Fetcher is rapidly turned off and on, it may not have time to
+// capture the `instr_ptr`; therefore, it has an extra cycle when the `start`
+// signal is asserted.
+
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n)
@@ -272,11 +277,29 @@ assign instr_valid_o = ~inst_q_empty;
 
 assign instr_o = inst_q[next_inst_ptr_q];
 
+// iow instruction on this PC readed and Fetcher wait next PC
 assign pc_readed_o = (start || (ahb_i.hready)) && ~stop_load_pc;
 
 //============================================================================*/
 // INSTANCES
 //============================================================================*/
+
+// ///////////////////////////////////////////////////////// //
+//                   *** EDGE DETECTOR ***                   //
+// NOTE: Catch RE of en_i and output start signal
+edge_detector #(
+    .ED_CATCH_T       (EDGE_CATCH_T_RE),
+    .DEF_PREV_SIG_VAL (0)
+) edge_detector_u (
+    //================### COMMON SIGNALS ###=================//
+    .clk      (clk  ), // <-
+    .rst_n    (rst_n), // <-
+    .sig      (en_i ), // <-
+    .sig_edge (start)  // ->
+    //=======================================================//
+);
+// ///////////////////////////////////////////////////////// //
+
 
 // ///////////////////////////////////////////////////////// //
 //                    *** AHB MASTER ***                     //

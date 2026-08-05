@@ -2,6 +2,8 @@ cvfpu/src/fpnew_pkg.sv
 rtl/utils/base_pkg.sv
 rtl/utils/lsu_pkg.sv
 rtl/utils/adder_pow2.sv
+rtl/utils/edge_detector_pkg.sv
+rtl/utils/edge_detector.sv
 rtl/reg_common/core_csrm_pkg.sv
 rtl/fpu_dummy.sv
 rtl/handshake_fpu_pkg.sv
