@@ -27,6 +27,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "util/u_math.h"
 #include "util/u_memory.h"
 #include "util/u_prim.h"
@@ -602,6 +603,29 @@ int vertecies_info(struct draw_context * draw) {
 }
 
 
+static void software_scheduler(struct draw_context *draw, unsigned vertex_id_offset, struct draw_vertex_info *vert_info, bool print_debug)
+{
+   unsigned vertex_count = vert_info->count;
+   // if (vertex_count % THREADS_IN_CORE != 0) {
+   //    printf("No mechanism to disable calculation of the unused threads is available\n");
+   //    exit(1);
+   // }
+
+   MyVtop simulation = verilator_rtl_init();
+   for (unsigned batch = 0; batch < vertex_count; batch += THREADS_IN_CORE) {
+      unsigned batch_vertex_id_offset = vertex_id_offset + batch;
+      // 44 is shader specific, needs better calculation
+      // these are changing values in ubos
+      // TODO: somehow disable the vertex threads, which won't be used
+      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
+      verilator_rtl_run(simulation, batch_vertex_id_offset);
+      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
+         draw->viewports->scale[1], draw->viewports->scale[0], print_debug, vertex_id_offset, THREADS_IN_CORE, batch);
+   }
+   verilator_rtl_destroy(simulation);
+}
+
+
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
                       const struct draw_fetch_info *fetch_info,
@@ -757,14 +781,7 @@ llvm_pipeline_generic(struct draw_pt_middle_end *middle,
       //    printf("%x ", ((uint32_t *) draw->pt.user.vbuffer->map)[i]);
       // }
 
-      MyVtop simulation = verilator_rtl_init();
-      verilator_rtl_write_inputs(simulation, (float *) draw->pt.user.vbuffer->map, 44);
-      verilator_rtl_run(simulation, vertex_id_offset);
-      verilator_rtl_read_outputs(simulation, (float *)vert_info->verts->data, vert_info->vertex_size / 4,
-         draw->viewports->scale[1], draw->viewports->scale[0], print_debug, vertex_id_offset);
-      verilator_rtl_destroy(simulation);
-
-
+      software_scheduler(draw, vertex_id_offset, vert_info, print_debug);
 
       if (print_debug){
          printf("As loaded, true offsets: \n");

@@ -62,8 +62,15 @@ void verilator_rtl_run(MyVtop item, int start_vid) {
 
         iter++;
     }
+
     if (!vtop->is_done()) {
         printf("Simulation was killed (timeout)\n");
+    }
+
+    int visual_buffer_time = 100;
+    for (int i = visual_buffer_time; i > 0; i--) {
+       vtop->eval();
+       contextp->time(contextp->time() + 1);
     }
 }
 
@@ -99,7 +106,7 @@ int hw_get_output_offset(int vertex_id, int attribute_id, int coord_id) {
 }
 
 void verilator_rtl_read_outputs(MyVtop item, float *buffer, size_t vertex_stride, size_t height, size_t width, int print_debug,
-int vertex_offset){
+int vertex_offset, unsigned vertex_number, int scheduler_vertex_offset){
     Vtop_env *vtop = (Vtop_env *)item.vtop;
 
     const size_t MESA_VERTEX_BASE = 0u;
@@ -107,14 +114,13 @@ int vertex_offset){
     const size_t MESA_ATTRIBUTE_STRIDE = 4u;
     const size_t MESA_COORD_STRIDE = 1u;
 
-    const int VERTEX_NUMBER = 4;
     const int ATTRIBUTES_NUMBER = 2;
     const int ATTRIBUTES_SIZE = 4;
 
     const char *attributes[2] = {".gl_Position", "vVaryingColor"};
 
     // reading output data
-    for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
+    for (int vertex = scheduler_vertex_offset; vertex < scheduler_vertex_offset + vertex_number; vertex++) {
         for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
             for (int coord = 0; coord < ATTRIBUTES_SIZE; coord++) {
                 mem_t value;
@@ -132,7 +138,7 @@ int vertex_offset){
 
     if (print_debug != 0) {
         printf("As-read from the simulation\n");
-        for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
+        for (int vertex = scheduler_vertex_offset; vertex < scheduler_vertex_offset + vertex_number; vertex++) {
             printf("\tVertex: %d\n", vertex);
             for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
                 printf("\t\t%s: ", attributes[attribute]);
@@ -152,7 +158,7 @@ int vertex_offset){
     }
 
     // post-processing of .gl_Position
-    for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
+    for (int vertex = scheduler_vertex_offset; vertex < scheduler_vertex_offset + vertex_number; vertex++) {
         int attribute = 0;
 
         size_t address = MESA_VERTEX_BASE;
@@ -177,7 +183,7 @@ int vertex_offset){
 
     if (print_debug != 0) {
         printf("Post-viewport coordinates\n");
-        for (int vertex = 0; vertex < VERTEX_NUMBER; vertex++) {
+        for (int vertex = scheduler_vertex_offset; vertex < scheduler_vertex_offset + vertex_number; vertex++) {
             printf("\tVertex: %d\n", vertex);
             for (int attribute = 0; attribute < ATTRIBUTES_NUMBER; attribute++) {
                 printf("\t\t%s: ", attributes[attribute]);

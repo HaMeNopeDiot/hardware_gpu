@@ -9,6 +9,8 @@
 
 #include <stdlib.h>
 
+#define THREADS_IN_CORE 4
+
 typedef struct {
     void *contextp;
     void *vtop;
@@ -25,7 +27,9 @@ EXTERNC void verilator_rtl_read_outputs(
     size_t height,
     size_t width,
     int print_debug,
-    int vertex_offset
+    int vertex_offset,
+    unsigned vertex_number,
+    int scheduler_vertex_offset
 );
 EXTERNC void verilator_rtl_run(MyVtop item, int start_vid);
 
