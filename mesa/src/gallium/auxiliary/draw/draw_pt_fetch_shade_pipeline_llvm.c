@@ -43,6 +43,7 @@
 #include "gallivm/lp_bld_debug.h"
 // #include "extract.h"
 #include "inresults.h"
+#include "verilator_dpi_wrapper.h"
 
 
 struct llvm_middle_end {
@@ -600,23 +601,6 @@ int vertecies_info(struct draw_context * draw) {
    return 0;
 }
 
-typedef struct {
-    void *contextp;
-    void *vtop;
-} MyVtop;
-MyVtop verilator_rtl_init(void);
-void verilator_rtl_destroy(MyVtop item);
-void verilator_rtl_run(MyVtop item, int start_vid);
-void verilator_rtl_write_inputs(MyVtop item, float *buffer, unsigned int buffer_len);
-void verilator_rtl_read_outputs(
-    MyVtop item,
-    float *buffer,
-    size_t vertex_stride,
-    size_t height,
-    size_t width,
-    int print_debug,
-    int vertex_offset
-);
 
 static void
 llvm_pipeline_generic(struct draw_pt_middle_end *middle,
